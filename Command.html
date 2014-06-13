@@ -45,8 +45,8 @@
 
     
     <div class="description">
-        A Command is a chainable object that can be used to execute commands serially against a remote environment using
-a fluid interface.
+        <p>A Command is a chainable object that can be used to execute commands serially against a remote environment using
+a fluid interface.</p>
     </div>
     
 
@@ -109,8 +109,8 @@ a fluid interface.
 
             
 
-            <td class="description last">The parent command that this command is chained to, or a <a href="Session.html">module:leadfoot/Session</a> object if this is the
-first command in a command chain.</td>
+            <td class="description last"><p>The parent command that this command is chained to, or a <a href="Session.html">module:leadfoot/Session</a> object if this is the
+first command in a command chain.</p></td>
         </tr>
 
     
@@ -141,9 +141,9 @@ first command in a command chain.</td>
 
             
 
-            <td class="description last">A function that will be executed when all parent commands have completed execution. This function can create a
-new context for this command by calling the passed `setContext` function any time prior to resolving the Promise
-that it returns. If no context is explicitly provided, the context from the parent command will be used.</td>
+            <td class="description last"><p>A function that will be executed when all parent commands have completed execution. This function can create a
+new context for this command by calling the passed <code>setContext</code> function any time prior to resolving the Promise
+that it returns. If no context is explicitly provided, the context from the parent command will be used.</p></td>
         </tr>
 
     
@@ -176,9 +176,9 @@ that it returns. If no context is explicitly provided, the context from the pare
 
             
 
-            <td class="description last">A function that will be executed if any parent commands failed to complete successfully. This function can create
-a new context for the current command by calling the passed `setContext` function any time prior to resolving the
-Promise that it returns. If no context is explicitly provided, the context from the parent command will be used.</td>
+            <td class="description last"><p>A function that will be executed if any parent commands failed to complete successfully. This function can create
+a new context for the current command by calling the passed <code>setContext</code> function any time prior to resolving the
+Promise that it returns. If no context is explicitly provided, the context from the parent command will be used.</p></td>
         </tr>
 
     
@@ -305,7 +305,7 @@ Promise that it returns. If no context is explicitly provided, the context from 
 <dd>
     
     <div class="description">
-        The parent Command of the command, if one exists.
+        <p>The parent Command of the command, if one exists.</p>
     </div>
     
 
@@ -371,7 +371,7 @@ Promise that it returns. If no context is explicitly provided, the context from 
 <dd>
     
     <div class="description">
-        The parent Session of the command.
+        <p>The parent Session of the command.</p>
     </div>
     
 
@@ -444,15 +444,15 @@ Promise that it returns. If no context is explicitly provided, the context from 
 
     
     <div class="description">
-        Augments `target` with a method that will call `key` on all context elements stored within `target`.
+        <p>Augments <code>target</code> with a method that will call <code>key</code> on all context elements stored within <code>target</code>.
 This can be used to easily add new methods from any custom object that implements the Element API to any target
-object that implements the Command API.
-
-Functions that are copied may have the following extra properties in order to change the way that Command works
-with these functions:
-
-- `createsContext` (boolean): If this property is specified, the return value from the function will be used as
-  the new context for the returned Command.
+object that implements the Command API.</p>
+<p>Functions that are copied may have the following extra properties in order to change the way that Command works
+with these functions:</p>
+<ul>
+<li><code>createsContext</code> (boolean): If this property is specified, the return value from the function will be used as
+the new context for the returned Command.</li>
+</ul>
     </div>
     
 
@@ -594,17 +594,17 @@ with these functions:
 
     
     <div class="description">
-        Augments `target` with a conversion of the `originalFn` method that enables its use with a Command object.
+        <p>Augments <code>target</code> with a conversion of the <code>originalFn</code> method that enables its use with a Command object.
 This can be used to easily add new methods from any custom object that implements the Session API to any target
-object that implements the Command API.
-
-Functions that are copied may have the following extra properties in order to change the way that Command works
-with these functions:
-
-- `createsContext` (boolean): If this property is specified, the return value from the function will be used as
-  the new context for the returned Command.
-- `usesElement` (boolean): If this property is specified, element(s) from the current context will be used as
-  the first argument to the function, if the explicitly specified first argument is not already an element.
+object that implements the Command API.</p>
+<p>Functions that are copied may have the following extra properties in order to change the way that Command works
+with these functions:</p>
+<ul>
+<li><code>createsContext</code> (boolean): If this property is specified, the return value from the function will be used as
+the new context for the returned Command.</li>
+<li><code>usesElement</code> (boolean): If this property is specified, element(s) from the current context will be used as
+the first argument to the function, if the explicitly specified first argument is not already an element.</li>
+</ul>
     </div>
     
 
@@ -769,8 +769,8 @@ with these functions:
 
     
     <div class="description">
-        Creates a function that, when called, creates a new Command that retrieves elements from the parent context and
-uses them as the context for the newly created Command.
+        <p>Creates a function that, when called, creates a new Command that retrieves elements from the parent context and
+uses them as the context for the newly created Command.</p>
     </div>
     
 
@@ -918,7 +918,7 @@ uses them as the context for the newly created Command.
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha8</a> on Thu Jun 12 2014 16:02:28 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha8</a> on Fri Jun 13 2014 19:02:01 GMT+0000 (UTC)
 </footer>
 
 <script> prettyPrint(); </script>

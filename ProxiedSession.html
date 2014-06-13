@@ -45,9 +45,9 @@
 
     
     <div class="description">
-        A ProxiedSession object represents a WebDriver session that interacts with the Intern instrumenting proxy. It
+        <p>A ProxiedSession object represents a WebDriver session that interacts with the Intern instrumenting proxy. It
 collects code instrumentation data from pages and converts local filesystem paths into URLs for use with
-module:leadfoot/Session#get.
+module:leadfoot/Session#get.</p>
     </div>
     
 
@@ -97,7 +97,7 @@ module:leadfoot/Session#get.
 
             
 
-            <td class="description last">The ID of the session, as provided by the remote.</td>
+            <td class="description last"><p>The ID of the session, as provided by the remote.</p></td>
         </tr>
 
     
@@ -120,7 +120,7 @@ module:leadfoot/Session#get.
 
             
 
-            <td class="description last">The server that the session belongs to.</td>
+            <td class="description last"><p>The server that the session belongs to.</p></td>
         </tr>
 
     
@@ -143,7 +143,7 @@ module:leadfoot/Session#get.
 
             
 
-            <td class="description last">A map of bugs and features that the remote environment exposes.</td>
+            <td class="description last"><p>A map of bugs and features that the remote environment exposes.</p></td>
         </tr>
 
     
@@ -270,7 +270,7 @@ module:leadfoot/Session#get.
 <dd>
     
     <div class="description">
-        Information about the available features and bugs in the remote environment.
+        <p>Information about the available features and bugs in the remote environment.</p>
     </div>
     
 
@@ -341,8 +341,8 @@ module:leadfoot/Session#get.
 <dd>
     
     <div class="description">
-        The number of characters that need to be truncated from the front of file paths to get a working path-part
-for a URL.
+        <p>The number of characters that need to be truncated from the front of file paths to get a working path-part
+for a URL.</p>
     </div>
     
 
@@ -408,7 +408,7 @@ for a URL.
 <dd>
     
     <div class="description">
-        The base URL of the proxy server in use.
+        <p>The base URL of the proxy server in use.</p>
     </div>
     
 
@@ -474,7 +474,7 @@ for a URL.
 <dd>
     
     <div class="description">
-        The Server that the session runs on.
+        <p>The Server that the session runs on.</p>
     </div>
     
 
@@ -545,7 +545,7 @@ for a URL.
 <dd>
     
     <div class="description">
-        The current session ID.
+        <p>The current session ID.</p>
     </div>
     
 
@@ -623,7 +623,7 @@ for a URL.
 
     
     <div class="description">
-        Clears all data in local storage for the focused window/frame.
+        <p>Clears all data in local storage for the focused window/frame.</p>
     </div>
     
 
@@ -717,7 +717,7 @@ for a URL.
 
     
     <div class="description">
-        Clears all data in session storage for the focused window/frame.
+        <p>Clears all data in session storage for the focused window/frame.</p>
     </div>
     
 
@@ -811,7 +811,7 @@ for a URL.
 
     
     <div class="description">
-        Deletes a value from local storage for the focused window/frame.
+        <p>Deletes a value from local storage for the focused window/frame.</p>
     </div>
     
 
@@ -861,7 +861,7 @@ for a URL.
 
             
 
-            <td class="description last">The key of the data to delete.</td>
+            <td class="description last"><p>The key of the data to delete.</p></td>
         </tr>
 
     
@@ -953,7 +953,7 @@ for a URL.
 
     
     <div class="description">
-        Deletes a value from session storage for the focused window/frame.
+        <p>Deletes a value from session storage for the focused window/frame.</p>
     </div>
     
 
@@ -1003,7 +1003,7 @@ for a URL.
 
             
 
-            <td class="description last">The key of the data to delete.</td>
+            <td class="description last"><p>The key of the data to delete.</p></td>
         </tr>
 
     
@@ -1087,6 +1087,2138 @@ for a URL.
         
             
 <dt>
+    <h4 class="name" id="findAllByClassName"><span class="type-signature"></span>findAllByClassName<span class="signature">(className)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets all elements in the currently active window/frame matching the given CSS class name.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>className</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The CSS class name to search for.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Session.html#findAllByClassName">module:leadfoot/Session#findAllByClassName</a>
+    </li></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1870">line 1870</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findAllByCssSelector"><span class="type-signature"></span>findAllByCssSelector<span class="signature">(selector)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets all elements in the currently active window/frame matching the given CSS selector.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>selector</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The CSS selector to search for.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Session.html#findAllByCssSelector">module:leadfoot/Session#findAllByCssSelector</a>
+    </li></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1879">line 1879</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findAllByLinkText"><span class="type-signature"></span>findAllByLinkText<span class="signature">(text)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets all elements in the currently active window/frame matching the given case-insensitive link text.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>text</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The link text of the element.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Session.html#findAllByLinkText">module:leadfoot/Session#findAllByLinkText</a>
+    </li></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1897">line 1897</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findAllByName"><span class="type-signature"></span>findAllByName<span class="signature">(name)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets all elements in the currently active window/frame matching the given name attribute.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The name of the element.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Session.html#findAllByName">module:leadfoot/Session#findAllByName</a>
+    </li></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1888">line 1888</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findAllByPartialLinkText"><span class="type-signature"></span>findAllByPartialLinkText<span class="signature">(text)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets all elements in the currently active window/frame partially matching the given case-insensitive
+link text.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>text</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The partial link text of the element.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Session.html#findAllByPartialLinkText">module:leadfoot/Session#findAllByPartialLinkText</a>
+    </li></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1906">line 1906</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findAllByTagName"><span class="type-signature"></span>findAllByTagName<span class="signature">(tagName)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets all elements in the currently active window/frame matching the given HTML tag name.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tagName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The tag name of the element.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Session.html#findAllByTagName">module:leadfoot/Session#findAllByTagName</a>
+    </li></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1916">line 1916</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findAllByXpath"><span class="type-signature"></span>findAllByXpath<span class="signature">(path)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets all elements in the currently active window/frame matching the given XPath selector.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>path</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The XPath selector to search for.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Session.html#findAllByXpath">module:leadfoot/Session#findAllByXpath</a>
+    </li></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1925">line 1925</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findByClassName"><span class="type-signature"></span>findByClassName<span class="signature">(className)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets the first element in the currently active window/frame matching the given CSS class name.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>className</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The CSS class name to search for.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Session.html#findByClassName">module:leadfoot/Session#findByClassName</a>
+    </li></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1797">line 1797</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findByCssSelector"><span class="type-signature"></span>findByCssSelector<span class="signature">(selector)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets the first element in the currently active window/frame matching the given CSS selector.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>selector</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The CSS selector to search for.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Session.html#findByCssSelector">module:leadfoot/Session#findByCssSelector</a>
+    </li></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1806">line 1806</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findById"><span class="type-signature"></span>findById<span class="signature">(id)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets the first element in the currently active window/frame matching the given ID.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The ID of the element.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Session.html#findById">module:leadfoot/Session#findById</a>
+    </li></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1815">line 1815</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findByLinkText"><span class="type-signature"></span>findByLinkText<span class="signature">(text)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets the first element in the currently active window/frame matching the given case-insensitive link text.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>text</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The link text of the element.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Session.html#findByLinkText">module:leadfoot/Session#findByLinkText</a>
+    </li></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1833">line 1833</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findByName"><span class="type-signature"></span>findByName<span class="signature">(name)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets the first element in the currently active window/frame matching the given name attribute.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The name of the element.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Session.html#findByName">module:leadfoot/Session#findByName</a>
+    </li></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1824">line 1824</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findByPartialLinkText"><span class="type-signature"></span>findByPartialLinkText<span class="signature">(text)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets the first element in the currently active window/frame partially matching the given case-insensitive
+link text.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>text</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The partial link text of the element.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Session.html#findByPartialLinkText">module:leadfoot/Session#findByPartialLinkText</a>
+    </li></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1842">line 1842</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findByTagName"><span class="type-signature"></span>findByTagName<span class="signature">(tagName)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets the first element in the currently active window/frame matching the given HTML tag name.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tagName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The tag name of the element.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Session.html#findByTagName">module:leadfoot/Session#findByTagName</a>
+    </li></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1852">line 1852</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findByXpath"><span class="type-signature"></span>findByXpath<span class="signature">(path)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets the first element in the currently active window/frame matching the given XPath selector.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>path</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The XPath selector to search for.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Session.html#findByXpath">module:leadfoot/Session#findByXpath</a>
+    </li></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1861">line 1861</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
     <h4 class="name" id="get"><span class="type-signature"></span>get<span class="signature">(url)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
 
     
@@ -1095,8 +3227,8 @@ for a URL.
 
     
     <div class="description">
-        Navigates the browser to a new URL like module:leadfoot/Session#get, but retrieves any code coverage
-data recorded by the browser prior to navigation.
+        <p>Navigates the browser to a new URL like module:leadfoot/Session#get, but retrieves any code coverage
+data recorded by the browser prior to navigation.</p>
     </div>
     
 
@@ -1225,2138 +3357,6 @@ data recorded by the browser prior to navigation.
         
             
 <dt>
-    <h4 class="name" id="getElementByClassName"><span class="type-signature"></span>getElementByClassName<span class="signature">(className)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets the first element in the currently active window/frame matching the given CSS class name.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>className</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The CSS class name to search for.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Session.html#getElementByClassName">module:leadfoot/Session#getElementByClassName</a>
-    </li></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1797">line 1797</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementByCssSelector"><span class="type-signature"></span>getElementByCssSelector<span class="signature">(selector)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets the first element in the currently active window/frame matching the given CSS selector.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>selector</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The CSS selector to search for.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Session.html#getElementByCssSelector">module:leadfoot/Session#getElementByCssSelector</a>
-    </li></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1806">line 1806</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementById"><span class="type-signature"></span>getElementById<span class="signature">(id)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets the first element in the currently active window/frame matching the given ID.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>id</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The ID of the element.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Session.html#getElementById">module:leadfoot/Session#getElementById</a>
-    </li></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1815">line 1815</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementByLinkText"><span class="type-signature"></span>getElementByLinkText<span class="signature">(text)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets the first element in the currently active window/frame matching the given case-insensitive link text.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>text</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The link text of the element.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Session.html#getElementByLinkText">module:leadfoot/Session#getElementByLinkText</a>
-    </li></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1833">line 1833</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementByName"><span class="type-signature"></span>getElementByName<span class="signature">(name)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets the first element in the currently active window/frame matching the given name attribute.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The name of the element.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Session.html#getElementByName">module:leadfoot/Session#getElementByName</a>
-    </li></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1824">line 1824</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementByPartialLinkText"><span class="type-signature"></span>getElementByPartialLinkText<span class="signature">(text)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets the first element in the currently active window/frame partially matching the given case-insensitive
-link text.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>text</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The partial link text of the element.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Session.html#getElementByPartialLinkText">module:leadfoot/Session#getElementByPartialLinkText</a>
-    </li></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1842">line 1842</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementByTagName"><span class="type-signature"></span>getElementByTagName<span class="signature">(tagName)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets the first element in the currently active window/frame matching the given HTML tag name.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>tagName</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The tag name of the element.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Session.html#getElementByTagName">module:leadfoot/Session#getElementByTagName</a>
-    </li></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1852">line 1852</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementByXpath"><span class="type-signature"></span>getElementByXpath<span class="signature">(path)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets the first element in the currently active window/frame matching the given XPath selector.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>path</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The XPath selector to search for.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Session.html#getElementByXpath">module:leadfoot/Session#getElementByXpath</a>
-    </li></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1861">line 1861</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementsByClassName"><span class="type-signature"></span>getElementsByClassName<span class="signature">(className)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets all elements in the currently active window/frame matching the given CSS class name.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>className</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The CSS class name to search for.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Session.html#getElementsByClassName">module:leadfoot/Session#getElementsByClassName</a>
-    </li></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1870">line 1870</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementsByCssSelector"><span class="type-signature"></span>getElementsByCssSelector<span class="signature">(selector)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets all elements in the currently active window/frame matching the given CSS selector.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>selector</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The CSS selector to search for.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Session.html#getElementsByCssSelector">module:leadfoot/Session#getElementsByCssSelector</a>
-    </li></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1879">line 1879</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementsByLinkText"><span class="type-signature"></span>getElementsByLinkText<span class="signature">(text)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets all elements in the currently active window/frame matching the given case-insensitive link text.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>text</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The link text of the element.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Session.html#getElementsByLinkText">module:leadfoot/Session#getElementsByLinkText</a>
-    </li></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1897">line 1897</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementsByName"><span class="type-signature"></span>getElementsByName<span class="signature">(name)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets all elements in the currently active window/frame matching the given name attribute.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The name of the element.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Session.html#getElementsByName">module:leadfoot/Session#getElementsByName</a>
-    </li></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1888">line 1888</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementsByPartialLinkText"><span class="type-signature"></span>getElementsByPartialLinkText<span class="signature">(text)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets all elements in the currently active window/frame partially matching the given case-insensitive
-link text.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>text</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The partial link text of the element.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Session.html#getElementsByPartialLinkText">module:leadfoot/Session#getElementsByPartialLinkText</a>
-    </li></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1906">line 1906</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementsByTagName"><span class="type-signature"></span>getElementsByTagName<span class="signature">(tagName)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets all elements in the currently active window/frame matching the given HTML tag name.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>tagName</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The tag name of the element.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Session.html#getElementsByTagName">module:leadfoot/Session#getElementsByTagName</a>
-    </li></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1916">line 1916</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementsByXpath"><span class="type-signature"></span>getElementsByXpath<span class="signature">(path)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets all elements in the currently active window/frame matching the given XPath selector.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>path</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The XPath selector to search for.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="Session.html#getElementsByXpath">module:leadfoot/Session#getElementsByXpath</a>
-    </li></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Session.js.html">Session.js</a>, <a href="Session.js.html#line1925">line 1925</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
     <h4 class="name" id="getExecuteAsyncTimeout"><span class="type-signature"></span>getExecuteAsyncTimeout<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;number>}</span></h4>
 
     
@@ -3365,7 +3365,7 @@ link text.
 
     
     <div class="description">
-        Gets the timeout for module:leadfoot/Session#executeAsync calls.
+        <p>Gets the timeout for module:leadfoot/Session#executeAsync calls.</p>
     </div>
     
 
@@ -3459,7 +3459,7 @@ link text.
 
     
     <div class="description">
-        Gets the timeout for module:leadfoot/Session#getElement calls.
+        <p>Gets the timeout for module:leadfoot/Session#find calls.</p>
     </div>
     
 
@@ -3553,7 +3553,7 @@ link text.
 
     
     <div class="description">
-        Gets a value from local storage for the focused window/frame.
+        <p>Gets a value from local storage for the focused window/frame.</p>
     </div>
     
 
@@ -3603,7 +3603,7 @@ link text.
 
             
 
-            <td class="description last">The key of the data to get.</td>
+            <td class="description last"><p>The key of the data to get.</p></td>
         </tr>
 
     
@@ -3695,7 +3695,7 @@ link text.
 
     
     <div class="description">
-        Gets the list of keys set in local storage for the focused window/frame.
+        <p>Gets the list of keys set in local storage for the focused window/frame.</p>
     </div>
     
 
@@ -3789,7 +3789,7 @@ link text.
 
     
     <div class="description">
-        Gets the number of keys set in local storage for the focused window/frame.
+        <p>Gets the number of keys set in local storage for the focused window/frame.</p>
     </div>
     
 
@@ -3883,7 +3883,7 @@ link text.
 
     
     <div class="description">
-        Gets the timeout for module:leadfoot/Session#get calls.
+        <p>Gets the timeout for module:leadfoot/Session#get calls.</p>
     </div>
     
 
@@ -3977,7 +3977,7 @@ link text.
 
     
     <div class="description">
-        Gets a value from session storage for the focused window/frame.
+        <p>Gets a value from session storage for the focused window/frame.</p>
     </div>
     
 
@@ -4027,7 +4027,7 @@ link text.
 
             
 
-            <td class="description last">The key of the data to get.</td>
+            <td class="description last"><p>The key of the data to get.</p></td>
         </tr>
 
     
@@ -4119,7 +4119,7 @@ link text.
 
     
     <div class="description">
-        Gets the list of keys set in session storage for the focused window/frame.
+        <p>Gets the list of keys set in session storage for the focused window/frame.</p>
     </div>
     
 
@@ -4213,7 +4213,7 @@ link text.
 
     
     <div class="description">
-        Gets the number of keys set in session storage for the focused window/frame.
+        <p>Gets the number of keys set in session storage for the focused window/frame.</p>
     </div>
     
 
@@ -4307,8 +4307,8 @@ link text.
 
     
     <div class="description">
-        Quits the browser like module:leadfoot/Session#quit, but retrieves any code coverage data recorded
-by the browser prior to quitting.
+        <p>Quits the browser like module:leadfoot/Session#quit, but retrieves any code coverage data recorded
+by the browser prior to quitting.</p>
     </div>
     
 
@@ -4341,7 +4341,7 @@ by the browser prior to quitting.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="ProxiedSession.js.html">ProxiedSession.js</a>, <a href="ProxiedSession.js.html#line85">line 85</a>
+        <a href="ProxiedSession.js.html">ProxiedSession.js</a>, <a href="ProxiedSession.js.html#line86">line 86</a>
     </li></ul></dd>
     
 
@@ -4397,7 +4397,7 @@ by the browser prior to quitting.
 
     
     <div class="description">
-        Sets the timeout for module:leadfoot/Session#executeAsync calls.
+        <p>Sets the timeout for module:leadfoot/Session#executeAsync calls.</p>
     </div>
     
 
@@ -4447,7 +4447,7 @@ by the browser prior to quitting.
 
             
 
-            <td class="description last">The length of the timeout, in milliseconds.</td>
+            <td class="description last"><p>The length of the timeout, in milliseconds.</p></td>
         </tr>
 
     
@@ -4539,8 +4539,8 @@ by the browser prior to quitting.
 
     
     <div class="description">
-        Sets up a timer to send no-op commands to the remote server on an interval to prevent long-running unit tests
-from causing the session to time out.
+        <p>Sets up a timer to send no-op commands to the remote server on an interval to prevent long-running unit tests
+from causing the session to time out.</p>
     </div>
     
 
@@ -4590,7 +4590,7 @@ from causing the session to time out.
 
             
 
-            <td class="description last">Amount of time to wait between heartbeats. Setting the delay to 0 will disable heartbeats.</td>
+            <td class="description last"><p>Amount of time to wait between heartbeats. Setting the delay to 0 will disable heartbeats.</p></td>
         </tr>
 
     
@@ -4621,7 +4621,7 @@ from causing the session to time out.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="ProxiedSession.js.html">ProxiedSession.js</a>, <a href="ProxiedSession.js.html#line108">line 108</a>
+        <a href="ProxiedSession.js.html">ProxiedSession.js</a>, <a href="ProxiedSession.js.html#line109">line 109</a>
     </li></ul></dd>
     
 
@@ -4677,7 +4677,7 @@ from causing the session to time out.
 
     
     <div class="description">
-        Sets the timeout for module:leadfoot/Session#getElement calls.
+        <p>Sets the timeout for module:leadfoot/Session#find calls.</p>
     </div>
     
 
@@ -4727,7 +4727,7 @@ from causing the session to time out.
 
             
 
-            <td class="description last">The length of the timeout, in milliseconds.</td>
+            <td class="description last"><p>The length of the timeout, in milliseconds.</p></td>
         </tr>
 
     
@@ -4819,7 +4819,7 @@ from causing the session to time out.
 
     
     <div class="description">
-        Sets a value in local storage for the focused window/frame.
+        <p>Sets a value in local storage for the focused window/frame.</p>
     </div>
     
 
@@ -4869,7 +4869,7 @@ from causing the session to time out.
 
             
 
-            <td class="description last">The key to set.</td>
+            <td class="description last"><p>The key to set.</p></td>
         </tr>
 
     
@@ -4892,7 +4892,7 @@ from causing the session to time out.
 
             
 
-            <td class="description last">The value to set.</td>
+            <td class="description last"><p>The value to set.</p></td>
         </tr>
 
     
@@ -4984,7 +4984,7 @@ from causing the session to time out.
 
     
     <div class="description">
-        Sets the timeout for module:leadfoot/Session#get calls.
+        <p>Sets the timeout for module:leadfoot/Session#get calls.</p>
     </div>
     
 
@@ -5034,7 +5034,7 @@ from causing the session to time out.
 
             
 
-            <td class="description last">The length of the timeout, in milliseconds.</td>
+            <td class="description last"><p>The length of the timeout, in milliseconds.</p></td>
         </tr>
 
     
@@ -5126,7 +5126,7 @@ from causing the session to time out.
 
     
     <div class="description">
-        Sets a value in session storage for the focused window/frame.
+        <p>Sets a value in session storage for the focused window/frame.</p>
     </div>
     
 
@@ -5176,7 +5176,7 @@ from causing the session to time out.
 
             
 
-            <td class="description last">The key to set.</td>
+            <td class="description last"><p>The key to set.</p></td>
         </tr>
 
     
@@ -5199,7 +5199,7 @@ from causing the session to time out.
 
             
 
-            <td class="description last">The value to set.</td>
+            <td class="description last"><p>The value to set.</p></td>
         </tr>
 
     
@@ -5291,7 +5291,7 @@ from causing the session to time out.
 
     
     <div class="description">
-        Waits for all elements in the currently active window/frame to be destroyed.
+        <p>Waits for all elements in the currently active window/frame to be destroyed.</p>
     </div>
     
 
@@ -5341,7 +5341,7 @@ from causing the session to time out.
 
             
 
-            <td class="description last">The element retrieval strategy to use. See module:leadfoot/Session#getElement for options.</td>
+            <td class="description last"><p>The element retrieval strategy to use. See module:leadfoot/Session#find for options.</p></td>
         </tr>
 
     
@@ -5364,7 +5364,7 @@ from causing the session to time out.
 
             
 
-            <td class="description last">The strategy-specific value to search for. See module:leadfoot/Session#getElement for details.</td>
+            <td class="description last"><p>The strategy-specific value to search for. See module:leadfoot/Session#find for details.</p></td>
         </tr>
 
     
@@ -5456,8 +5456,8 @@ from causing the session to time out.
 
     
     <div class="description">
-        Waits for all elements in the currently active window/frame matching the given CSS class name to be
-destroyed.
+        <p>Waits for all elements in the currently active window/frame matching the given CSS class name to be
+destroyed.</p>
     </div>
     
 
@@ -5507,7 +5507,7 @@ destroyed.
 
             
 
-            <td class="description last">The CSS class name to search for.</td>
+            <td class="description last"><p>The CSS class name to search for.</p></td>
         </tr>
 
     
@@ -5599,7 +5599,7 @@ destroyed.
 
     
     <div class="description">
-        Waits for all elements in the currently active window/frame matching the given CSS selector to be destroyed.
+        <p>Waits for all elements in the currently active window/frame matching the given CSS selector to be destroyed.</p>
     </div>
     
 
@@ -5649,7 +5649,7 @@ destroyed.
 
             
 
-            <td class="description last">The CSS selector to search for.</td>
+            <td class="description last"><p>The CSS selector to search for.</p></td>
         </tr>
 
     
@@ -5741,7 +5741,7 @@ destroyed.
 
     
     <div class="description">
-        Waits for all elements in the currently active window/frame matching the given ID to be destroyed.
+        <p>Waits for all elements in the currently active window/frame matching the given ID to be destroyed.</p>
     </div>
     
 
@@ -5791,7 +5791,7 @@ destroyed.
 
             
 
-            <td class="description last">The ID of the element.</td>
+            <td class="description last"><p>The ID of the element.</p></td>
         </tr>
 
     
@@ -5883,8 +5883,8 @@ destroyed.
 
     
     <div class="description">
-        Waits for all elements in the currently active window/frame matching the given case-insensitive link text
-to be destroyed.
+        <p>Waits for all elements in the currently active window/frame matching the given case-insensitive link text
+to be destroyed.</p>
     </div>
     
 
@@ -5934,7 +5934,7 @@ to be destroyed.
 
             
 
-            <td class="description last">The link text of the element.</td>
+            <td class="description last"><p>The link text of the element.</p></td>
         </tr>
 
     
@@ -6026,8 +6026,8 @@ to be destroyed.
 
     
     <div class="description">
-        Waits for all elements in the currently active window/frame matching the given name attribute to be
-destroyed.
+        <p>Waits for all elements in the currently active window/frame matching the given name attribute to be
+destroyed.</p>
     </div>
     
 
@@ -6077,7 +6077,7 @@ destroyed.
 
             
 
-            <td class="description last">The name of the element.</td>
+            <td class="description last"><p>The name of the element.</p></td>
         </tr>
 
     
@@ -6169,8 +6169,8 @@ destroyed.
 
     
     <div class="description">
-        Waits for all elements in the currently active window/frame partially matching the given case-insensitive
-link text to be destroyed.
+        <p>Waits for all elements in the currently active window/frame partially matching the given case-insensitive
+link text to be destroyed.</p>
     </div>
     
 
@@ -6220,7 +6220,7 @@ link text to be destroyed.
 
             
 
-            <td class="description last">The partial link text of the element.</td>
+            <td class="description last"><p>The partial link text of the element.</p></td>
         </tr>
 
     
@@ -6312,7 +6312,7 @@ link text to be destroyed.
 
     
     <div class="description">
-        Waits for all elements in the currently active window/frame matching the given HTML tag name to be destroyed.
+        <p>Waits for all elements in the currently active window/frame matching the given HTML tag name to be destroyed.</p>
     </div>
     
 
@@ -6362,7 +6362,7 @@ link text to be destroyed.
 
             
 
-            <td class="description last">The tag name of the element.</td>
+            <td class="description last"><p>The tag name of the element.</p></td>
         </tr>
 
     
@@ -6454,8 +6454,8 @@ link text to be destroyed.
 
     
     <div class="description">
-        Waits for all elements in the currently active window/frame matching the given XPath selector to be
-destroyed.
+        <p>Waits for all elements in the currently active window/frame matching the given XPath selector to be
+destroyed.</p>
     </div>
     
 
@@ -6505,7 +6505,7 @@ destroyed.
 
             
 
-            <td class="description last">The XPath selector to search for.</td>
+            <td class="description last"><p>The XPath selector to search for.</p></td>
         </tr>
 
     
@@ -6608,7 +6608,7 @@ destroyed.
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha8</a> on Thu Jun 12 2014 16:02:28 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha8</a> on Fri Jun 13 2014 19:02:02 GMT+0000 (UTC)
 </footer>
 
 <script> prettyPrint(); </script>

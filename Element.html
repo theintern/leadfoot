@@ -45,7 +45,7 @@
 
     
     <div class="description">
-        An Element represents a DOM or UI element within the remote environment.
+        <p>An Element represents a DOM or UI element within the remote environment.</p>
     </div>
     
 
@@ -101,7 +101,7 @@
 
             
 
-            <td class="description last">The ID of the element, as provided by the remote.</td>
+            <td class="description last"><p>The ID of the element, as provided by the remote.</p></td>
         </tr>
 
     
@@ -124,7 +124,7 @@
 
             
 
-            <td class="description last">The session that the element belongs to.</td>
+            <td class="description last"><p>The session that the element belongs to.</p></td>
         </tr>
 
     
@@ -251,7 +251,7 @@
 <dd>
     
     <div class="description">
-        The opaque, remote-provided ID of the element.
+        <p>The opaque, remote-provided ID of the element.</p>
     </div>
     
 
@@ -317,7 +317,7 @@
 <dd>
     
     <div class="description">
-        The session that the element belongs to.
+        <p>The session that the element belongs to.</p>
     </div>
     
 
@@ -382,7 +382,7 @@
         <dl>
             
 <dt>
-    <h4 class="name" id="getElementByClassName"><span class="type-signature"></span>getElementByClassName<span class="signature">(className)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
+    <h4 class="name" id="findAllByClassName"><span class="type-signature"></span>findAllByClassName<span class="signature">(className)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
 
     
 </dt>
@@ -390,7 +390,7 @@
 
     
     <div class="description">
-        Gets the first element inside this element matching the given CSS class name.
+        <p>Gets all elements inside this element matching the given CSS class name.</p>
     </div>
     
 
@@ -440,1103 +440,7 @@
 
             
 
-            <td class="description last">The CSS class name to search for.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">Element.js</a>, <a href="Element.js.html#line437">line 437</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementByCssSelector"><span class="type-signature"></span>getElementByCssSelector<span class="signature">(selector)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets the first element inside this element matching the given CSS selector.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>selector</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The CSS selector to search for.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">Element.js</a>, <a href="Element.js.html#line446">line 446</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementById"><span class="type-signature"></span>getElementById<span class="signature">(id)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets the first element inside this element matching the given ID.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>id</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The ID of the element.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">Element.js</a>, <a href="Element.js.html#line455">line 455</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementByLinkText"><span class="type-signature"></span>getElementByLinkText<span class="signature">(text)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets the first element inside this element matching the given case-insensitive link text.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>text</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The link text of the element.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">Element.js</a>, <a href="Element.js.html#line473">line 473</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementByName"><span class="type-signature"></span>getElementByName<span class="signature">(name)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets the first element inside this element matching the given name attribute.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The name of the element.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">Element.js</a>, <a href="Element.js.html#line464">line 464</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementByPartialLinkText"><span class="type-signature"></span>getElementByPartialLinkText<span class="signature">(text)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets the first element inside this element partially matching the given case-insensitive link text.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>text</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The partial link text of the element.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">Element.js</a>, <a href="Element.js.html#line482">line 482</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementByTagName"><span class="type-signature"></span>getElementByTagName<span class="signature">(tagName)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets the first element inside this element matching the given HTML tag name.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>tagName</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The tag name of the element.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">Element.js</a>, <a href="Element.js.html#line491">line 491</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementByXpath"><span class="type-signature"></span>getElementByXpath<span class="signature">(path)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets the first element inside this element matching the given XPath selector.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>path</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The XPath selector to search for.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Element.js.html">Element.js</a>, <a href="Element.js.html#line500">line 500</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getElementsByClassName"><span class="type-signature"></span>getElementsByClassName<span class="signature">(className)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Gets all elements inside this element matching the given CSS class name.
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>className</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The CSS class name to search for.</td>
+            <td class="description last"><p>The CSS class name to search for.</p></td>
         </tr>
 
     
@@ -1615,7 +519,7 @@
         
             
 <dt>
-    <h4 class="name" id="getElementsByCssSelector"><span class="type-signature"></span>getElementsByCssSelector<span class="signature">(selector)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
+    <h4 class="name" id="findAllByCssSelector"><span class="type-signature"></span>findAllByCssSelector<span class="signature">(selector)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
 
     
 </dt>
@@ -1623,7 +527,7 @@
 
     
     <div class="description">
-        Gets all elements inside this element matching the given CSS selector.
+        <p>Gets all elements inside this element matching the given CSS selector.</p>
     </div>
     
 
@@ -1673,7 +577,7 @@
 
             
 
-            <td class="description last">The CSS selector to search for.</td>
+            <td class="description last"><p>The CSS selector to search for.</p></td>
         </tr>
 
     
@@ -1752,7 +656,7 @@
         
             
 <dt>
-    <h4 class="name" id="getElementsByLinkText"><span class="type-signature"></span>getElementsByLinkText<span class="signature">(text)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
+    <h4 class="name" id="findAllByLinkText"><span class="type-signature"></span>findAllByLinkText<span class="signature">(text)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
 
     
 </dt>
@@ -1760,7 +664,7 @@
 
     
     <div class="description">
-        Gets all elements inside this element matching the given case-insensitive link text.
+        <p>Gets all elements inside this element matching the given case-insensitive link text.</p>
     </div>
     
 
@@ -1810,7 +714,7 @@
 
             
 
-            <td class="description last">The link text of the element.</td>
+            <td class="description last"><p>The link text of the element.</p></td>
         </tr>
 
     
@@ -1889,7 +793,7 @@
         
             
 <dt>
-    <h4 class="name" id="getElementsByName"><span class="type-signature"></span>getElementsByName<span class="signature">(name)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
+    <h4 class="name" id="findAllByName"><span class="type-signature"></span>findAllByName<span class="signature">(name)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
 
     
 </dt>
@@ -1897,7 +801,7 @@
 
     
     <div class="description">
-        Gets all elements inside this element matching the given name attribute.
+        <p>Gets all elements inside this element matching the given name attribute.</p>
     </div>
     
 
@@ -1947,7 +851,7 @@
 
             
 
-            <td class="description last">The name of the element.</td>
+            <td class="description last"><p>The name of the element.</p></td>
         </tr>
 
     
@@ -2026,7 +930,7 @@
         
             
 <dt>
-    <h4 class="name" id="getElementsByPartialLinkText"><span class="type-signature"></span>getElementsByPartialLinkText<span class="signature">(text)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
+    <h4 class="name" id="findAllByPartialLinkText"><span class="type-signature"></span>findAllByPartialLinkText<span class="signature">(text)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
 
     
 </dt>
@@ -2034,7 +938,7 @@
 
     
     <div class="description">
-        Gets all elements inside this element partially matching the given case-insensitive link text.
+        <p>Gets all elements inside this element partially matching the given case-insensitive link text.</p>
     </div>
     
 
@@ -2084,7 +988,7 @@
 
             
 
-            <td class="description last">The partial link text of the element.</td>
+            <td class="description last"><p>The partial link text of the element.</p></td>
         </tr>
 
     
@@ -2163,7 +1067,7 @@
         
             
 <dt>
-    <h4 class="name" id="getElementsByTagName"><span class="type-signature"></span>getElementsByTagName<span class="signature">(tagName)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
+    <h4 class="name" id="findAllByTagName"><span class="type-signature"></span>findAllByTagName<span class="signature">(tagName)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
 
     
 </dt>
@@ -2171,7 +1075,7 @@
 
     
     <div class="description">
-        Gets all elements inside this element matching the given HTML tag name.
+        <p>Gets all elements inside this element matching the given HTML tag name.</p>
     </div>
     
 
@@ -2221,7 +1125,7 @@
 
             
 
-            <td class="description last">The tag name of the element.</td>
+            <td class="description last"><p>The tag name of the element.</p></td>
         </tr>
 
     
@@ -2300,7 +1204,7 @@
         
             
 <dt>
-    <h4 class="name" id="getElementsByXpath"><span class="type-signature"></span>getElementsByXpath<span class="signature">(path)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
+    <h4 class="name" id="findAllByXpath"><span class="type-signature"></span>findAllByXpath<span class="signature">(path)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Element.html">module:leadfoot/Element</a>>>}</span></h4>
 
     
 </dt>
@@ -2308,7 +1212,7 @@
 
     
     <div class="description">
-        Gets all elements inside this element matching the given XPath selector.
+        <p>Gets all elements inside this element matching the given XPath selector.</p>
     </div>
     
 
@@ -2358,7 +1262,7 @@
 
             
 
-            <td class="description last">The XPath selector to search for.</td>
+            <td class="description last"><p>The XPath selector to search for.</p></td>
         </tr>
 
     
@@ -2437,6 +1341,1102 @@
         
             
 <dt>
+    <h4 class="name" id="findByClassName"><span class="type-signature"></span>findByClassName<span class="signature">(className)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets the first element inside this element matching the given CSS class name.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>className</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The CSS class name to search for.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Element.js.html">Element.js</a>, <a href="Element.js.html#line437">line 437</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findByCssSelector"><span class="type-signature"></span>findByCssSelector<span class="signature">(selector)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets the first element inside this element matching the given CSS selector.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>selector</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The CSS selector to search for.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Element.js.html">Element.js</a>, <a href="Element.js.html#line446">line 446</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findById"><span class="type-signature"></span>findById<span class="signature">(id)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets the first element inside this element matching the given ID.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The ID of the element.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Element.js.html">Element.js</a>, <a href="Element.js.html#line455">line 455</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findByLinkText"><span class="type-signature"></span>findByLinkText<span class="signature">(text)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets the first element inside this element matching the given case-insensitive link text.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>text</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The link text of the element.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Element.js.html">Element.js</a>, <a href="Element.js.html#line473">line 473</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findByName"><span class="type-signature"></span>findByName<span class="signature">(name)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets the first element inside this element matching the given name attribute.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The name of the element.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Element.js.html">Element.js</a>, <a href="Element.js.html#line464">line 464</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findByPartialLinkText"><span class="type-signature"></span>findByPartialLinkText<span class="signature">(text)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets the first element inside this element partially matching the given case-insensitive link text.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>text</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The partial link text of the element.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Element.js.html">Element.js</a>, <a href="Element.js.html#line482">line 482</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findByTagName"><span class="type-signature"></span>findByTagName<span class="signature">(tagName)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets the first element inside this element matching the given HTML tag name.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tagName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The tag name of the element.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Element.js.html">Element.js</a>, <a href="Element.js.html#line491">line 491</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="findByXpath"><span class="type-signature"></span>findByXpath<span class="signature">(path)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>>}</span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Gets the first element inside this element matching the given XPath selector.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>path</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The XPath selector to search for.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Element.js.html">Element.js</a>, <a href="Element.js.html#line500">line 500</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="Element.html">module:leadfoot/Element</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</dd>
+
+        
+            
+<dt>
     <h4 class="name" id="waitForDeletedElement"><span class="type-signature"></span>waitForDeletedElement<span class="signature">(using, value)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
 
     
@@ -2445,7 +2445,7 @@
 
     
     <div class="description">
-        Waits for all elements inside this element that match the given query to be destroyed.
+        <p>Waits for all elements inside this element that match the given query to be destroyed.</p>
     </div>
     
 
@@ -2495,7 +2495,7 @@
 
             
 
-            <td class="description last">The element retrieval strategy to use. See module:leadfoot/Session#getElement for options.</td>
+            <td class="description last"><p>The element retrieval strategy to use. See module:leadfoot/Session#find for options.</p></td>
         </tr>
 
     
@@ -2518,7 +2518,7 @@
 
             
 
-            <td class="description last">The strategy-specific value to search for. See module:leadfoot/Session#getElement for details.</td>
+            <td class="description last"><p>The strategy-specific value to search for. See module:leadfoot/Session#find for details.</p></td>
         </tr>
 
     
@@ -2605,7 +2605,7 @@
 
     
     <div class="description">
-        Waits for all elements inside this element matching the given CSS class name to be destroyed.
+        <p>Waits for all elements inside this element matching the given CSS class name to be destroyed.</p>
     </div>
     
 
@@ -2655,7 +2655,7 @@
 
             
 
-            <td class="description last">The CSS class name to search for.</td>
+            <td class="description last"><p>The CSS class name to search for.</p></td>
         </tr>
 
     
@@ -2742,7 +2742,7 @@
 
     
     <div class="description">
-        Waits for all elements inside this element matching the given CSS selector to be destroyed.
+        <p>Waits for all elements inside this element matching the given CSS selector to be destroyed.</p>
     </div>
     
 
@@ -2792,7 +2792,7 @@
 
             
 
-            <td class="description last">The CSS selector to search for.</td>
+            <td class="description last"><p>The CSS selector to search for.</p></td>
         </tr>
 
     
@@ -2879,7 +2879,7 @@
 
     
     <div class="description">
-        Waits for all elements inside this element matching the given ID to be destroyed.
+        <p>Waits for all elements inside this element matching the given ID to be destroyed.</p>
     </div>
     
 
@@ -2929,7 +2929,7 @@
 
             
 
-            <td class="description last">The ID of the element.</td>
+            <td class="description last"><p>The ID of the element.</p></td>
         </tr>
 
     
@@ -3016,7 +3016,7 @@
 
     
     <div class="description">
-        Waits for all elements inside this element matching the given case-insensitive link text to be destroyed.
+        <p>Waits for all elements inside this element matching the given case-insensitive link text to be destroyed.</p>
     </div>
     
 
@@ -3066,7 +3066,7 @@
 
             
 
-            <td class="description last">The link text of the element.</td>
+            <td class="description last"><p>The link text of the element.</p></td>
         </tr>
 
     
@@ -3153,7 +3153,7 @@
 
     
     <div class="description">
-        Waits for all elements inside this element matching the given name attribute to be destroyed.
+        <p>Waits for all elements inside this element matching the given name attribute to be destroyed.</p>
     </div>
     
 
@@ -3203,7 +3203,7 @@
 
             
 
-            <td class="description last">The name of the element.</td>
+            <td class="description last"><p>The name of the element.</p></td>
         </tr>
 
     
@@ -3290,8 +3290,8 @@
 
     
     <div class="description">
-        Waits for all elements inside this element partially matching the given case-insensitive link text to be
-destroyed.
+        <p>Waits for all elements inside this element partially matching the given case-insensitive link text to be
+destroyed.</p>
     </div>
     
 
@@ -3341,7 +3341,7 @@ destroyed.
 
             
 
-            <td class="description last">The partial link text of the element.</td>
+            <td class="description last"><p>The partial link text of the element.</p></td>
         </tr>
 
     
@@ -3428,7 +3428,7 @@ destroyed.
 
     
     <div class="description">
-        Waits for all elements inside this element matching the given HTML tag name to be destroyed.
+        <p>Waits for all elements inside this element matching the given HTML tag name to be destroyed.</p>
     </div>
     
 
@@ -3478,7 +3478,7 @@ destroyed.
 
             
 
-            <td class="description last">The tag name of the element.</td>
+            <td class="description last"><p>The tag name of the element.</p></td>
         </tr>
 
     
@@ -3565,7 +3565,7 @@ destroyed.
 
     
     <div class="description">
-        Waits for all elements inside this element matching the given XPath selector to be destroyed.
+        <p>Waits for all elements inside this element matching the given XPath selector to be destroyed.</p>
     </div>
     
 
@@ -3615,7 +3615,7 @@ destroyed.
 
             
 
-            <td class="description last">The XPath selector to search for.</td>
+            <td class="description last"><p>The XPath selector to search for.</p></td>
         </tr>
 
     
@@ -3702,7 +3702,7 @@ destroyed.
 
     
     <div class="description">
-        Delegates the HTTP request for a method to the underlying <a href="Session.html">module:leadfoot/Session</a> object.
+        <p>Delegates the HTTP request for a method to the underlying <a href="Session.html">module:leadfoot/Session</a> object.</p>
     </div>
     
 
@@ -3850,7 +3850,7 @@ destroyed.
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha8</a> on Thu Jun 12 2014 16:02:28 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha8</a> on Fri Jun 13 2014 19:02:01 GMT+0000 (UTC)
 </footer>
 
 <script> prettyPrint(); </script>
