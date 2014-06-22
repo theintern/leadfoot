@@ -299,7 +299,7 @@ Promise that it returns. If no context is explicitly provided, the context from 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line52">line 52</a>
+        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line56">line 56</a>
     </li></ul></dd>
     
 
@@ -396,7 +396,14 @@ Promise that it returns. If no context is explicitly provided, the context from 
     
     <div class="description">
         <p>The filtered elements that will be used if an element-specific method is invoked. Note that this property is not
-valid until the parent Command has been settled.</p>
+valid until the parent Command has been settled. The context array also has two additional properties:</p>
+<ul>
+<li>isSingle (boolean): If true, the context will always contain a single element. This is used to differentiate
+between methods that should still return scalar values (<code>find</code>) and methods that should return arrays of
+values even if there is only one element in the context (<code>findAll</code>).</li>
+<li>depth (number): The depth of the context within the command chain. This is used to prevent traversal into
+higher filtering levels by <a href="Command.html#end">module:leadfoot/Command#end</a>.</li>
+</ul>
     </div>
     
 
@@ -435,7 +442,7 @@ valid until the parent Command has been settled.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line398">line 398</a>
+        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line411">line 411</a>
     </li></ul></dd>
     
 
@@ -501,7 +508,7 @@ valid until the parent Command has been settled.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line376">line 376</a>
+        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line389">line 389</a>
     </li></ul></dd>
     
 
@@ -567,7 +574,7 @@ valid until the parent Command has been settled.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line410">line 410</a>
+        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line429">line 429</a>
     </li></ul></dd>
     
 
@@ -633,7 +640,7 @@ valid until the parent Command has been settled.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line387">line 387</a>
+        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line400">line 400</a>
     </li></ul></dd>
     
 
@@ -779,7 +786,7 @@ the new context for the returned Command.</li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line627">line 627</a>
+        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line646">line 646</a>
     </li></ul></dd>
     
 
@@ -954,7 +961,7 @@ the first argument to the function, if the explicitly specified first argument i
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line564">line 564</a>
+        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line583">line 583</a>
     </li></ul></dd>
     
 
@@ -1253,7 +1260,7 @@ subsequent chained commands to fail with a CancelError.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line537">line 537</a>
+        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line556">line 556</a>
     </li></ul></dd>
     
 
@@ -1390,7 +1397,7 @@ subsequent chained commands to fail with a CancelError.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line517">line 517</a>
+        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line536">line 536</a>
     </li></ul></dd>
     
 
@@ -3042,7 +3049,7 @@ to the previous state. This is equivalent to the <code>jQuery#end</code> method.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line451">line 451</a>
+        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line470">line 470</a>
     </li></ul></dd>
     
 
@@ -3686,7 +3693,7 @@ returned.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line527">line 527</a>
+        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line546">line 546</a>
     </li></ul></dd>
     
 
@@ -13616,7 +13623,7 @@ window names. Omit this argument to resize the currently focused window.</p></td
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line427">line 427</a>
+        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line446">line 446</a>
     </li></ul></dd>
     
 
@@ -14504,7 +14511,7 @@ the <code>setContext</code> method is not called, the element context from the p
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line486">line 486</a>
+        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line505">line 505</a>
     </li></ul></dd>
     
 
@@ -16316,7 +16323,7 @@ destroyed.</p>
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha8</a> on Fri Jun 20 2014 06:51:09 GMT+0000 (UTC)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha8</a> on Sun Jun 22 2014 07:20:22 GMT+0000 (UTC)
 </footer>
 
 <script> prettyPrint(); </script>
