@@ -1,0 +1,77 @@
+//Fonts
+$defaultFonts = 'Open Sans', sans-serif;
+$codeFonts = 'Source Code Pro', monospace;
+$codeCommentFonts = Palatino, 'Palatino Linotype', serif;
+$headingFonts = 'Lora', serif;
+
+//Default colors
+$primaryThemeColor = #297664;
+$defaultBackgroundColor = #F8F8F8;
+$defaultTextColor = #000;
+$defaultLinkColor = #146B93;
+$disabledTextColor = #454545;
+$headingColor = #333;
+$deprecatedTextColor = #900;
+
+//Header and Nav
+$headerBackground = #2C353C;
+$headerTitleColor = #fff;
+$headerTitleSize = 1.7em;
+$headerBorderColor = lighten($headerBackground, 15%);
+$headerHeight = 55px;
+
+$navActiveBackground = #ddd;
+$navBackground = #fff;
+$navBorderColor = #ddd;
+$navBorderWidth = 1px;
+$navLinkColor = $defaultLinkColor;
+$navTitleColor = $headingColor;
+$navWidth = 240px;
+
+$modulesHeight = 140px;
+$modulesBackground = #F8F8F8;
+
+//Content sections
+$overviewBackground = #fff;
+$sectionBackground = #fff;
+
+$subsectionHeadingBackground = #F2F2F2;
+$subsectionHeadingBorderColor = #41BDC5;
+$subsectionTitleColor = #2C353C;
+$overviewHeadingBorderColor = #F87622;
+$overviewHeadingBackgroundColor = #2C353C;
+
+$codeBackground = #2C353C;
+
+$methodsColor = #418CC5;
+$propertiesColor = #41BDC5;
+$eventsColor = #684AA0;
+
+$signatureColor = #B41377;
+$propTitleColor = #4E5255;
+$propNameColor = #531DA1;
+$typedefsColor = #CB6FAF;
+$classesColor = #9ECB6F;
+
+
+$a($linkColor) {
+	a {
+		color: $linkColor;
+
+		&:hover {
+			color: lighten(@color, 20%);
+		}
+
+		&:visited {
+			color: darken(@color, 10%);
+
+			&:hover {
+				color: lighten(@color, 20%);
+			}
+		}
+
+		&:active {
+			color: lighten(@color, 10%);
+		}
+	}
+}

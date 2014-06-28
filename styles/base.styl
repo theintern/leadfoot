@@ -1,0 +1,54 @@
+html,
+body {
+	background: $defaultBackgroundColor;
+	color: $defaultTextColor;
+	font: 14px/1.3 $defaultFonts;
+	margin: 0;
+	padding: 0;
+}
+
+p {
+	-webkit-font-feature-settings: 'kern' on;
+}
+
+.vh {
+	height: 1px;
+	left: -10000px;
+	overflow: hidden;
+	position: absolute;
+	top: auto;
+	width: 1px;
+}
+
+.mainHeader {
+	background: $headerBackground;
+	fixed: top left right;
+	height: $headerHeight;
+	line-height: $headerHeight;
+
+	.projectName {
+		color: $headerTitleColor;
+		display: inline-block;
+		font-family: $headingFonts;
+		font-size: $headerTitleSize;
+		font-weight: 400;
+		padding: 0 0.5em;
+		text-decoration: none;
+
+		&:hover {
+			color: $headerTitleColor;
+		}
+	}
+
+	.projectLogo {
+		max-width: $navWidth - 20%;
+		vertical-align: -20%;
+	}
+}
+
+.mainContent {
+	bottom: 0;
+	fixed: top $headerHeight left ($navWidth + $navBorderWidth);
+	overflow: auto;
+	right: 0;
+}

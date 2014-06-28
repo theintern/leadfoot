@@ -1,5746 +1,2018 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>JSDoc: Global</title>
-
-    <script src="scripts/prettify/prettify.js"> </script>
-    <script src="scripts/prettify/lang-css.js"> </script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+	<meta charset="utf-8">
+	<title>Leadfoot docs: Globals</title>
+	<link rel="stylesheet" href="styles/catalyst.css">
 </head>
-
 <body>
-
-<div id="main">
-
-    <h1 class="page-title">Global</h1>
-
-    
-
-
-
-<section>
-
-<header>
-    <h2>
-    
-    </h2>
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-
-    
-        
-
-        
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-     
-
-    
-
-    
-        <h3 class="subsection-title">Members</h3>
-
-        <dl>
-            
-<dt>
-    <h4 class="name" id="module:leadfoot/keys"><span class="type-signature"></span>module:leadfoot/keys<span class="type-signature"> :string</span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>A list of special keys that can be used with the <code>pressKeys</code> and <code>type</code> functions.</p>
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">string</span>
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-        <h5 class="subsection-title">Properties:</h5>
-
-        <dl>
-
-<table class="props">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>NULL</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>Releases all held modifier keys.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>CANCEL</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>OS-specific keystroke sequence that performs a cancel action.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>HELP</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The help key. This key only appears on older Apple keyboards in place of the Insert key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>BACKSPACE</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The backspace key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>TAB</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The tab key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>CLEAR</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The clear key. This key only appears on full-size Apple keyboards in place of Num Lock key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>RETURN</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The return key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>ENTER</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The enter (numpad) key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>SHIFT</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The shift key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>CONTROL</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The control key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>ALT</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The alt key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>PAUSE</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The pause key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>ESCAPE</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The escape key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>SPACE</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The space bar.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>PAGE_UP</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The page up key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>PAGE_DOWN</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The page down key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>END</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The end key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>HOME</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The home key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>ARROW_LEFT</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The left arrow.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>ARROW_UP</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The up arrow.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>ARROW_RIGHT</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The right arrow.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>ARROW_DOWN</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The down arrow.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>INSERT</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The insert key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>DELETE</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The delete key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>SEMICOLON</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The semicolon key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>EQUALS</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The equals key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>NUMPAD0</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The numpad zero key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>NUMPAD1</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The numpad one key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>NUMPAD2</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The numpad two key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>NUMPAD3</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The numpad three key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>NUMPAD4</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The numpad four key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>NUMPAD5</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The numpad five key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>NUMPAD6</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The numpad six key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>NUMPAD7</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The numpad seven key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>NUMPAD8</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The numpad eight key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>NUMPAD9</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The numpad nine key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>MULTIPLY</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The numpad multiply (*) key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>ADD</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The numpad add (+) key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>SEPARATOR</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The numpad separator (=) key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>SUBTRACT</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The numpad subtract (-) key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>DECIMAL</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The numpad decimal (.) key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>DIVIDE</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The numpad divide (/) key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>F1</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The F1 key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>F2</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The F2 key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>F3</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The F3 key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>F4</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The F4 key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>F5</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The F5 key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>F6</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The F6 key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>F7</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The F7 key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>F8</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The F8 key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>F9</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The F9 key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>F10</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The F10 key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>F11</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The F11 key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>F12</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The F12 key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>META</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The meta (Windows) key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>COMMAND</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The command (⌘) key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>ZENKAKU_HANKAKU</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    
-                
-                </td>
-            
-
-            <td class="description last"><p>The zenkaku/hankaku key.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    NULL
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Cancel
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Help
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Backspace
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Tab
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Clear
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Return
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Enter
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Shift
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Control
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Alt
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Pause
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Escape
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Space
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Page up
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Page down
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    End
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Home
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Left arrow
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Up arrow
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Right arrow
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Down arrow
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Insert
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Delete
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Semicolon
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Equals
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Numpad 0
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Numpad 1
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Numpad 2
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Numpad 3
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Numpad 4
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Numpad 5
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Numpad 6
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Numpad 7
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Numpad 8
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Numpad 9
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Multiply
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Add
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Separator
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Subtract
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Decimal
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Divide
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    F1
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    F2
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    F3
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    F4
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    F5
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    F6
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    F7
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    F8
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    F9
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    F10
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    F11
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    F12
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Command
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code></code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-                <td class="default">
-                
-                    Zenkaku/hankaku
-                
-                </td>
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table></dl>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="keys.js.html">keys.js</a>, <a href="keys.js.html#line14">line 14</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="Session.html#pressKeys">module:leadfoot/Session#pressKeys</a> for usage details.</li>
-        </ul>
-    </dd>
-    
-
-    
-</dl>
-
-
-    
-
-    
-</dd>
-
-        </dl>
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        <dl>
-            
-<dt>
-    <h4 class="name" id="module:leadfoot/helpers/pollUntil"><span class="type-signature"></span>(require("leadfoot/helpers/pollUntil"))<span class="signature">(poller, args<span class="signature-attributes">opt</span>, timeout<span class="signature-attributes">opt</span>, pollInterval<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;any>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        <p>A <a href="Command.html">module:leadfoot/Command</a> helper that polls for a value within the client environment until the value exists
-or a timeout is reached.</p>
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>poller</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-|
-
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>The poller function to execute on an interval. The function should return <code>null</code> or <code>undefined</code> if there is not a
-result. If the poller function throws, polling will halt.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>args</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;any></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>An array of arguments to pass to the poller function when it is invoked.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>timeout</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>The maximum amount of time to wait for a successful result, in milliseconds. If not specified, the current
-<code>executeAsync</code> maximum timeout for the session will be used.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>pollInterval</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>The amount of time to wait between calls to the poller function, in milliseconds. If not specified, defaults to 67ms.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="pollUntil.js.html">helpers/pollUntil.js</a>, <a href="pollUntil.js.html#line57">line 57</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>A promise that resolves to the value returned by the poller function on success and rejects on failure.</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;any></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-        <h5>Examples</h5>
-        
-    <pre class="prettyprint"><code>var Command = require('leadfoot/Command');
-var pollUntil = require('leadfoot/helpers/pollUntil');
-
-new Command(session)
-    .get('http://example.com')
-    .then(pollUntil('return document.getElementById("a");', 1000))
-    .then(function (elementA) {
-        // element was found
-    }, function (error) {
-        // element was not found
-    });</code></pre>
-
-    <pre class="prettyprint"><code>var Command = require('leadfoot/Command');
-var pollUntil = require('leadfoot/helpers/pollUntil');
-
-new Command(session)
-    .get('http://example.com')
-    .then(pollUntil(function (value) {
-        var element = document.getElementById('a');
-        return element &amp;&amp; element.value === value ? true : null;
-    }, [ 'foo' ], 1000))
-    .then(function () {
-        // value was set to 'foo'
-    }, function (error) {
-        // value was never set
-    });</code></pre>
-
-    
-</dd>
-
-        </dl>
-    
-
-    
-        <h3 class="subsection-title">Type Definitions</h3>
-
-        <dl>
-                
-<dt>
-    <h4 class="name" id="Capabilities">Capabilities</h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>A list of possible capabilities for a remote WebDriver environment.</p>
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">Object</span>
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-        <h5 class="subsection-title">Properties:</h5>
-
-        <dl>
-
-<table class="props">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>applicationCacheEnabled</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability expose the state of the browser’s offline application cache via the WebDriver API.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>brokenCookies</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability are incapable of clearing or deleting cookies. This issue cannot be worked around.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>brokenCssTransformedSize</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability do not correctly retrieve the size of a CSS transformed element. This issue is
-automatically corrected.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>brokenDeleteCookie</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability do not correctly delete cookies. This issue is automatically corrected for cookies
-that are accessible via JavaScript.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>brokenDoubleClick</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability do not follow the correct event order when double-clicking. This issue is
-automatically corrected.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>brokenExecuteElementReturn</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability return invalid element handles from execute functions. This issue cannot be worked
-around.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>brokenElementDisplayedOpacity</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability claim fully transparent elements are non-hidden. This issue is automatically
-corrected.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>brokenElementDisplayedOffscreen</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability claim elements positioned offscreen to the top/left of the page are non-hidden.
-This issue is automatically corrected.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>brokenElementPosition</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability do not correctly retrieve the position of a CSS transformed element. This issue is
-automatically corrected.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>brokenFlickFinger</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability do not operate correctly when the <code>flickFinger</code> method is called. This issue cannot
-be corrected.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>brokenHtmlTagName</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability return HTML tag names with the incorrect case. This issue is automatically
-corrected.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>brokenLongTap</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability fail to perform long tap gestures. This issue is not currently corrected.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>brokenMouseEvents</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability have broken mouse event APIs. This issue is automatically corrected as much as
-possible through JavaScript-based event emulation.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>brokenMoveFinger</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability do not support dragging fingers across the page. This issue is not currently
-corrected.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>brokenNavigation</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability do not support browser navigation functions (back, forward, refresh). This issue
-cannot be corrected.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>brokenNullGetSpecAttribute</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability incorrectly return an empty string instead of <code>null</code> for attributes that do not
-exist when using the <code>getSpecAttribute</code> retrieval method. This issue is automatically corrected.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>brokenRefresh</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability fail to complete calls to refresh a page through the standard WebDriver API. This
-issue is automatically corrected.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>brokenSendKeys</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability have broken keyboard event APIs. This issue is automatically corrected as much as
-possible through JavaScript-based event emulation.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>brokenSubmitElement</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability incorrectly omit the key/value of the button being submitted. This issue is
-automatically corrected.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>brokenTouchScroll</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability do not operate correctly when the <code>touchScroll</code> method is called. This issue is
-automatically corrected.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>brokenWindowSwitch</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability cannot switch between windows. This issue cannot be corrected.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>brokenWindowPosition</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability break when <code>setWindowPosition</code> is called. This issue cannot be corrected.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>browserName</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The name of the current environment.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>cssSelectorsEnabled</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability can use CSS selectors to find elements.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>dynamicViewport</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability have viewports that can be resized.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>fixedLogTypes</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-|
-
-<span class="param-type">Array.&lt;string></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability break when the <code>getLogTypes</code> method is called. The list of log types provided here
-are used in lieu of the values provided by the server when calling <code>getLogTypes</code>.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>javascriptEnabled</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability have JavaScript enabled. Leadfoot does not operate in environments without
-JavaScript.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>locationContextEnabled</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability allow the geographic location of the browser to be set and retrieved using the
-WebDriver API.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>mouseEnabled</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability support interaction via mouse commands.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>nativeEvents</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability use platform native events instead of emulated events.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>platform</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The name of the platform on which the current environment is running.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>rotatable</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability allow the rotation of the device to be set and retrieved using the WebDriver API.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>shortcutKey</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The special key that is used by default on the given platform to perform keyboard shortcuts.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>supportsCssTransforms</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability support CSS transforms.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>supportsExecuteAsync</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability support asynchronous JavaScript execution.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>supportsNavigationDataUris</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability support navigation to <code>data:</code> URIs.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>takesScreenshot</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability allow screenshots of the current screen to be taken.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>touchEnabled</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability support interaction via touch commands.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>version</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The version number of the current environment.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>webStorageEnabled</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Environments with this capability allow local storage and session storage to be set and retrieved using the
-WebDriver API.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table></dl>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line78">line 78</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-</dd>
-
-            
-                
-<dt>
-    <h4 class="name" id="Geolocation">Geolocation</h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>An object that describes a geographical location.</p>
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">Object</span>
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-        <h5 class="subsection-title">Properties:</h5>
-
-        <dl>
-
-<table class="props">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>latitude</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>Latitude in WGS84 decimal coordinate system.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>longitude</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>Longitude in WGS84 decimal coordinate system.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>altitude</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>Altitude in meters above the WGS84 ellipsoid.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table></dl>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line55">line 55</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-</dd>
-
-            
-                
-<dt>
-    <h4 class="name" id="LogEntry">LogEntry</h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>A remote log entry.</p>
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">Object</span>
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-        <h5 class="subsection-title">Properties:</h5>
-
-        <dl>
-
-<table class="props">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>timestamp</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The timestamp of the entry.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>level</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The severity level of the entry. This level is not currently normalised.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>message</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The log entry message.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table></dl>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line64">line 64</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-</dd>
-
-            
-                
-<dt>
-    <h4 class="name" id="WebDriverCookie">WebDriverCookie</h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>An object that describes an HTTP cookie.</p>
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">Object</span>
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-        <h5 class="subsection-title">Properties:</h5>
-
-        <dl>
-
-<table class="props">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>The name of the cookie.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>value</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>The value of the cookie.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>path</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>The registered path for the cookie.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>domain</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>The registered domain for the cookie.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>secure</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>True if the cookie should only be transmitted over HTTPS.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>httpOnly</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>True if the cookie should be inaccessible to client-side scripting.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>expiry</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Date</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>The expiration date of the cookie.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table></dl>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line29">line 29</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-</dd>
-
-            
-                
-<dt>
-    <h4 class="name" id="WebDriverError">WebDriverError</h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>An error from the remote WebDriver server.</p>
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">Object</span>
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-        <h5 class="subsection-title">Properties:</h5>
-
-        <dl>
-
-<table class="props">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The human-readable error type returned by the WebDriver server. See module:leadfoot/lib/statusCodes for a
-list of error types.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>message</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>A human-readable message describing the error.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>status</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The raw error status code returned by the WebDriver server.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>detail</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The raw detail of the error returned by the WebDriver server.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>request</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The parameters for the request.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>response</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">module:dojo/request.IResponse</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The response object for the request.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>stack</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The stack trace for the request.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table></dl>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line1">line 1</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-</dd>
-
-            </dl>
-    
-
-    
-</article>
-
-</section>
-
-
-
-
-</div>
-
-<nav>
-    <h2><a href="index.html">Index</a></h2><h3>Modules</h3><ul><li><a href="Command.html">leadfoot/Command</a></li><li><a href="compat.html">leadfoot/compat</a></li><li><a href="Element.html">leadfoot/Element</a></li><li><a href="pollUntil.html">leadfoot/helpers/pollUntil</a></li><li><a href="keys.html">leadfoot/keys</a></li><li><a href="Server.html">leadfoot/Server</a></li><li><a href="Session.html">leadfoot/Session</a></li></ul><h3><a href="global.html">Global</a></h3>
+	<h1 class="mainHeader"><a href="index.html" class="projectName">
+		
+			<img src="logo.png" class="projectLogo"
+				alt="Leadfoot" title="Leadfoot">
+		
+	</a></h1>
+	
+<nav class="mainMenu">
+	
+		<div class="modulesContainer">
+			<h2 class="subsection-title modules">Modules</h2>
+			<ul class="modules">
+				
+<li data-member-id="module:leadfoot/Command" class="">
+	<a href="Command.html">leadfoot/Command</a>
+</li>
+
+<li data-member-id="module:leadfoot/compat" class="icons-1">
+	<a href="compat.html"><span class="icon icon-deprecated" title="Deprecated"></span>leadfoot/compat</a>
+</li>
+
+<li data-member-id="module:leadfoot/Element" class="">
+	<a href="Element.html">leadfoot/Element</a>
+</li>
+
+<li data-member-id="module:leadfoot/helpers/pollUntil" class="">
+	<a href="pollUntil.html">leadfoot/helpers/pollUntil</a>
+</li>
+
+<li data-member-id="module:leadfoot/keys" class="">
+	<a href="keys.html">leadfoot/keys</a>
+</li>
+
+<li data-member-id="module:leadfoot/Server" class="">
+	<a href="Server.html">leadfoot/Server</a>
+</li>
+
+<li data-member-id="module:leadfoot/Session" class="">
+	<a href="Session.html">leadfoot/Session</a>
+</li>
+
+				<li class="active"><a href="global.html">Globals</a></li>
+			</ul>
+		</div>
+	
+		<h2 class="subsection-title typedefs"><a href="#typedefs">Type Defintions</a></h2>
+		<ul class="typedefs">
+			
+<li data-member-id="Capabilities" class="">
+	<a href="global.html#Capabilities">Capabilities</a>
+</li>
+
+<li data-member-id="Geolocation" class="">
+	<a href="global.html#Geolocation">Geolocation</a>
+</li>
+
+<li data-member-id="LogEntry" class="">
+	<a href="global.html#LogEntry">LogEntry</a>
+</li>
+
+<li data-member-id="WebDriverCookie" class="">
+	<a href="global.html#WebDriverCookie">WebDriverCookie</a>
+</li>
+
+<li data-member-id="WebDriverError" class="">
+	<a href="global.html#WebDriverError">WebDriverError</a>
+</li>
+
+		</ul>
+	
 </nav>
+<main class="mainContent doc-globalobj">
 
-<br clear="both">
+	<h1 class="vh">Globals</h1>
 
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha8</a> on Fri Jun 27 2014 16:13:29 GMT-0400 (EDT)
-</footer>
 
-<script> prettyPrint(); </script>
-<script src="scripts/linenumber.js"> </script>
+
+
+
+
+
+
+
+	<div class="section typedefs" id="typedefs">
+		<h2 class="header">Type Definitions</h2>
+		<div class="subsection">
+			
+<div class="member kind-typedef" id="Capabilities">
+	
+		<h3 class="memberName">
+			Capabilities
+			
+		</h3>
+	
+
+	<div class="memberInfo">
+		<div class="versionInfo">
+			
+
+			
+		</div>
+
+		
+
+		
+			<div class="description"><p>A list of possible capabilities for a remote WebDriver environment.</p></div>
+		
+
+		<!-- object property -->
+			
+				<div class="tag table tag-properties">
+					<h4 class="name">Properties</h4>
+					
+
+<table class="properties value">
+	<thead>
+		<tr>
+			<th class="name">Name</th>
+			<th class="type">Type</th>
+			
+			
+			<th class="table-description">Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		
+			<tr>
+				
+					<td class="name"><code>applicationCacheEnabled</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability expose the state of the browser’s offline application cache via the WebDriver API.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>brokenCookies</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability are incapable of clearing or deleting cookies. This issue cannot be worked around.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>brokenCssTransformedSize</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability do not correctly retrieve the size of a CSS transformed element. This issue is
+automatically corrected.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>brokenDeleteCookie</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability do not correctly delete cookies. This issue is automatically corrected for cookies
+that are accessible via JavaScript.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>brokenDoubleClick</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability do not follow the correct event order when double-clicking. This issue is
+automatically corrected.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>brokenExecuteElementReturn</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability return invalid element handles from execute functions. This issue cannot be worked
+around.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>brokenElementDisplayedOpacity</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability claim fully transparent elements are non-hidden. This issue is automatically
+corrected.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>brokenElementDisplayedOffscreen</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability claim elements positioned offscreen to the top/left of the page are non-hidden.
+This issue is automatically corrected.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>brokenElementPosition</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability do not correctly retrieve the position of a CSS transformed element. This issue is
+automatically corrected.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>brokenFlickFinger</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability do not operate correctly when the <code>flickFinger</code> method is called. This issue cannot
+be corrected.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>brokenHtmlTagName</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability return HTML tag names with the incorrect case. This issue is automatically
+corrected.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>brokenLongTap</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability fail to perform long tap gestures. This issue is not currently corrected.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>brokenMouseEvents</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability have broken mouse event APIs. This issue is automatically corrected as much as
+possible through JavaScript-based event emulation.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>brokenMoveFinger</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability do not support dragging fingers across the page. This issue is not currently
+corrected.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>brokenNavigation</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability do not support browser navigation functions (back, forward, refresh). This issue
+cannot be corrected.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>brokenNullGetSpecAttribute</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability incorrectly return an empty string instead of <code>null</code> for attributes that do not
+exist when using the <code>getSpecAttribute</code> retrieval method. This issue is automatically corrected.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>brokenRefresh</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability fail to complete calls to refresh a page through the standard WebDriver API. This
+issue is automatically corrected.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>brokenSendKeys</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability have broken keyboard event APIs. This issue is automatically corrected as much as
+possible through JavaScript-based event emulation.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>brokenSubmitElement</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability incorrectly omit the key/value of the button being submitted. This issue is
+automatically corrected.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>brokenTouchScroll</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability do not operate correctly when the <code>touchScroll</code> method is called. This issue is
+automatically corrected.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>brokenWindowSwitch</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability cannot switch between windows. This issue cannot be corrected.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>brokenWindowPosition</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability break when <code>setWindowPosition</code> is called. This issue cannot be corrected.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>browserName</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">string</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The name of the current environment.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>cssSelectorsEnabled</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability can use CSS selectors to find elements.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>dynamicViewport</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability have viewports that can be resized.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>fixedLogTypes</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>|<span class="param-type">Array.&lt;string></span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability break when the <code>getLogTypes</code> method is called. The list of log types provided here
+are used in lieu of the values provided by the server when calling <code>getLogTypes</code>.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>javascriptEnabled</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability have JavaScript enabled. Leadfoot does not operate in environments without
+JavaScript.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>locationContextEnabled</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability allow the geographic location of the browser to be set and retrieved using the
+WebDriver API.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>mouseEnabled</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability support interaction via mouse commands.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>nativeEvents</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability use platform native events instead of emulated events.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>platform</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">string</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The name of the platform on which the current environment is running.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>rotatable</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability allow the rotation of the device to be set and retrieved using the WebDriver API.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>shortcutKey</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">string</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The special key that is used by default on the given platform to perform keyboard shortcuts.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>supportsCssTransforms</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability support CSS transforms.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>supportsExecuteAsync</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability support asynchronous JavaScript execution.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>supportsNavigationDataUris</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability support navigation to <code>data:</code> URIs.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>takesScreenshot</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability allow screenshots of the current screen to be taken.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>touchEnabled</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability support interaction via touch commands.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>version</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">string</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The version number of the current environment.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>webStorageEnabled</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Environments with this capability allow local storage and session storage to be set and retrieved using the
+WebDriver API.</p>
+						
+					</td>
+				
+			</tr>
+		
+	</tbody>
+</table>
+
+				</div>
+			
+		<!-- /object property -->
+
+		
+
+		<!-- function -->
+			
+
+			
+
+			
+
+			
+
+			
+			
+
+			
+			
+		<!-- /function -->
+
+		<!-- education -->
+			
+
+			
+
+			
+			
+		<!-- /education -->
+
+		
+			<div class="tag scalar tag-source">
+				<h4 class="name">Source</h4>
+				<div class="value">
+					<a href="typedefs.js.html">typedefs.js</a>,
+					<a href="typedefs.js.html#line78">line 78</a>
+				</div>
+			</div>
+		
+	</div>
+</div>
+
+<div class="member kind-typedef" id="Geolocation">
+	
+		<h3 class="memberName">
+			Geolocation
+			
+		</h3>
+	
+
+	<div class="memberInfo">
+		<div class="versionInfo">
+			
+
+			
+		</div>
+
+		
+
+		
+			<div class="description"><p>An object that describes a geographical location.</p></div>
+		
+
+		<!-- object property -->
+			
+				<div class="tag table tag-properties">
+					<h4 class="name">Properties</h4>
+					
+
+<table class="properties value">
+	<thead>
+		<tr>
+			<th class="name">Name</th>
+			<th class="type">Type</th>
+			<th class="attributes">Attributes</th>
+			
+			<th class="table-description">Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		
+			<tr>
+				
+					<td class="name"><code>latitude</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">number</span>
+					
+				</td>
+
+				
+				
+					<td class="attributes"></td>
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Latitude in WGS84 decimal coordinate system.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>longitude</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">number</span>
+					
+				</td>
+
+				
+				
+					<td class="attributes"></td>
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Longitude in WGS84 decimal coordinate system.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>altitude</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">number</span>
+					
+				</td>
+
+				
+				
+					<td class="attributes">optional</td>
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>Altitude in meters above the WGS84 ellipsoid.</p>
+						
+					</td>
+				
+			</tr>
+		
+	</tbody>
+</table>
+
+				</div>
+			
+		<!-- /object property -->
+
+		
+
+		<!-- function -->
+			
+
+			
+
+			
+
+			
+
+			
+			
+
+			
+			
+		<!-- /function -->
+
+		<!-- education -->
+			
+
+			
+
+			
+			
+		<!-- /education -->
+
+		
+			<div class="tag scalar tag-source">
+				<h4 class="name">Source</h4>
+				<div class="value">
+					<a href="typedefs.js.html">typedefs.js</a>,
+					<a href="typedefs.js.html#line55">line 55</a>
+				</div>
+			</div>
+		
+	</div>
+</div>
+
+<div class="member kind-typedef" id="LogEntry">
+	
+		<h3 class="memberName">
+			LogEntry
+			
+		</h3>
+	
+
+	<div class="memberInfo">
+		<div class="versionInfo">
+			
+
+			
+		</div>
+
+		
+
+		
+			<div class="description"><p>A remote log entry.</p></div>
+		
+
+		<!-- object property -->
+			
+				<div class="tag table tag-properties">
+					<h4 class="name">Properties</h4>
+					
+
+<table class="properties value">
+	<thead>
+		<tr>
+			<th class="name">Name</th>
+			<th class="type">Type</th>
+			
+			
+			<th class="table-description">Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		
+			<tr>
+				
+					<td class="name"><code>timestamp</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">number</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The timestamp of the entry.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>level</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">string</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The severity level of the entry. This level is not currently normalised.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>message</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">string</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The log entry message.</p>
+						
+					</td>
+				
+			</tr>
+		
+	</tbody>
+</table>
+
+				</div>
+			
+		<!-- /object property -->
+
+		
+
+		<!-- function -->
+			
+
+			
+
+			
+
+			
+
+			
+			
+
+			
+			
+		<!-- /function -->
+
+		<!-- education -->
+			
+
+			
+
+			
+			
+		<!-- /education -->
+
+		
+			<div class="tag scalar tag-source">
+				<h4 class="name">Source</h4>
+				<div class="value">
+					<a href="typedefs.js.html">typedefs.js</a>,
+					<a href="typedefs.js.html#line64">line 64</a>
+				</div>
+			</div>
+		
+	</div>
+</div>
+
+<div class="member kind-typedef" id="WebDriverCookie">
+	
+		<h3 class="memberName">
+			WebDriverCookie
+			
+		</h3>
+	
+
+	<div class="memberInfo">
+		<div class="versionInfo">
+			
+
+			
+		</div>
+
+		
+
+		
+			<div class="description"><p>An object that describes an HTTP cookie.</p></div>
+		
+
+		<!-- object property -->
+			
+				<div class="tag table tag-properties">
+					<h4 class="name">Properties</h4>
+					
+
+<table class="properties value">
+	<thead>
+		<tr>
+			<th class="name">Name</th>
+			<th class="type">Type</th>
+			<th class="attributes">Attributes</th>
+			
+			<th class="table-description">Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		
+			<tr>
+				
+					<td class="name"><code>name</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">string</span>
+					
+				</td>
+
+				
+				
+					<td class="attributes"></td>
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The name of the cookie.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>value</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">string</span>
+					
+				</td>
+
+				
+				
+					<td class="attributes"></td>
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The value of the cookie.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>path</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">string</span>
+					
+				</td>
+
+				
+				
+					<td class="attributes">optional</td>
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The registered path for the cookie.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>domain</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">string</span>
+					
+				</td>
+
+				
+				
+					<td class="attributes">optional</td>
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The registered domain for the cookie.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>secure</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+					<td class="attributes">optional</td>
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>True if the cookie should only be transmitted over HTTPS.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>httpOnly</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">boolean</span>
+					
+				</td>
+
+				
+				
+					<td class="attributes">optional</td>
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>True if the cookie should be inaccessible to client-side scripting.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>expiry</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">Date</span>
+					
+				</td>
+
+				
+				
+					<td class="attributes">optional</td>
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The expiration date of the cookie.</p>
+						
+					</td>
+				
+			</tr>
+		
+	</tbody>
+</table>
+
+				</div>
+			
+		<!-- /object property -->
+
+		
+
+		<!-- function -->
+			
+
+			
+
+			
+
+			
+
+			
+			
+
+			
+			
+		<!-- /function -->
+
+		<!-- education -->
+			
+
+			
+
+			
+			
+		<!-- /education -->
+
+		
+			<div class="tag scalar tag-source">
+				<h4 class="name">Source</h4>
+				<div class="value">
+					<a href="typedefs.js.html">typedefs.js</a>,
+					<a href="typedefs.js.html#line29">line 29</a>
+				</div>
+			</div>
+		
+	</div>
+</div>
+
+<div class="member kind-typedef" id="WebDriverError">
+	
+		<h3 class="memberName">
+			WebDriverError
+			
+		</h3>
+	
+
+	<div class="memberInfo">
+		<div class="versionInfo">
+			
+
+			
+		</div>
+
+		
+
+		
+			<div class="description"><p>An error from the remote WebDriver server.</p></div>
+		
+
+		<!-- object property -->
+			
+				<div class="tag table tag-properties">
+					<h4 class="name">Properties</h4>
+					
+
+<table class="properties value">
+	<thead>
+		<tr>
+			<th class="name">Name</th>
+			<th class="type">Type</th>
+			
+			
+			<th class="table-description">Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		
+			<tr>
+				
+					<td class="name"><code>name</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">string</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The human-readable error type returned by the WebDriver server. See leadfoot/lib/statusCodes for a
+list of error types.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>message</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">string</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>A human-readable message describing the error.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>status</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">number</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The raw error status code returned by the WebDriver server.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>detail</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">Object</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The raw detail of the error returned by the WebDriver server.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>request</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">Object</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The parameters for the request.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>response</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">dojo/request.IResponse</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The response object for the request.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>stack</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">string</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The stack trace for the request.</p>
+						
+					</td>
+				
+			</tr>
+		
+	</tbody>
+</table>
+
+				</div>
+			
+		<!-- /object property -->
+
+		
+
+		<!-- function -->
+			
+
+			
+
+			
+
+			
+
+			
+			
+
+			
+			
+		<!-- /function -->
+
+		<!-- education -->
+			
+
+			
+
+			
+			
+		<!-- /education -->
+
+		
+			<div class="tag scalar tag-source">
+				<h4 class="name">Source</h4>
+				<div class="value">
+					<a href="typedefs.js.html">typedefs.js</a>,
+					<a href="typedefs.js.html#line1">line 1</a>
+				</div>
+			</div>
+		
+	</div>
+</div>
+
+		</div>
+	</div>
+
+
+
+
+ 
+</main>
+
+
+	<script src="scripts/prettify/prettify.js"></script>
+	<script src="scripts/prettify/lang-css.js"></script>
+	<script>prettyPrint();</script>
+	<script src="scripts/nav.js"></script>
 </body>
 </html>

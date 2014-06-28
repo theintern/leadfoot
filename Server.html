@@ -1,1317 +1,1345 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>JSDoc: Module: leadfoot/Server</title>
-
-    <script src="scripts/prettify/prettify.js"> </script>
-    <script src="scripts/prettify/lang-css.js"> </script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+	<meta charset="utf-8">
+	<title>Leadfoot docs: Module: leadfoot/Server</title>
+	<link rel="stylesheet" href="styles/catalyst.css">
 </head>
-
 <body>
-
-<div id="main">
-
-    <h1 class="page-title">Module: leadfoot/Server</h1>
-
-    
-
-
-
-<section>
-
-<header>
-    <h2>
-    leadfoot/Server
-    </h2>
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-<dt>
-    <h4 class="name" id="module:leadfoot/Server"><span class="type-signature"></span>new (require("leadfoot/Server"))<span class="signature">(url)</span><span class="type-signature"></span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        <p>The Server class represents a remote HTTP server implementing the WebDriver wire protocol that can be used to
-generate new remote control sessions.</p>
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>url</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-|
-
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The fully qualified URL to the JsonWireProtocol endpoint on the server. The default endpoint for a
-JsonWireProtocol HTTP server is http://localhost:4444/wd/hub. You may also pass a parsed URL object which will
-be converted to a string.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Server.js.html">Server.js</a>, <a href="Server.js.html#line204">line 204</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-    
-
-    
-        
-
-        
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Server.js.html">Server.js</a>, <a href="Server.js.html#line2">line 2</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-     
-
-    
-
-    
-        <h3 class="subsection-title">Members</h3>
-
-        <dl>
-            
-<dt>
-    <h4 class="name" id="fixSessionCapabilities"><span class="type-signature"></span>fixSessionCapabilities<span class="type-signature"> :boolean</span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>Whether or not to perform capabilities testing and correction when creating a new Server.</p>
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">boolean</span>
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-default">Default Value:</dt>
-    <dd class="tag-default"><ul class="dummy">
-            <li>true</li>
-        </ul></dd>
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Server.js.html">Server.js</a>, <a href="Server.js.html#line245">line 245</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="sessionConstructor"><span class="type-signature"></span>sessionConstructor<span class="type-signature"> :<a href="Session.html">module:leadfoot/Session</a></span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>An alternative session constructor. Defaults to the standard <a href="Session.html">module:leadfoot/Session</a> constructor if
-one is not provided.</p>
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type"><a href="Session.html">module:leadfoot/Session</a></span>
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-default">Default Value:</dt>
-    <dd class="tag-default"><ul class="dummy">
-            <li>Session</li>
-        </ul></dd>
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Server.js.html">Server.js</a>, <a href="Server.js.html#line238">line 238</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-</dd>
-
-        </dl>
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        <dl>
-            
-<dt>
-    <h4 class="name" id="createSession"><span class="type-signature"></span>createSession<span class="signature">(desiredCapabilities, requiredCapabilities<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Session.html">module:leadfoot/Session</a>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        <p>Creates a new remote control session on the remote server.</p>
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>desiredCapabilities</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#Capabilities">Capabilities</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>A hash map of desired capabilities of the remote environment. The server may return an environment that does
-not match all the desired capabilities if one is not available.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>requiredCapabilities</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#Capabilities">Capabilities</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>A hash map of required capabilities of the remote environment. The server will not return an environment that
-does not match all the required capabilities if one is not available.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Server.js.html">Server.js</a>, <a href="Server.js.html#line274">line 274</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;<a href="Session.html">module:leadfoot/Session</a>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="deleteSession"><span class="type-signature"></span>deleteSession<span class="signature">(sessionId)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        <p>Terminates a session on the server.</p>
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>sessionId</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Server.js.html">Server.js</a>, <a href="Server.js.html#line793">line 793</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;void></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getSessionCapabilities"><span class="type-signature"></span>getSessionCapabilities<span class="signature">(sessionId)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        <p>Gets information on the capabilities of a given session from the server. The list of capabilities returned
-by this command will not include any of the extra session capabilities detected by Leadfoot and may be
-inaccurate.</p>
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>sessionId</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Server.js.html">Server.js</a>, <a href="Server.js.html#line783">line 783</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;Object></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getSessions"><span class="type-signature"></span>getSessions<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;Object>>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        <p>Gets a list of all currently active remote control sessions on this server.</p>
-    </div>
-    
-
-    
-
-    
-
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Server.js.html">Server.js</a>, <a href="Server.js.html#line771">line 771</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;Array.&lt;Object>></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="getStatus"><span class="type-signature"></span>getStatus<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        <p>Gets the status of the remote server.</p>
-    </div>
-    
-
-    
-
-    
-
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Server.js.html">Server.js</a>, <a href="Server.js.html#line257">line 257</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>An object containing arbitrary properties describing the status of the remote
-server.</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;Object></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="createHttpRequest"><span class="type-signature">(inner) </span>createHttpRequest<span class="signature">(method)</span><span class="type-signature"> &rarr; {function}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        <p>Creates a function that performs an HTTP request to a JsonWireProtocol endpoint.</p>
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>method</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The HTTP method to fix.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Server.js.html">Server.js</a>, <a href="Server.js.html#line21">line 21</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">function</span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="returnValue"><span class="type-signature">(inner) </span>returnValue<span class="signature">(response)</span><span class="type-signature"> &rarr; {any}</span></h4>
-
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        <p>Returns the actual response value from the remote environment.</p>
-    </div>
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>response</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>JsonWireProtocol response object.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-    
-
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Server.js.html">Server.js</a>, <a href="Server.js.html#line200">line 200</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>The actual response value.</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">any</span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-</dd>
-
-        </dl>
-    
-
-    
-
-    
-</article>
-
-</section>
-
-
-
-
-</div>
-
-<nav>
-    <h2><a href="index.html">Index</a></h2><h3>Modules</h3><ul><li><a href="Command.html">leadfoot/Command</a></li><li><a href="compat.html">leadfoot/compat</a></li><li><a href="Element.html">leadfoot/Element</a></li><li><a href="pollUntil.html">leadfoot/helpers/pollUntil</a></li><li><a href="keys.html">leadfoot/keys</a></li><li><a href="Server.html">leadfoot/Server</a></li><li><a href="Session.html">leadfoot/Session</a></li></ul><h3><a href="global.html">Global</a></h3>
+	<h1 class="mainHeader"><a href="index.html" class="projectName">
+		
+			<img src="logo.png" class="projectLogo"
+				alt="Leadfoot" title="Leadfoot">
+		
+	</a></h1>
+	
+<nav class="mainMenu">
+	
+		<div class="modulesContainer">
+			<h2 class="subsection-title modules">Modules</h2>
+			<ul class="modules">
+				
+<li data-member-id="module:leadfoot/Command" class="">
+	<a href="Command.html">leadfoot/Command</a>
+</li>
+
+<li data-member-id="module:leadfoot/compat" class="icons-1">
+	<a href="compat.html"><span class="icon icon-deprecated" title="Deprecated"></span>leadfoot/compat</a>
+</li>
+
+<li data-member-id="module:leadfoot/Element" class="">
+	<a href="Element.html">leadfoot/Element</a>
+</li>
+
+<li data-member-id="module:leadfoot/helpers/pollUntil" class="">
+	<a href="pollUntil.html">leadfoot/helpers/pollUntil</a>
+</li>
+
+<li data-member-id="module:leadfoot/keys" class="">
+	<a href="keys.html">leadfoot/keys</a>
+</li>
+
+<li data-member-id="module:leadfoot/Server" class="active">
+	<a href="Server.html">leadfoot/Server</a>
+</li>
+
+<li data-member-id="module:leadfoot/Session" class="">
+	<a href="Session.html">leadfoot/Session</a>
+</li>
+
+				<li><a href="global.html">Globals</a></li>
+			</ul>
+		</div>
+	
+		<h2 class="subsection-title properties"><a href="#properties">Properties</a></h2>
+		<ul class="properties">
+			
+<li data-member-id="module:leadfoot/Server#fixSessionCapabilities" class="">
+	<a href="Server.html#fixSessionCapabilities">fixSessionCapabilities</a>
+</li>
+
+<li data-member-id="module:leadfoot/Server#sessionConstructor" class="">
+	<a href="Server.html#sessionConstructor">sessionConstructor</a>
+</li>
+
+		</ul>
+	
+		<h2 class="subsection-title methods"><a href="#methods">Methods</a></h2>
+		<ul class="methods">
+			
+<li data-member-id="module:leadfoot/Server#createSession" class="">
+	<a href="Server.html#createSession">createSession</a>
+</li>
+
+<li data-member-id="module:leadfoot/Server#deleteSession" class="">
+	<a href="Server.html#deleteSession">deleteSession</a>
+</li>
+
+<li data-member-id="module:leadfoot/Server#getSessionCapabilities" class="">
+	<a href="Server.html#getSessionCapabilities">getSessionCapabilities</a>
+</li>
+
+<li data-member-id="module:leadfoot/Server#getSessions" class="">
+	<a href="Server.html#getSessions">getSessions</a>
+</li>
+
+<li data-member-id="module:leadfoot/Server#getStatus" class="">
+	<a href="Server.html#getStatus">getStatus</a>
+</li>
+
+<li data-member-id="module:leadfoot/Server~createHttpRequest" class="">
+	<a href="Server.html#createHttpRequest">createHttpRequest</a>
+</li>
+
+<li data-member-id="module:leadfoot/Server~returnValue" class="">
+	<a href="Server.html#returnValue">returnValue</a>
+</li>
+
+		</ul>
+	
 </nav>
+<div class="persistentTitle hidden"><a href="#overview">leadfoot/Server</a></div><main class="mainContent doc-module">
 
-<br clear="both">
+	<div class="section overview" id="overview">
+		<div class="classInfo">
+			<h1 class="title header">leadfoot/Server</h1>
 
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha8</a> on Fri Jun 27 2014 16:13:29 GMT-0400 (EDT)
-</footer>
+			
 
-<script> prettyPrint(); </script>
-<script src="scripts/linenumber.js"> </script>
+			
+				<div class="superclasses">
+					<h2>Inheritance</h2>
+					<ol>
+						<li>leadfoot/Server</li>
+						
+							<li>Object</li>
+						
+					</ol>
+				</div>
+				
+				
+			
+		</div>
+
+		
+<div class="member kind-class" id="module:leadfoot/Server">
+	
+		<h2 class="memberName">
+			<span class="type-signature"></span>new (require("leadfoot/Server"))<span class="signature">(url:<span class="type-signature"> Object|string</span>)</span><span class="type-signature"></span>
+			
+		</h2>
+	
+
+	<div class="memberInfo">
+		<div class="versionInfo">
+			
+
+			
+		</div>
+
+		
+
+		
+			<div class="description"><p>The Server class represents a remote HTTP server implementing the WebDriver wire protocol that can be used to
+generate new remote control sessions.</p></div>
+		
+
+		<!-- object property -->
+			
+		<!-- /object property -->
+
+		
+
+		<!-- function -->
+			
+				<div class="tag table tag-parameters">
+					<h3 class="name">Parameters</h3>
+					
+
+<table class="parameters value">
+	<thead>
+		<tr>
+			<th class="name">Name</th>
+			<th class="type">Type</th>
+			
+			
+			<th class="table-description">Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		
+			<tr>
+				
+					<td class="name"><code>url</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">Object</span>|<span class="param-type">string</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The fully qualified URL to the JsonWireProtocol endpoint on the server. The default endpoint for a
+JsonWireProtocol HTTP server is http://localhost:4444/wd/hub. You may also pass a parsed URL object which will
+be converted to a string.</p>
+						
+					</td>
+				
+			</tr>
+		
+	</tbody>
+</table>
+
+				</div>
+			
+
+			
+
+			
+
+			
+
+			
+			
+
+			
+			
+		<!-- /function -->
+
+		<!-- education -->
+			
+
+			
+
+			
+			
+		<!-- /education -->
+
+		
+			<div class="tag scalar tag-source">
+				<h3 class="name">Source</h3>
+				<div class="value">
+					<a href="Server.js.html">Server.js</a>,
+					<a href="Server.js.html#line204">line 204</a>
+				</div>
+			</div>
+		
+	</div>
+</div>
+
+
+		
+			<div class="summary properties">
+				<h2 class="header"><span class="inherited">All</span> Properties</h2>
+				
+<table class="summaryTable">
+	<thead>
+		<tr>
+			<th class="property">Property</th>
+			<th class="source">Defined by</th>
+		</tr>
+	</thead>
+	<tbody>
+		
+			
+			<tr class="icons-0 ">
+				<td class="property">
+					<div class="name">
+						<a href="Server.html#fixSessionCapabilities">fixSessionCapabilities</a>:<span class="type-signature"> boolean</span>
+					</div>
+					<div class="description">
+						<span class="type-signature"></span><p>Whether or not to perform capabilities testing and correction when creating a new Server.</p>
+					</div>
+				</td>
+				<td class="source">
+					
+						leadfoot/Server
+					
+				</td>
+			</tr>
+		
+			
+			<tr class="icons-0 ">
+				<td class="property">
+					<div class="name">
+						<a href="Server.html#sessionConstructor">sessionConstructor</a>:<span class="type-signature"> <a href="Session.html">leadfoot/Session</a></span>
+					</div>
+					<div class="description">
+						<span class="type-signature"></span><p>An alternative session constructor.</p>
+					</div>
+				</td>
+				<td class="source">
+					
+						leadfoot/Server
+					
+				</td>
+			</tr>
+		
+	</tbody>
+</table>
+
+			</div>
+		
+
+		
+			<div class="summary methods">
+				<h2 class="header"><span class="inherited">All</span> Methods</h2>
+				
+<table class="summaryTable">
+	<thead>
+		<tr>
+			<th class="method">Method</th>
+			<th class="source">Defined by</th>
+		</tr>
+	</thead>
+	<tbody>
+		
+			
+			<tr class="icons-0 ">
+				<td class="method">
+					<div class="name">
+						<a href="Server.html#createSession">createSession</a><span class="signature">(desiredCapabilities:<span class="type-signature"> <a href="global.html#Capabilities">Capabilities</a></span>, requiredCapabilities<span class="signature-attributes">opt</span>:<span class="type-signature"> <a href="global.html#Capabilities">Capabilities</a></span>):</span><span class="type-signature"> Promise.&lt;<a href="Session.html">leadfoot/Session</a>></span>
+					</div>
+					<div class="description">
+						<span class="type-signature"></span><p>Creates a new remote control session on the remote server.</p>
+					</div>
+				</td>
+				<td class="source">
+					
+						leadfoot/Server
+					
+				</td>
+			</tr>
+		
+			
+			<tr class="icons-0 ">
+				<td class="method">
+					<div class="name">
+						<a href="Server.html#deleteSession">deleteSession</a><span class="signature">(sessionId:<span class="type-signature"> string</span>):</span><span class="type-signature"> Promise.&lt;void></span>
+					</div>
+					<div class="description">
+						<span class="type-signature"></span><p>Terminates a session on the server.</p>
+					</div>
+				</td>
+				<td class="source">
+					
+						leadfoot/Server
+					
+				</td>
+			</tr>
+		
+			
+			<tr class="icons-0 ">
+				<td class="method">
+					<div class="name">
+						<a href="Server.html#getSessionCapabilities">getSessionCapabilities</a><span class="signature">(sessionId:<span class="type-signature"> string</span>):</span><span class="type-signature"> Promise.&lt;Object></span>
+					</div>
+					<div class="description">
+						<span class="type-signature"></span><p>Gets information on the capabilities of a given session from the server.</p>
+					</div>
+				</td>
+				<td class="source">
+					
+						leadfoot/Server
+					
+				</td>
+			</tr>
+		
+			
+			<tr class="icons-0 ">
+				<td class="method">
+					<div class="name">
+						<a href="Server.html#getSessions">getSessions</a><span class="signature">():</span><span class="type-signature"> Promise.&lt;Array.&lt;Object>></span>
+					</div>
+					<div class="description">
+						<span class="type-signature"></span><p>Gets a list of all currently active remote control sessions on this server.</p>
+					</div>
+				</td>
+				<td class="source">
+					
+						leadfoot/Server
+					
+				</td>
+			</tr>
+		
+			
+			<tr class="icons-0 ">
+				<td class="method">
+					<div class="name">
+						<a href="Server.html#getStatus">getStatus</a><span class="signature">():</span><span class="type-signature"> Promise.&lt;Object></span>
+					</div>
+					<div class="description">
+						<span class="type-signature"></span><p>Gets the status of the remote server.</p>
+					</div>
+				</td>
+				<td class="source">
+					
+						leadfoot/Server
+					
+				</td>
+			</tr>
+		
+			
+			<tr class="icons-0 ">
+				<td class="method">
+					<div class="name">
+						<a href="Server.html#createHttpRequest">createHttpRequest</a><span class="signature">(method:<span class="type-signature"> string</span>):</span><span class="type-signature"> function</span>
+					</div>
+					<div class="description">
+						<span class="type-signature">(inner) </span><p>Creates a function that performs an HTTP request to a JsonWireProtocol endpoint.</p>
+					</div>
+				</td>
+				<td class="source">
+					
+						leadfoot/Server
+					
+				</td>
+			</tr>
+		
+			
+			<tr class="icons-0 ">
+				<td class="method">
+					<div class="name">
+						<a href="Server.html#returnValue">returnValue</a><span class="signature">(response:<span class="type-signature"> Object</span>):</span><span class="type-signature"> any</span>
+					</div>
+					<div class="description">
+						<span class="type-signature">(inner) </span><p>Returns the actual response value from the remote environment.</p>
+					</div>
+				</td>
+				<td class="source">
+					
+						leadfoot/Server
+					
+				</td>
+			</tr>
+		
+	</tbody>
+</table>
+
+			</div>
+		
+
+		
+	</div>
+
+
+
+	<div class="section properties" id="properties">
+		<h2 class="header">Properties</h2>
+		<div class="subsection">
+			
+				
+<div class="member kind-member" id="fixSessionCapabilities">
+	
+		<h3 class="memberName">
+			<span class="type-signature"></span>fixSessionCapabilities:<span class="type-signature"> boolean</span>
+			
+		</h3>
+	
+
+	<div class="memberInfo">
+		<div class="versionInfo">
+			
+
+			
+		</div>
+
+		
+
+		
+			<div class="description"><p>Whether or not to perform capabilities testing and correction when creating a new Server.</p></div>
+		
+
+		<!-- object property -->
+			
+		<!-- /object property -->
+
+		
+			<div class="tag scalar tag-default">
+				<h4 class="name">Defaults to</h4>
+				<div class="value">
+					
+						<code>true</code>
+					
+				</div>
+			</div>
+		
+
+		<!-- function -->
+			
+
+			
+
+			
+
+			
+
+			
+			
+
+			
+			
+		<!-- /function -->
+
+		<!-- education -->
+			
+
+			
+
+			
+			
+		<!-- /education -->
+
+		
+			<div class="tag scalar tag-source">
+				<h4 class="name">Source</h4>
+				<div class="value">
+					<a href="Server.js.html">Server.js</a>,
+					<a href="Server.js.html#line245">line 245</a>
+				</div>
+			</div>
+		
+	</div>
+</div>
+
+			
+				
+<div class="member kind-member" id="sessionConstructor">
+	
+		<h3 class="memberName">
+			<span class="type-signature"></span>sessionConstructor:<span class="type-signature"> <a href="Session.html">leadfoot/Session</a></span>
+			
+		</h3>
+	
+
+	<div class="memberInfo">
+		<div class="versionInfo">
+			
+
+			
+		</div>
+
+		
+
+		
+			<div class="description"><p>An alternative session constructor. Defaults to the standard <a href="Session.html">leadfoot/Session</a> constructor if
+one is not provided.</p></div>
+		
+
+		<!-- object property -->
+			
+		<!-- /object property -->
+
+		
+			<div class="tag scalar tag-default">
+				<h4 class="name">Defaults to</h4>
+				<div class="value">
+					
+						<code>Session</code>
+					
+				</div>
+			</div>
+		
+
+		<!-- function -->
+			
+
+			
+
+			
+
+			
+
+			
+			
+
+			
+			
+		<!-- /function -->
+
+		<!-- education -->
+			
+
+			
+
+			
+			
+		<!-- /education -->
+
+		
+			<div class="tag scalar tag-source">
+				<h4 class="name">Source</h4>
+				<div class="value">
+					<a href="Server.js.html">Server.js</a>,
+					<a href="Server.js.html#line238">line 238</a>
+				</div>
+			</div>
+		
+	</div>
+</div>
+
+			
+		</div>
+	</div>
+
+
+
+	<div class="section methods" id="methods">
+		<h2 class="header">Methods</h2>
+		<div class="subsection">
+			
+				
+<div class="member kind-function" id="createSession">
+	
+		<h3 class="memberName">
+			<span class="type-signature"></span>createSession<span class="signature">(desiredCapabilities:<span class="type-signature"> <a href="global.html#Capabilities">Capabilities</a></span>, requiredCapabilities<span class="signature-attributes">opt</span>:<span class="type-signature"> <a href="global.html#Capabilities">Capabilities</a></span>):</span><span class="type-signature"> Promise.&lt;<a href="Session.html">leadfoot/Session</a>></span>
+			
+		</h3>
+	
+
+	<div class="memberInfo">
+		<div class="versionInfo">
+			
+
+			
+		</div>
+
+		
+
+		
+			<div class="description"><p>Creates a new remote control session on the remote server.</p></div>
+		
+
+		<!-- object property -->
+			
+		<!-- /object property -->
+
+		
+
+		<!-- function -->
+			
+				<div class="tag table tag-parameters">
+					<h4 class="name">Parameters</h4>
+					
+
+<table class="parameters value">
+	<thead>
+		<tr>
+			<th class="name">Name</th>
+			<th class="type">Type</th>
+			<th class="attributes">Attributes</th>
+			
+			<th class="table-description">Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		
+			<tr>
+				
+					<td class="name"><code>desiredCapabilities</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type"><a href="global.html#Capabilities">Capabilities</a></span>
+					
+				</td>
+
+				
+				
+					<td class="attributes"></td>
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>A hash map of desired capabilities of the remote environment. The server may return an environment that does
+not match all the desired capabilities if one is not available.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>requiredCapabilities</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type"><a href="global.html#Capabilities">Capabilities</a></span>
+					
+				</td>
+
+				
+				
+					<td class="attributes">optional</td>
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>A hash map of required capabilities of the remote environment. The server will not return an environment that
+does not match all the required capabilities if one is not available.</p>
+						
+					</td>
+				
+			</tr>
+		
+	</tbody>
+</table>
+
+				</div>
+			
+
+			
+
+			
+
+			
+
+			
+			
+
+			
+			
+		<!-- /function -->
+
+		<!-- education -->
+			
+
+			
+
+			
+			
+		<!-- /education -->
+
+		
+			<div class="tag scalar tag-source">
+				<h4 class="name">Source</h4>
+				<div class="value">
+					<a href="Server.js.html">Server.js</a>,
+					<a href="Server.js.html#line274">line 274</a>
+				</div>
+			</div>
+		
+	</div>
+</div>
+
+			
+				
+<div class="member kind-function" id="deleteSession">
+	
+		<h3 class="memberName">
+			<span class="type-signature"></span>deleteSession<span class="signature">(sessionId:<span class="type-signature"> string</span>):</span><span class="type-signature"> Promise.&lt;void></span>
+			
+		</h3>
+	
+
+	<div class="memberInfo">
+		<div class="versionInfo">
+			
+
+			
+		</div>
+
+		
+
+		
+			<div class="description"><p>Terminates a session on the server.</p></div>
+		
+
+		<!-- object property -->
+			
+		<!-- /object property -->
+
+		
+
+		<!-- function -->
+			
+				<div class="tag table tag-parameters">
+					<h4 class="name">Parameters</h4>
+					
+
+<table class="parameters value">
+	<thead>
+		<tr>
+			<th class="name">Name</th>
+			<th class="type">Type</th>
+			
+			
+			
+		</tr>
+	</thead>
+	<tbody>
+		
+			<tr>
+				
+					<td class="name"><code>sessionId</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">string</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+			</tr>
+		
+	</tbody>
+</table>
+
+				</div>
+			
+
+			
+
+			
+
+			
+
+			
+			
+
+			
+			
+		<!-- /function -->
+
+		<!-- education -->
+			
+
+			
+
+			
+			
+		<!-- /education -->
+
+		
+			<div class="tag scalar tag-source">
+				<h4 class="name">Source</h4>
+				<div class="value">
+					<a href="Server.js.html">Server.js</a>,
+					<a href="Server.js.html#line793">line 793</a>
+				</div>
+			</div>
+		
+	</div>
+</div>
+
+			
+				
+<div class="member kind-function" id="getSessionCapabilities">
+	
+		<h3 class="memberName">
+			<span class="type-signature"></span>getSessionCapabilities<span class="signature">(sessionId:<span class="type-signature"> string</span>):</span><span class="type-signature"> Promise.&lt;Object></span>
+			
+		</h3>
+	
+
+	<div class="memberInfo">
+		<div class="versionInfo">
+			
+
+			
+		</div>
+
+		
+
+		
+			<div class="description"><p>Gets information on the capabilities of a given session from the server. The list of capabilities returned
+by this command will not include any of the extra session capabilities detected by Leadfoot and may be
+inaccurate.</p></div>
+		
+
+		<!-- object property -->
+			
+		<!-- /object property -->
+
+		
+
+		<!-- function -->
+			
+				<div class="tag table tag-parameters">
+					<h4 class="name">Parameters</h4>
+					
+
+<table class="parameters value">
+	<thead>
+		<tr>
+			<th class="name">Name</th>
+			<th class="type">Type</th>
+			
+			
+			
+		</tr>
+	</thead>
+	<tbody>
+		
+			<tr>
+				
+					<td class="name"><code>sessionId</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">string</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+			</tr>
+		
+	</tbody>
+</table>
+
+				</div>
+			
+
+			
+
+			
+
+			
+
+			
+			
+
+			
+			
+		<!-- /function -->
+
+		<!-- education -->
+			
+
+			
+
+			
+			
+		<!-- /education -->
+
+		
+			<div class="tag scalar tag-source">
+				<h4 class="name">Source</h4>
+				<div class="value">
+					<a href="Server.js.html">Server.js</a>,
+					<a href="Server.js.html#line783">line 783</a>
+				</div>
+			</div>
+		
+	</div>
+</div>
+
+			
+				
+<div class="member kind-function" id="getSessions">
+	
+		<h3 class="memberName">
+			<span class="type-signature"></span>getSessions<span class="signature">():</span><span class="type-signature"> Promise.&lt;Array.&lt;Object>></span>
+			
+		</h3>
+	
+
+	<div class="memberInfo">
+		<div class="versionInfo">
+			
+
+			
+		</div>
+
+		
+
+		
+			<div class="description"><p>Gets a list of all currently active remote control sessions on this server.</p></div>
+		
+
+		<!-- object property -->
+			
+		<!-- /object property -->
+
+		
+
+		<!-- function -->
+			
+
+			
+
+			
+
+			
+
+			
+			
+
+			
+			
+		<!-- /function -->
+
+		<!-- education -->
+			
+
+			
+
+			
+			
+		<!-- /education -->
+
+		
+			<div class="tag scalar tag-source">
+				<h4 class="name">Source</h4>
+				<div class="value">
+					<a href="Server.js.html">Server.js</a>,
+					<a href="Server.js.html#line771">line 771</a>
+				</div>
+			</div>
+		
+	</div>
+</div>
+
+			
+				
+<div class="member kind-function" id="getStatus">
+	
+		<h3 class="memberName">
+			<span class="type-signature"></span>getStatus<span class="signature">():</span><span class="type-signature"> Promise.&lt;Object></span>
+			
+		</h3>
+	
+
+	<div class="memberInfo">
+		<div class="versionInfo">
+			
+
+			
+		</div>
+
+		
+
+		
+			<div class="description"><p>Gets the status of the remote server.</p></div>
+		
+
+		<!-- object property -->
+			
+		<!-- /object property -->
+
+		
+
+		<!-- function -->
+			
+
+			
+				<div class="tag list tag-returns">
+					<h4 class="name">Returns</h4>
+					<ul class="value">
+						
+							<li><p>An object containing arbitrary properties describing the status of the remote
+server.</p></li>
+						
+					</ul>
+				</div>
+			
+
+			
+
+			
+
+			
+			
+
+			
+			
+		<!-- /function -->
+
+		<!-- education -->
+			
+
+			
+
+			
+			
+		<!-- /education -->
+
+		
+			<div class="tag scalar tag-source">
+				<h4 class="name">Source</h4>
+				<div class="value">
+					<a href="Server.js.html">Server.js</a>,
+					<a href="Server.js.html#line257">line 257</a>
+				</div>
+			</div>
+		
+	</div>
+</div>
+
+			
+				
+<div class="member kind-function" id="createHttpRequest">
+	
+		<h3 class="memberName">
+			<span class="type-signature">(inner) </span>createHttpRequest<span class="signature">(method:<span class="type-signature"> string</span>):</span><span class="type-signature"> function</span>
+			
+		</h3>
+	
+
+	<div class="memberInfo">
+		<div class="versionInfo">
+			
+
+			
+		</div>
+
+		
+
+		
+			<div class="description"><p>Creates a function that performs an HTTP request to a JsonWireProtocol endpoint.</p></div>
+		
+
+		<!-- object property -->
+			
+		<!-- /object property -->
+
+		
+
+		<!-- function -->
+			
+				<div class="tag table tag-parameters">
+					<h4 class="name">Parameters</h4>
+					
+
+<table class="parameters value">
+	<thead>
+		<tr>
+			<th class="name">Name</th>
+			<th class="type">Type</th>
+			
+			
+			<th class="table-description">Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		
+			<tr>
+				
+					<td class="name"><code>method</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">string</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The HTTP method to fix.</p>
+						
+					</td>
+				
+			</tr>
+		
+	</tbody>
+</table>
+
+				</div>
+			
+
+			
+
+			
+
+			
+
+			
+			
+
+			
+			
+		<!-- /function -->
+
+		<!-- education -->
+			
+
+			
+
+			
+			
+		<!-- /education -->
+
+		
+			<div class="tag scalar tag-source">
+				<h4 class="name">Source</h4>
+				<div class="value">
+					<a href="Server.js.html">Server.js</a>,
+					<a href="Server.js.html#line21">line 21</a>
+				</div>
+			</div>
+		
+	</div>
+</div>
+
+			
+				
+<div class="member kind-function" id="returnValue">
+	
+		<h3 class="memberName">
+			<span class="type-signature">(inner) </span>returnValue<span class="signature">(response:<span class="type-signature"> Object</span>):</span><span class="type-signature"> any</span>
+			
+		</h3>
+	
+
+	<div class="memberInfo">
+		<div class="versionInfo">
+			
+
+			
+		</div>
+
+		
+
+		
+			<div class="description"><p>Returns the actual response value from the remote environment.</p></div>
+		
+
+		<!-- object property -->
+			
+		<!-- /object property -->
+
+		
+
+		<!-- function -->
+			
+				<div class="tag table tag-parameters">
+					<h4 class="name">Parameters</h4>
+					
+
+<table class="parameters value">
+	<thead>
+		<tr>
+			<th class="name">Name</th>
+			<th class="type">Type</th>
+			
+			
+			<th class="table-description">Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		
+			<tr>
+				
+					<td class="name"><code>response</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">Object</span>
+					
+				</td>
+
+				
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>JsonWireProtocol response object.</p>
+						
+					</td>
+				
+			</tr>
+		
+	</tbody>
+</table>
+
+				</div>
+			
+
+			
+				<div class="tag list tag-returns">
+					<h4 class="name">Returns</h4>
+					<ul class="value">
+						
+							<li><p>The actual response value.</p></li>
+						
+					</ul>
+				</div>
+			
+
+			
+
+			
+
+			
+			
+
+			
+			
+		<!-- /function -->
+
+		<!-- education -->
+			
+
+			
+
+			
+			
+		<!-- /education -->
+
+		
+			<div class="tag scalar tag-source">
+				<h4 class="name">Source</h4>
+				<div class="value">
+					<a href="Server.js.html">Server.js</a>,
+					<a href="Server.js.html#line200">line 200</a>
+				</div>
+			</div>
+		
+	</div>
+</div>
+
+			
+		</div>
+	</div>
+
+
+
+
+
+
+
+
+ 
+</main>
+
+
+	<script src="scripts/prettify/prettify.js"></script>
+	<script src="scripts/prettify/lang-css.js"></script>
+	<script>prettyPrint();</script>
+	<script src="scripts/nav.js"></script>
 </body>
 </html>

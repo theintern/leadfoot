@@ -1,296 +1,259 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>JSDoc: Module: leadfoot/helpers/pollUntil</title>
-
-    <script src="scripts/prettify/prettify.js"> </script>
-    <script src="scripts/prettify/lang-css.js"> </script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+	<meta charset="utf-8">
+	<title>Leadfoot docs: Module: leadfoot/helpers/pollUntil</title>
+	<link rel="stylesheet" href="styles/catalyst.css">
 </head>
-
 <body>
+	<h1 class="mainHeader"><a href="index.html" class="projectName">
+		
+			<img src="logo.png" class="projectLogo"
+				alt="Leadfoot" title="Leadfoot">
+		
+	</a></h1>
+	
+<nav class="mainMenu">
+	
+		<div class="modulesContainer">
+			<h2 class="subsection-title modules">Modules</h2>
+			<ul class="modules">
+				
+<li data-member-id="module:leadfoot/Command" class="">
+	<a href="Command.html">leadfoot/Command</a>
+</li>
 
-<div id="main">
+<li data-member-id="module:leadfoot/compat" class="icons-1">
+	<a href="compat.html"><span class="icon icon-deprecated" title="Deprecated"></span>leadfoot/compat</a>
+</li>
 
-    <h1 class="page-title">Module: leadfoot/helpers/pollUntil</h1>
+<li data-member-id="module:leadfoot/Element" class="">
+	<a href="Element.html">leadfoot/Element</a>
+</li>
 
-    
+<li data-member-id="module:leadfoot/helpers/pollUntil" class="active">
+	<a href="pollUntil.html">leadfoot/helpers/pollUntil</a>
+</li>
 
+<li data-member-id="module:leadfoot/keys" class="">
+	<a href="keys.html">leadfoot/keys</a>
+</li>
 
+<li data-member-id="module:leadfoot/Server" class="">
+	<a href="Server.html">leadfoot/Server</a>
+</li>
 
-<section>
+<li data-member-id="module:leadfoot/Session" class="">
+	<a href="Session.html">leadfoot/Session</a>
+</li>
 
-<header>
-    <h2>
-    leadfoot/helpers/pollUntil
-    </h2>
-    
-</header>
+				<li><a href="global.html">Globals</a></li>
+			</ul>
+		</div>
+	
+</nav>
+<div class="persistentTitle hidden"><a href="#overview">leadfoot/helpers/pollUntil</a></div><main class="mainContent doc-module">
 
-<article>
-    <div class="container-overview">
-    
-        
-<dt>
-    <h4 class="name" id="module:leadfoot/helpers/pollUntil"><span class="type-signature"></span>(require("leadfoot/helpers/pollUntil"))<span class="signature">(poller, args<span class="signature-attributes">opt</span>, timeout<span class="signature-attributes">opt</span>, pollInterval<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;any>}</span></h4>
+	<div class="section overview" id="overview">
+		<div class="classInfo">
+			<h1 class="title header">leadfoot/helpers/pollUntil</h1>
 
-    
-</dt>
-<dd>
+			
 
-    
-    <div class="description">
-        <p>A <a href="Command.html">module:leadfoot/Command</a> helper that polls for a value within the client environment until the value exists
-or a timeout is reached.</p>
-    </div>
-    
+			
+		</div>
 
-    
+		
+<div class="member kind-function" id="module:leadfoot/helpers/pollUntil">
+	
+		<h2 class="memberName">
+			<span class="type-signature"></span>(require("leadfoot/helpers/pollUntil"))<span class="signature">(poller:<span class="type-signature"> function|string</span>, args<span class="signature-attributes">opt</span>:<span class="type-signature"> Array.&lt;any></span>, timeout<span class="signature-attributes">opt</span>:<span class="type-signature"> number</span>, pollInterval<span class="signature-attributes">opt</span>:<span class="type-signature"> number</span>):</span><span class="type-signature"> Promise.&lt;any></span>
+			
+		</h2>
+	
 
-    
+	<div class="memberInfo">
+		<div class="versionInfo">
+			
 
-    
-        <h5>Parameters:</h5>
-        
+			
+		</div>
 
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
+		
 
-        <th>Type</th>
+		
+			<div class="description"><p>A <a href="Command.html">leadfoot/Command</a> helper that polls for a value within the client environment until the value exists
+or a timeout is reached.</p></div>
+		
 
-        
-        <th>Attributes</th>
-        
+		<!-- object property -->
+			
+		<!-- /object property -->
 
-        
+		
 
-        <th class="last">Description</th>
-    </tr>
-    </thead>
+		<!-- function -->
+			
+				<div class="tag table tag-parameters">
+					<h3 class="name">Parameters</h3>
+					
 
-    <tbody>
-    
+<table class="parameters value">
+	<thead>
+		<tr>
+			<th class="name">Name</th>
+			<th class="type">Type</th>
+			<th class="attributes">Attributes</th>
+			
+			<th class="table-description">Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		
+			<tr>
+				
+					<td class="name"><code>poller</code></td>
+				
 
-        <tr>
-            
-                <td class="name"><code>poller</code></td>
-            
+				<td class="type">
+					
+						<span class="param-type">function</span>|<span class="param-type">string</span>
+					
+				</td>
 
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-|
+				
+				
+					<td class="attributes"></td>
+				
 
-<span class="param-type">string</span>
+				
 
+				
+					<td class="table-description">
+						<p>The poller function to execute on an interval. The function should return <code>null</code> or <code>undefined</code> if there is not a
+result. If the poller function throws, polling will halt.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>args</code></td>
+				
 
-            
-            </td>
+				<td class="type">
+					
+						<span class="param-type">Array.&lt;any></span>
+					
+				</td>
 
-            
-                <td class="attributes">
-                
+				
+				
+					<td class="attributes">optional</td>
+				
 
-                
+				
 
-                
-                </td>
-            
+				
+					<td class="table-description">
+						<p>An array of arguments to pass to the poller function when it is invoked.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>timeout</code></td>
+				
 
-            
+				<td class="type">
+					
+						<span class="param-type">number</span>
+					
+				</td>
 
-            <td class="description last"><p>The poller function to execute on an interval. The function should return <code>null</code> or <code>undefined</code> if there is not a
-result. If the poller function throws, polling will halt.</p></td>
-        </tr>
+				
+				
+					<td class="attributes">optional</td>
+				
 
-    
+				
 
-        <tr>
-            
-                <td class="name"><code>args</code></td>
-            
+				
+					<td class="table-description">
+						<p>The maximum amount of time to wait for a successful result, in milliseconds. If not specified, the current
+<code>executeAsync</code> maximum timeout for the session will be used.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>pollInterval</code></td>
+				
 
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;any></span>
+				<td class="type">
+					
+						<span class="param-type">number</span>
+					
+				</td>
 
+				
+				
+					<td class="attributes">optional</td>
+				
 
-            
-            </td>
+				
 
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>An array of arguments to pass to the poller function when it is invoked.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>timeout</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>The maximum amount of time to wait for a successful result, in milliseconds. If not specified, the current
-<code>executeAsync</code> maximum timeout for the session will be used.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>pollInterval</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>The amount of time to wait between calls to the poller function, in milliseconds. If not specified, defaults to 67ms.</p></td>
-        </tr>
-
-    
-    </tbody>
+				
+					<td class="table-description">
+						<p>The amount of time to wait between calls to the poller function, in milliseconds. If not specified, defaults to 67ms.</p>
+						
+					</td>
+				
+			</tr>
+		
+	</tbody>
 </table>
-    
 
-    
-<dl class="details">
-    
+				</div>
+			
 
-    
+			
+				<div class="tag list tag-returns">
+					<h3 class="name">Returns</h3>
+					<ul class="value">
+						
+							<li><p>A promise that resolves to the value returned by the poller function on success and rejects on failure.</p></li>
+						
+					</ul>
+				</div>
+			
 
-    
+			
 
-    
+			
 
-    
+			
+			
 
-    
+			
+			
+		<!-- /function -->
 
-    
+		<!-- education -->
+			
 
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="pollUntil.js.html">helpers/pollUntil.js</a>, <a href="pollUntil.js.html#line57">line 57</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>A promise that resolves to the value returned by the poller function on success and rejects on failure.</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;any></span>
-
-
-    </dd>
-</dl>
-
-        
-
-    
-        <h5>Examples</h5>
-        
-    <pre class="prettyprint"><code>var Command = require('leadfoot/Command');
+			
+				<div class="tag tag-examples">
+					<h3 class="name">Examples</h3>
+					
+						<div class="value example">
+							
+							<pre class="prettyprint"><code>var Command = require('leadfoot/Command');
 var pollUntil = require('leadfoot/helpers/pollUntil');
 
 new Command(session)
@@ -301,8 +264,11 @@ new Command(session)
     }, function (error) {
         // element was not found
     });</code></pre>
-
-    <pre class="prettyprint"><code>var Command = require('leadfoot/Command');
+						</div>
+					
+						<div class="value example">
+							
+							<pre class="prettyprint"><code>var Command = require('leadfoot/Command');
 var pollUntil = require('leadfoot/helpers/pollUntil');
 
 new Command(session)
@@ -316,93 +282,53 @@ new Command(session)
     }, function (error) {
         // value was never set
     });</code></pre>
+						</div>
+					
+				</div>
+			
 
-    
-</dd>
+			
+			
+		<!-- /education -->
 
-    
-
-    
-        
-
-        
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="pollUntil.js.html">helpers/pollUntil.js</a>, <a href="pollUntil.js.html#line1">line 1</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-     
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
-
-
-
-
+		
+			<div class="tag scalar tag-source">
+				<h3 class="name">Source</h3>
+				<div class="value">
+					<a href="pollUntil.js.html">helpers/pollUntil.js</a>,
+					<a href="pollUntil.js.html#line57">line 57</a>
+				</div>
+			</div>
+		
+	</div>
 </div>
 
-<nav>
-    <h2><a href="index.html">Index</a></h2><h3>Modules</h3><ul><li><a href="Command.html">leadfoot/Command</a></li><li><a href="compat.html">leadfoot/compat</a></li><li><a href="Element.html">leadfoot/Element</a></li><li><a href="pollUntil.html">leadfoot/helpers/pollUntil</a></li><li><a href="keys.html">leadfoot/keys</a></li><li><a href="Server.html">leadfoot/Server</a></li><li><a href="Session.html">leadfoot/Session</a></li></ul><h3><a href="global.html">Global</a></h3>
-</nav>
 
-<br clear="both">
+		
 
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha8</a> on Fri Jun 27 2014 16:13:29 GMT-0400 (EDT)
-</footer>
+		
 
-<script> prettyPrint(); </script>
-<script src="scripts/linenumber.js"> </script>
+		
+	</div>
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+</main>
+
+
+	<script src="scripts/prettify/prettify.js"></script>
+	<script src="scripts/prettify/lang-css.js"></script>
+	<script>prettyPrint();</script>
+	<script src="scripts/nav.js"></script>
 </body>
 </html>

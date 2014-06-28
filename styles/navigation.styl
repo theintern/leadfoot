@@ -1,0 +1,145 @@
+@import "icons";
+
+.mainMenu {
+	background: $navBackground;
+	border-right: $navBorderWidth solid $navBorderColor;
+	bottom: 0;
+	fixed: top $headerHeight left;
+	overflow: auto;
+	width: $navWidth;
+
+	$a($navLinkColor);
+
+	a {
+		display: block;
+		text-decoration: none;
+	}
+
+	.subsection-title {
+		background: lighten($navBackground, 80%);
+		border-left: 3px solid $navBackground;
+		color: $navTitleColor;
+		font: 1.1em/1.3 $defaultFonts;
+		margin: 0.25em;
+		padding: 0.4em;
+		text-transform: capitalize;
+
+		&.modules {
+			background: none;
+			border: 0;
+			margin: 0;
+			padding: 1em 1em 0 1em;
+		}
+
+		&.events {
+			background: lighten($eventsColor, 80%);
+			border-color: $eventsColor;
+		}
+
+		&.index {
+			margin: 0.5em 0;
+		}
+
+		&.properties {
+			background: lighten($propertiesColor, 80%);
+			border-color: $propertiesColor;
+		}
+
+		&.methods {
+			background: lighten($methodsColor, 80%);
+			border-color: $methodsColor;
+		}
+
+		&.typedefs {
+			background: lighten($typedefsColor, 80%);
+			border-color: $typedefsColor;
+		}
+
+		&.classes {
+			background: lighten($classesColor, 80%);
+			border-color: $classesColor;
+		}
+	}
+
+	.modulesContainer {
+		background: $modulesBackground;
+		border-bottom: 1px solid $navBorderColor;
+		margin-bottom: 0.25em;
+	}
+
+	ul {
+		list-style-type: none;
+		margin: 0.25em;
+		padding: 0 0 0.25em 0;
+
+		&.modules {
+			li:hover {
+				background: darken($modulesBackground, 5%);
+			}
+		}
+
+		&.events {
+			li:hover {
+				background: lighten($eventsColor, 90%);
+			}
+		}
+
+		&.properties {
+			li:hover {
+				background: lighten($propertiesColor, 90%);
+			}
+		}
+
+		&.methods {
+			li:hover {
+				background: lighten($methodsColor, 90%);
+			}
+		}
+
+		&.typedefs {
+			li:hover {
+				background: lighten($typedefsColor, 90%);
+			}
+		}
+
+		&.classes {
+			li:hover {
+				background: lighten($classesColor, 90%);
+			}
+		}
+
+		li {
+			transition: background 0.3s;
+
+			a {
+				padding: 0.35em 1em 0.35em 1.9em;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+
+				&:hover {
+					color: lighten($navLinkColor, 20%);
+				}
+			}
+
+			&.active {
+				background: $navActiveBackground;
+			}
+
+			.icon:before {
+				color: desaturate(lighten($navLinkColor, 60%), 80%);
+				display: inline-block;
+				font-size: 0.7em;
+				width: 16px;
+			}
+
+			&.icons-1 {
+				margin-left: -16px;
+			}
+
+			&.icons-2 {
+				margin-left: -32px;
+			}
+		}
+	}
+}
