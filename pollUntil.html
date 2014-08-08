@@ -157,7 +157,8 @@ result. If the poller function throws, polling will halt.</p>
 
 				
 					<td class="table-description">
-						<p>An array of arguments to pass to the poller function when it is invoked.</p>
+						<p>An array of arguments to pass to the poller function when it is invoked. Only values that can be serialised to JSON,
+plus <a href="Element.html">leadfoot/Element</a> objects, can be specified as arguments.</p>
 						
 					</td>
 				
@@ -296,7 +297,7 @@ new Command(session)
 				<h3 class="name">Source</h3>
 				<div class="value">
 					<a href="pollUntil.js.html">helpers/pollUntil.js</a>,
-					<a href="pollUntil.js.html#line57">line 57</a>
+					<a href="pollUntil.js.html#line58">line 58</a>
 				</div>
 			</div>
 		
