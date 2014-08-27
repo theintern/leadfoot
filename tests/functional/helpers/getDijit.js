@@ -29,9 +29,9 @@ define([
 						setContext(node);
 					})
 					.click()
-					.then(getDijit('testForm'))
-					.then(function (form) {
-						assert.deepEqual(form.get('value'), {
+					.then(getDijit('testForm', 'value'))
+					.then(function (formValue) {
+						assert.deepEqual(formValue, {
 							answer: 'yes'
 					});
 				});
