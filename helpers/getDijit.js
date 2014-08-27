@@ -15,6 +15,9 @@ var util = require('../lib/util');
  * @param {string} property
  * A string representing a Dijit instance property, for example, a domNode.
  *
+ * @param {boolean} getter
+ * A boolean, if the property should be retrieved using widget.get().
+ *
  * @example
  * var Command = require('leadfoot/Command');
  * var getDijit = require('leadfoot/helpers/getDijit');
@@ -27,18 +30,18 @@ var util = require('../lib/util');
  *     })
  *     .click();
  */
-module.exports = function (widgetId, property) {
+module.exports = function (widgetId, property, getter) {
 	return function () {
-		return new this.constructor(this.session).executeAsync(function (widgetId, property, done) {
+		return new this.constructor(this.session).executeAsync(function (widgetId, property, getter, done) {
 			require([ 'dijit/registry' ], function (registry) {
 				var widget = registry.byId(widgetId);
 				if (!widget) {
 					done(new Error('Could not find widget'));
 				}
 				else {
-					done(property ? widget[property] : widget);
+					done(property ? getter ? widget.get(property) : widget[property] : widget);
 				}
 			});
-		}, [widgetId, property]);
+		}, [widgetId, property, getter]);
 	}
 };
