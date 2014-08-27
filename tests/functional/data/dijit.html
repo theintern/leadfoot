@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Dijit</title>
+		<link rel="stylesheet"
+		href="//ajax.googleapis.com/ajax/libs/dojo/1.10.0/dijit/themes/claro/claro.css">
+	</head>
+	<body class="claro">
+		<div id="testForm" data-dojo-type="dijit/form/Form">
+			<input id="yesButton"
+				name="answer" type="radio" value="yes"
+				data-dojo-type="dijit/form/RadioButton"
+				><label>Yes</label>
+			<input id="noButton"
+				name="answer" type="radio" value="no"
+				data-dojo-type="dijit/form/RadioButton"
+				><label>No</label>
+		</div>
+
+		<script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.0/dojo/dojo.js" data-dojo-config="async: 1">
+		</script>
+		<script>
+			var ready = false;
+			require([
+				'dojo/parser',
+				'dijit/form/Form',
+				'dijit/form/RadioButton',
+				'dojo/domReady!'
+			], function (parser) {
+				parser.parse(document.body).then(function () {
+					ready = true;
+					})
+			});
+		</script>
+	</body>
+</html>
