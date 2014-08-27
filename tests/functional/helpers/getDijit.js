@@ -19,6 +19,7 @@ define([
 
 			'basic test': function () {
 				return command
+					.get(require.toUrl('../data/dijit.html'))
 					.setFindTimeout(10000)
 					.setPageLoadTimeout(5000)
 					.setExecuteAsyncTimeout(10000)
