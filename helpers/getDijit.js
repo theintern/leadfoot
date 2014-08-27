@@ -17,7 +17,7 @@ var util = require('../lib/util');
  *
  * @example
  * var Command = require('leadfoot/Command');
- * var pollUntil = require('leadfoot/helpers/getDijit');
+ * var getDijit = require('leadfoot/helpers/getDijit');
  *
  * new Command(session)
  *     .get('http://example.com')
