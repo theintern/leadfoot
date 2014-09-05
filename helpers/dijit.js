@@ -8,12 +8,6 @@
  * This helper assumes that the dojo and dijit packages
  * are defined in your Intern or leadfoot config
  *
- * @param {string} widgetId
- * An id for a Dijit reference
- *
- * @param {string} property
- * A string representing a Dijit instance property, for example, a domNode.
- *
  * @example
  * var Command = require('leadfoot/Command');
  * var pollUntil = require('leadfoot/helpers/dijit');
@@ -28,6 +22,14 @@
  */
 
 module.exports = {
+	/**
+	 * A widget object with a reference to all of its methods
+	 *
+	 * @memberOf module:leadfoot/helpers/dijit#
+	 *
+	 * @param {string} widgetId
+	 * An id for a Dijit reference
+	 */
 	get: function (widgetId) {
 		function getMethods (session, widgetId) {
 			return session.executeAsync(function (widgetId, done) {
@@ -67,6 +69,17 @@ module.exports = {
 		};
 	},
 
+	/**
+	 * A widget property
+	 *
+	 * @memberOf module:leadfoot/helpers/dijit#
+	 *
+	 * @param {string} widgetId
+	 * An id for a Dijit reference.
+	 *
+	 * @param {string} property
+	 * A string representing a Dijit instance property, for example, a domNode.
+	 */
 	getProperty: function (widgetId, property) {
 		return function () {
 			return this.session.executeAsync(function (widgetId, property, done) {
