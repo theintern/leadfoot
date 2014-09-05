@@ -484,9 +484,9 @@ Session.prototype = {
 	setTimeout: function (type, ms) {
 		// Infinity cannot be serialised by JSON
 		if (ms === Infinity) {
-			// It seems that at least ChromeDriver 2.10 has a limit here that is near the 32-bit signed integer limit;
-			// 24 days should be infinite enough for testing
-			ms = Math.pow(2, 31) - 1;
+			// It seems that at least ChromeDriver 2.10 has a limit here that is near the 32-bit signed integer limit,
+			// and IEDriverServer 2.42.2 has an even lower limit; 2.33 hours should be infinite enough for testing
+			ms = Math.pow(2, 23) - 1;
 		}
 
 		var self = this;
@@ -1264,6 +1264,7 @@ Session.prototype = {
 	 * Moves the remote environment’s mouse cursor to the specified element or relative position. If the element is
 	 * outside of the viewport, the remote driver will attempt to scroll it into view automatically.
 	 *
+	 * @method
 	 * @param {Element=} element
 	 * The element to move the mouse to. If x-offset and y-offset are not specified, the mouse will be moved to the
 	 * centre of the element.
@@ -1280,7 +1281,7 @@ Session.prototype = {
 	 *
 	 * @returns {Promise.&lt;void>}
 	 */
-	moveMouseTo: function (element, xOffset, yOffset) {
+	moveMouseTo: util.forCommand(function (element, xOffset, yOffset) {
 		var self = this;
 
 		if (typeof yOffset === 'undefined' &amp;&amp; typeof xOffset !== 'undefined') {
@@ -1321,7 +1322,7 @@ Session.prototype = {
 		}).then(function () {
 			self._movedToElement = true;
 		});
-	},
+	}, { usesElement: true }),
 
 	/**
 	 * Clicks a mouse button at the point where the mouse cursor is currently positioned. This method may fail to

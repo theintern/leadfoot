@@ -67,7 +67,7 @@
 <div class="member kind-function" id="module:leadfoot/helpers/pollUntil">
 	
 		<h2 class="memberName">
-			<span class="type-signature"></span>(require("leadfoot/helpers/pollUntil"))<span class="signature">(poller:<span class="type-signature"> function|string</span>, args<span class="signature-attributes">opt</span>:<span class="type-signature"> Array.&lt;any></span>, timeout<span class="signature-attributes">opt</span>:<span class="type-signature"> number</span>, pollInterval<span class="signature-attributes">opt</span>:<span class="type-signature"> number</span>):</span><span class="type-signature"> Promise.&lt;any></span>
+			<span class="type-signature"></span>(require("leadfoot/helpers/pollUntil"))<span class="signature">(poller:<span class="type-signature"> function|string</span>, args<span class="signature-attributes">opt</span>:<span class="type-signature"> Array.&lt;any></span>, timeout<span class="signature-attributes">opt</span>:<span class="type-signature"> number</span>, pollInterval<span class="signature-attributes">opt</span>:<span class="type-signature"> number</span>):</span><span class="type-signature"> function</span>
 			
 		</h2>
 	
@@ -228,7 +228,8 @@ plus <a href="Element.html">leadfoot/Element</a> objects, can be specified as ar
 					<h3 class="name">Returns</h3>
 					<ul class="value">
 						
-							<li><p>A promise that resolves to the value returned by the poller function on success and rejects on failure.</p></li>
+							<li><p>A <a href="Command.html#then">leadfoot/Command#then</a> callback function that, when called, returns a promise that resolves to the
+value returned by the poller function on success and rejects on failure.</p></li>
 						
 					</ul>
 				</div>
@@ -297,7 +298,7 @@ new Command(session)
 				<h3 class="name">Source</h3>
 				<div class="value">
 					<a href="pollUntil.js.html">helpers/pollUntil.js</a>,
-					<a href="pollUntil.js.html#line58">line 58</a>
+					<a href="pollUntil.js.html#line59">line 59</a>
 				</div>
 			</div>
 		
