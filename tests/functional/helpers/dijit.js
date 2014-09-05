@@ -20,25 +20,15 @@ define([
 			'basic test': function () {
 				return command
 					.get(require.toUrl('../data/dijit.html'))
-					.setFindTimeout(10000)
-					.setPageLoadTimeout(5000)
-					.setExecuteAsyncTimeout(10000)
-					.then(pollUntil('return window.ready',
-						[], 5000))
-					.then(dijit.getProperty('yesButton', 'focusNode'))
-					.then(function (node, setContext) {
-						setContext(node);
-					})
-					.click()
-					.then(dijit.get('testForm')),
+					.then(dijit.get('foo'))
 					.then(function (widget) {
-						return widget.get('value');
+						assert.isFunction(widget.get, 'widget.get is a function');
+						assert.strictEqual(widget.get('a'), 1, 'widget.get(a) === 1');
 					})
-					.then(function (formValue) {
-						assert.deepEqual(formValue, {
-							answer: 'yes'
+					.then(dijit.getProperty('foo', 'c'))
+					.then(function (c) {
+						assert.strictEqual(c, 3, 'widget.getProperty(foo, c) === 3');
 					});
-				});
 			}
 		};
 	});

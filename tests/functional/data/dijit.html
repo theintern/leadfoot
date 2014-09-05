@@ -3,35 +3,45 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Dijit</title>
-		<link rel="stylesheet"
-		href="//ajax.googleapis.com/ajax/libs/dojo/1.10.0/dijit/themes/claro/claro.css">
 	</head>
-	<body class="claro">
-		<div id="testForm" data-dojo-type="dijit/form/Form">
-			<input id="yesButton"
-				name="answer" type="radio" value="yes"
-				data-dojo-type="dijit/form/RadioButton"
-				><label>Yes</label>
-			<input id="noButton"
-				name="answer" type="radio" value="no"
-				data-dojo-type="dijit/form/RadioButton"
-				><label>No</label>
-		</div>
-
-		<script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.0/dojo/dojo.js" data-dojo-config="async: 1">
-		</script>
+	<body>
 		<script>
-			var ready = false;
-			require([
-				'dojo/parser',
-				'dijit/form/Form',
-				'dijit/form/RadioButton',
-				'dojo/domReady!'
-			], function (parser) {
-				parser.parse(document.body).then(function () {
-					ready = true;
+			function FakeWidget (args, node) {
+				this.args = args;
+				this.node = node;
+				this.a = 1;
+				this.b = 'foo';
+				this.c = 3;
+			}
+
+			FakeWidget.prototype = {
+				constructor: FakeWidget,
+				get: function (propertyName) {
+					return this[propertyName];
+				}
+			};
+
+			var require = function (mids) {
+				var modules = [];
+				mids.forEach(function (mid) {
+					if (mid === 'dijit/registry') {
+						modules.push({
+							byId: function (id) {
+								return new FakeWidget();
+							}
+						});
+					}
+					else if (mid === 'dojo/when')
+					{
+						modules.push(function (widget) {
+							function always (callback) {
+								return callback(widget);
+							}
+						});
+					}
 				});
-			});
+				return modules;
+			};
 		</script>
 	</body>
 </html>
