@@ -21,26 +21,35 @@
 				}
 			};
 
-			var require = function (mids) {
-				var modules = [];
+			require = function (mids, callback) {
+				var modules = {};
 				mids.forEach(function (mid) {
 					if (mid === 'dijit/registry') {
-						modules.push({
+						modules[mid] = {
 							byId: function (id) {
 								return new FakeWidget();
 							}
-						});
+						};
 					}
 					else if (mid === 'dojo/when')
 					{
-						modules.push(function (widget) {
-							function always (callback) {
-								return callback(widget);
+						modules[mid] = function (valueOrPromise, done) {
+							function always (done) {
+								return done(widget);
 							}
-						});
+						};
 					}
 				});
-				return modules;
+				if (mids.length === 1) {
+					return callback(modules[mids[0]]);
+				}
+				else if (mids.length === 2) {
+					return callback(modules[mids[0]], modules[mids[1]]);
+				}
+				else
+				{
+					return callback();
+				}
 			};
 		</script>
 	</body>
