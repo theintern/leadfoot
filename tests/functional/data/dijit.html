@@ -33,11 +33,16 @@
 					}
 					else if (mid === 'dojo/when')
 					{
-						modules[mid] = function (valueOrPromise, done) {
-							function always (done) {
-								return done(widget);
-							}
-						};
+						function fakePromise(value) {
+							this.value = value;
+							var self = this;
+
+							this.always = function (callback) {
+								callback(this.value);
+							};
+							return this;
+						}
+						modules[mid] = fakePromise;
 					}
 				});
 				if (mids.length === 1) {
