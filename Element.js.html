@@ -59,6 +59,7 @@
  * @module leadfoot/Element
  */
 
+var findDisplayed = require('./lib/findDisplayed');
 var fs = require('fs');
 var strategies = require('./lib/strategies');
 var waitForDeleted = require('./lib/waitForDeleted');
@@ -673,6 +674,112 @@ Element.prototype = {
  * @returns {Promise.&lt;module:leadfoot/Element[]>}
  */
 strategies.applyTo(Element.prototype);
+
+/**
+ * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
+ * matching the given query.
+ *
+ * @method findDisplayed
+ * @memberOf module:leadfoot/Element#
+ * @since 1.6
+ *
+ * @param {string} using
+ * The element retrieval strategy to use. See {@link module:leadfoot/Session#find} for options.
+ *
+ * @param {string} value
+ * The strategy-specific value to search for. See {@link module:leadfoot/Session#find} for details.
+ *
+ * @returns {Promise.&lt;module:leadfoot/Element>}
+ */
+
+/**
+ * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
+ * matching the given CSS class name.
+ *
+ * @method findDisplayedByClassName
+ * @memberOf module:leadfoot/Element#
+ * @since 1.6
+ * @param {string} className The CSS class name to search for.
+ * @returns {Promise.&lt;module:leadfoot/Element>}
+ */
+
+/**
+ * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
+ * matching the given CSS selector.
+ *
+ * @method findDisplayedByCssSelector
+ * @memberOf module:leadfoot/Element#
+ * @since 1.6
+ * @param {string} selector The CSS selector to search for.
+ * @returns {Promise.&lt;module:leadfoot/Element>}
+ */
+
+/**
+ * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
+ * matching the given ID.
+ *
+ * @method findDisplayedById
+ * @memberOf module:leadfoot/Element#
+ * @since 1.6
+ * @param {string} id The ID of the element.
+ * @returns {Promise.&lt;module:leadfoot/Element>}
+ */
+
+/**
+ * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
+ * matching the given name attribute.
+ *
+ * @method findDisplayedByName
+ * @memberOf module:leadfoot/Element#
+ * @since 1.6
+ * @param {string} name The name of the element.
+ * @returns {Promise.&lt;module:leadfoot/Element>}
+ */
+
+/**
+ * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
+ * matching the given case-insensitive link text.
+ *
+ * @method findDisplayedByLinkText
+ * @memberOf module:leadfoot/Element#
+ * @since 1.6
+ * @param {string} text The link text of the element.
+ * @returns {Promise.&lt;module:leadfoot/Element>}
+ */
+
+/**
+ * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
+ * partially matching the given case-insensitive link text.
+ *
+ * @method findDisplayedByPartialLinkText
+ * @memberOf module:leadfoot/Element#
+ * @since 1.6
+ * @param {string} text The partial link text of the element.
+ * @returns {Promise.&lt;module:leadfoot/Element>}
+ */
+
+/**
+ * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
+ * matching the given HTML tag name.
+ *
+ * @method findDisplayedByTagName
+ * @memberOf module:leadfoot/Element#
+ * @since 1.6
+ * @param {string} tagName The tag name of the element.
+ * @returns {Promise.&lt;module:leadfoot/Element>}
+ */
+
+/**
+ * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
+ * matching the given XPath selector.
+ *
+ * @method findDisplayedByXpath
+ * @memberOf module:leadfoot/Element#
+ * @since 1.6
+ * @param {string} path The XPath selector to search for.
+ * @returns {Promise.&lt;module:leadfoot/Element>}
+ */
+findDisplayed.applyTo(Element.prototype);
 
 /**
  * Waits for all elements inside this element that match the given query to be destroyed.
