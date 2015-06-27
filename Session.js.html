@@ -1987,7 +1987,8 @@ strategies.applyTo(Session.prototype);
 
 /**
  * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
- * matching the given query.
+ * matching the given query. This is inherently slower than {@link module:leadfoot/Session#find}, so should only be
+ * used in cases where the visibility of an element cannot be ensured in advance.
  *
  * @method findDisplayed
  * @memberOf module:leadfoot/Session#
@@ -2004,7 +2005,8 @@ strategies.applyTo(Session.prototype);
 
 /**
  * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
- * matching the given CSS class name.
+ * matching the given CSS class name. This is inherently slower than {@link module:leadfoot/Session#find}, so should
+ * only be used in cases where the visibility of an element cannot be ensured in advance.
  *
  * @method findDisplayedByClassName
  * @memberOf module:leadfoot/Session#
@@ -2015,7 +2017,8 @@ strategies.applyTo(Session.prototype);
 
 /**
  * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
- * matching the given CSS selector.
+ * matching the given CSS selector. This is inherently slower than {@link module:leadfoot/Session#find}, so should only
+ * be used in cases where the visibility of an element cannot be ensured in advance.
  *
  * @method findDisplayedByCssSelector
  * @memberOf module:leadfoot/Session#
@@ -2026,7 +2029,8 @@ strategies.applyTo(Session.prototype);
 
 /**
  * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
- * matching the given ID.
+ * matching the given ID. This is inherently slower than {@link module:leadfoot/Session#find}, so should only be
+ * used in cases where the visibility of an element cannot be ensured in advance.
  *
  * @method findDisplayedById
  * @memberOf module:leadfoot/Session#
@@ -2037,7 +2041,8 @@ strategies.applyTo(Session.prototype);
 
 /**
  * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
- * matching the given name attribute.
+ * matching the given name attribute. This is inherently slower than {@link module:leadfoot/Session#find}, so should
+ * only be used in cases where the visibility of an element cannot be ensured in advance.
  *
  * @method findDisplayedByName
  * @memberOf module:leadfoot/Session#
@@ -2048,7 +2053,8 @@ strategies.applyTo(Session.prototype);
 
 /**
  * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
- * matching the given case-insensitive link text.
+ * matching the given case-insensitive link text. This is inherently slower than {@link module:leadfoot/Session#find},
+ * so should only be used in cases where the visibility of an element cannot be ensured in advance.
  *
  * @method findDisplayedByLinkText
  * @memberOf module:leadfoot/Session#
@@ -2059,7 +2065,9 @@ strategies.applyTo(Session.prototype);
 
 /**
  * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
- * partially matching the given case-insensitive link text.
+ * partially matching the given case-insensitive link text. This is inherently slower than
+ * {@link module:leadfoot/Session#find}, so should only be used in cases where the visibility of an element cannot be
+ * ensured in advance.
  *
  * @method findDisplayedByPartialLinkText
  * @memberOf module:leadfoot/Session#
@@ -2070,7 +2078,8 @@ strategies.applyTo(Session.prototype);
 
 /**
  * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
- * matching the given HTML tag name.
+ * matching the given HTML tag name. This is inherently slower than {@link module:leadfoot/Session#find}, so should
+ * only be used in cases where the visibility of an element cannot be ensured in advance.
  *
  * @method findDisplayedByTagName
  * @memberOf module:leadfoot/Session#
@@ -2081,7 +2090,8 @@ strategies.applyTo(Session.prototype);
 
 /**
  * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
- * matching the given XPath selector.
+ * matching the given XPath selector. This is inherently slower than {@link module:leadfoot/Session#find}, so should
+ * only be used in cases where the visibility of an element cannot be ensured in advance.
  *
  * @method findDisplayedByXpath
  * @memberOf module:leadfoot/Session#
