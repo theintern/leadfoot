@@ -38,11 +38,7 @@ module.exports = {
 					if (!widget) {
 						done(new Error('Could not find widget "' + widgetId + '"'));
 					}
-					var methods = [];
-					for (var key in widget) {
-						methods.push(key);
-					}
-					done(methods);
+					when(widget[key].apply(widget, args)).always(done);
 				});
 			}, [widgetId]);
 		}
