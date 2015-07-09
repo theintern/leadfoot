@@ -14,10 +14,7 @@
  *
  * new Command(session)
  *     .get('http://example.com')
- *     .then(dijit.getProperty('someId', 'domNode'))
- *     .then(function (node, setContext) {
- *         setContext(node);
- *     })
+ *     .then(dijit.getNode('someId', 'domNode'))
  *     .click();
  */
 
@@ -89,6 +86,35 @@ module.exports = {
 					}
 				});
 			}, [widgetId, property]);
+		};
+	},
+
+	/**
+	 * A childNode within a widget instance
+	 *
+	 * @memberOf module:leadfoot/helpers/dijit#
+	 *
+	 * @param {string} widgetId
+	 * An id for a Dijit reference.
+	 *
+	 * @param {string} attachPoint
+	 * A string representing a Dijit childNode.
+	 */
+	getNode: function (widgetId, attachPoint) {
+		return function (ignoredValue, setContext) {
+			return this.session.executeAsync(function (widgetId, attachPoint, done) {
+				require([ 'dijit/registry' ], function (registry) {
+					var widget = registry.byId(widgetId);
+					if (!widget) {
+						done(new Error('Could not find widget "' + widgetId + '"'));
+					}
+					else {
+						done(attachPoint ? widget.get(attachPoint) : widget);
+					}
+				});
+			}, [widgetId, attachPoint]).then(function (node) {
+				setContext(node);
+			});
 		};
 	}
 };

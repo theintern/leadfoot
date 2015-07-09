@@ -5,10 +5,11 @@
 		<title>Dijit</title>
 	</head>
 	<body>
+		<div id="fooNode"></div>
 		<script>
 			function FakeWidget (args, node) {
 				this.args = args;
-				this.node = node;
+				this.node = document.getElementById('fooNode');
 				this.a = 1;
 				this.b = 'foo';
 				this.c = 3;

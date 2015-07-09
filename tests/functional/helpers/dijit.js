@@ -43,7 +43,20 @@ define([
 					.then(function (a) {
 						assert.strictEqual(a, 1, 'widget.get(a) === 1');
 					});
+			},
+
+			'.getNode': function () {
+				return command
+					.get(require.toUrl('../data/dijit.html'))
+					.setFindTimeout(4000)
+					.setPageLoadTimeout(4000)
+					.setExecuteAsyncTimeout(4000)
+					.then(dijit.getNode('foo', 'node'))
+					.then(function (node) {
+						assert.strictEqual(node.tagName, 'div', 'widget.getNode(foo, node).tagName === div');
+					})
 			}
+
 		};
 	});
 });
