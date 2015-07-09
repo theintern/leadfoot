@@ -73,24 +73,18 @@ module.exports = {
 	 * @param {string} property
 	 * A string representing a Dijit instance property, for example, a domNode.
 	 */
-	getProperty: function (widgetId, property) {
-		return function () {
-			return this.session.executeAsync(function (widgetId, property, done) {
-				require([ 'dijit/registry' ], function (registry) {
-					var widget = registry.byId(widgetId);
-					if (!widget) {
-						done(new Error('Could not find widget "' + widgetId + '"'));
-					}
-					else {
-						done(property ? widget.get(property) : widget);
-					}
-				});
-			}, [widgetId, property]);
-		};
-	},
+	 getProperty: function (widgetId, property) {
+		 return function () {
+			 return this.parent
+				 .then(dijit.get(widgetId))
+				 .then(function (widget) {
+					 return widget.get('property');
+				 });
+		 }
+	 },
 
 	/**
-	 * A childNode within a widget instance
+	 * A node within a widget instance
 	 *
 	 * @memberOf module:leadfoot/helpers/dijit#
 	 *
@@ -102,6 +96,7 @@ module.exports = {
 	 */
 	getNode: function (widgetId, attachPoint) {
 		return function (ignoredValue, setContext) {
+			// TODO: for the next line, it is better to say this.parent or this.session ?
 			return this.session.executeAsync(function (widgetId, attachPoint, done) {
 				require([ 'dijit/registry' ], function (registry) {
 					var widget = registry.byId(widgetId);
@@ -109,7 +104,7 @@ module.exports = {
 						done(new Error('Could not find widget "' + widgetId + '"'));
 					}
 					else {
-						done(attachPoint ? widget.get(attachPoint) : widget);
+						done(attachPoint ? widget.get(attachPoint) : widget.domNode);
 					}
 				});
 			}, [widgetId, attachPoint]).then(function (node) {
