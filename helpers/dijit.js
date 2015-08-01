@@ -27,7 +27,7 @@ module.exports = {
 	 * @param {string} widgetId
 	 * An id for a Dijit reference
 	 */
-	get: function (widgetId) {
+	byId: function (widgetId) {
 		function getMethods (session, widgetId) {
 			return session.executeAsync(function (widgetId, done) {
 				require([ 'dijit/registry' ], function (registry) {
@@ -73,15 +73,16 @@ module.exports = {
 	 * @param {string} property
 	 * A string representing a Dijit instance property, for example, a domNode.
 	 */
-	 getProperty: function (widgetId, property) {
-		 return function () {
-			 return this.parent
-				 .then(dijit.get(widgetId))
-				 .then(function (widget) {
-					 return widget.get('property');
-				 });
-		 }
-	 },
+	getProperty: function (widgetId, property) {
+		return function () {
+			return this.parent
+				// TODO: correct context?
+				.then(this.byId(widgetId))
+				.then(function (widget) {
+					return widget.get('property');
+				});
+		}
+	},
 
 	/**
 	 * A node within a widget instance
@@ -92,9 +93,10 @@ module.exports = {
 	 * An id for a Dijit reference.
 	 *
 	 * @param {string} attachPoint
-	 * A string representing a Dijit childNode.
+	 * Optional string representing a Dijit childNode. If unspecified,
+	 * 	the attachPoint will be the top level widget.domNode reference.
 	 */
-	getNode: function (widgetId, attachPoint) {
+	nodeById: function (widgetId, attachPoint) {
 		return function (ignoredValue, setContext) {
 			// TODO: for the next line, it is better to say this.parent or this.session ?
 			return this.session.executeAsync(function (widgetId, attachPoint, done) {

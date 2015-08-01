@@ -5,7 +5,7 @@ define([
 	'intern/dojo/node!../../../helpers/dijit',
 	'../support/util',
 	'require'
-], function (registerSuite, assert, Command, dijit, util, require) {
+], function (registerSuite, assert, Command, remoteRegistry, util, require) {
 	registerSuite(function () {
 		var command;
 		return {
@@ -23,19 +23,19 @@ define([
 					.setFindTimeout(4000)
 					.setPageLoadTimeout(4000)
 					.setExecuteAsyncTimeout(4000)
-					.then(dijit.getProperty('foo', 'c'))
+					.then(remoteRegistry.getProperty('foo', 'c'))
 					.then(function (c) {
 						assert.strictEqual(c, 3, 'widget.getProperty(foo, c) === 3');
 					})
 			},
 
-			'.get': function () {
+			'.byId': function () {
 				return command
 					.get(require.toUrl('../data/dijit.html'))
 					.setFindTimeout(4000)
 					.setPageLoadTimeout(4000)
 					.setExecuteAsyncTimeout(4000)
-					.then(dijit.get('foo'))
+					.then(remoteRegistry.byId('foo'))
 					.then(function (widget) {
 						assert.isFunction(widget.get, 'widget.get is a function');
 						return widget.get('a');
@@ -45,13 +45,13 @@ define([
 					});
 			},
 
-			'.getNode': function () {
+			'.nodeById': function () {
 				return command
 					.get(require.toUrl('../data/dijit.html'))
 					.setFindTimeout(4000)
 					.setPageLoadTimeout(4000)
 					.setExecuteAsyncTimeout(4000)
-					.then(dijit.getNode('foo', 'node'))
+					.then(remoteRegistry.nodeById('foo', 'node'))
 					.then(function (node) {
 						assert.strictEqual(node.tagName, 'div', 'widget.getNode(foo, node).tagName === div');
 					})
