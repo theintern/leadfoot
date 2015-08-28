@@ -350,7 +350,7 @@ define([
 				return session.get(require.toUrl('./data/upload.html')).then(function () {
 					return session.findById('file');
 				}).then(function (element) {
-					return element.type(require.toUrl('./data/upload.txt'));
+					return element.type(require.toUrl('./data/upload.jpg'));
 				}).then(function () {
 					/* global document:false */
 					return session.execute(function () {
@@ -359,8 +359,8 @@ define([
 					});
 				}).then(function (file) {
 					assert.deepEqual(file, {
-						name: 'upload.txt',
-						size: 19
+						name: 'upload.jpg',
+						size: 107276
 					});
 				});
 			},
