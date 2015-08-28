@@ -1681,14 +1681,14 @@ Session.prototype = {
 		var self = this;
 
 		return new Promise(function (resolve) {
-            var content = fs.readFileSync(filename);
+			var content = fs.readFileSync(filename);
 
-            var zip = new JSZip();
-            zip.file(path.basename(filename), content);
-            var data = zip.generate({type: 'base64'});
-            zip = null;
+			var zip = new JSZip();
+			zip.file(path.basename(filename), content);
+			var data = zip.generate({type: 'base64'});
+			zip = null;
 
-            resolve(self._post('file', { file: data }));
+			resolve(self._post('file', { file: data }));
 		});
 	}
 };
