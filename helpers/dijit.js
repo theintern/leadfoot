@@ -73,16 +73,21 @@ module.exports = {
 	 * @param {string} property
 	 * A string representing a Dijit instance property, for example, a domNode.
 	 */
-	getProperty: function (widgetId, property) {
-		return function () {
-			return this.parent
-				// TODO: correct context?
-				.then(this.byId(widgetId))
-				.then(function (widget) {
-					return widget.get('property');
-				});
-		}
-	},
+	 getProperty: function (widgetId, property) {
+		 return function () {
+			 return this.session.executeAsync(function (widgetId, property, done) {
+				 require([ 'dijit/registry' ], function (registry) {
+					 var widget = registry.byId(widgetId);
+					 if (!widget) {
+						 done(new Error('Could not find widget "' + widgetId + '"'));
+					 }
+					 else {
+						 done(property ? widget.get(property) : widget);
+					 }
+				 });
+			 }, [widgetId, property]);
+		 };
+	 },
 
 	/**
 	 * A node within a widget instance
