@@ -30,7 +30,7 @@ module.exports = {
 	byId: function (widgetId) {
 		function getMethods (session, widgetId) {
 			return session.executeAsync(function (widgetId, done) {
-				require([ 'dijit/registry' ], function (registry) {
+				require([ 'dijit/registry', 'dojo/when' ], function (registry, when) {
 					var widget = registry.byId(widgetId);
 					if (!widget) {
 						done(new Error('Could not find widget "' + widgetId + '"'));
