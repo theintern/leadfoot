@@ -28,7 +28,7 @@ module.exports = {
 	 * An id for a Dijit reference
 	 */
 	byId: function (widgetId) {
-		function getMethods (session, widgetId) {
+		function getMethods(session, widgetId) {
 			return session.executeAsync(function (widgetId, done) {
 				require([ 'dijit/registry', 'dojo/when' ], function (registry, when) {
 					var widget = registry.byId(widgetId);
@@ -99,7 +99,7 @@ module.exports = {
 	 *
 	 * @param {string} attachPoint
 	 * Optional string representing a Dijit childNode. If unspecified,
-	 * 	the attachPoint will be the top level widget.domNode reference.
+	 * the attachPoint will be the top level widget.domNode reference.
 	 */
 	nodeById: function (widgetId, attachPoint) {
 		return function (ignoredValue, setContext) {
