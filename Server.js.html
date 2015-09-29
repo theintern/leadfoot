@@ -94,15 +94,17 @@ function createHttpRequest(method) {
 			return encodeURIComponent(pathParts[index]);
 		});
 
+		var defaultRequestHeaders = {
+			// At least FirefoxDriver on Selenium 2.40.0 will throw a NullPointerException when retrieving
+			// session capabilities if an Accept header is not provided. (It is a good idea to provide one
+			// anyway)
+			'Accept': 'application/json,text/plain;q=0.9'
+		};
+
 		var kwArgs = lang.delegate(this.requestOptions, {
 			followRedirects: false,
 			handleAs: 'text',
-			headers: {
-				// At least FirefoxDriver on Selenium 2.40.0 will throw a NullPointerException when retrieving
-				// session capabilities if an Accept header is not provided. (It is a good idea to provide one
-				// anyway)
-				'Accept': 'application/json,text/plain;q=0.9'
-			},
+			headers: defaultRequestHeaders,
 			method: method
 		});
 
@@ -130,7 +132,8 @@ function createHttpRequest(method) {
 			// data about the session; as a result, we need to follow all redirects to get consistent data
 			if (response.statusCode >= 300 &amp;&amp; response.statusCode &lt; 400 &amp;&amp; response.getHeader('Location')) {
 				return request(response.getHeader('Location'), {
-					method: 'GET'
+					method: 'GET',
+					headers: defaultRequestHeaders
 				}).then(handleResponse, handleResponse);
 			}
 
@@ -199,7 +202,7 @@ function createHttpRequest(method) {
 				// At least InternetExplorerDriver 2.41.0 &amp; SafariDriver 2.41.0 respond with HTTP status codes
 				// other than Not Implemented and a Selenium status UnknownError for commands that are not
 				// implemented; like FirefoxDriver they provide a reliable indicator of unsupported commands
-				if (response.statusCode === 500 &amp;&amp; data.value &amp;&amp;
+				if (response.statusCode === 500 &amp;&amp; data.value &amp;&amp; data.value.message &amp;&amp;
 					(
 						data.value.message.indexOf('Command not found') > -1 ||
 						data.value.message.indexOf('Unknown command') > -1
@@ -210,7 +213,7 @@ function createHttpRequest(method) {
 
 				// At least GhostDriver 1.1.0 incorrectly responds with HTTP 405 instead of HTTP 501 for
 				// unimplemented commands
-				if (response.statusCode === 405 &amp;&amp; data.value &amp;&amp;
+				if (response.statusCode === 405 &amp;&amp; data.value &amp;&amp; data.value.message &amp;&amp;
 					data.value.message.indexOf('Invalid Command Method') > -1
 				) {
 					data.status = 9;
@@ -581,6 +584,7 @@ Server.prototype = {
 				return {
 					brokenDeleteCookie: false,
 					brokenExecuteElementReturn: false,
+					brokenExecuteUndefinedReturn: false,
 					brokenElementDisplayedOpacity: false,
 					brokenElementDisplayedOffscreen: false,
 					brokenSubmitElement: true,
@@ -647,6 +651,12 @@ Server.prototype = {
 			}).then(function (value) {
 				return value !== null;
 			}).catch(broken);
+
+			// At least Selendroid 0.16.0 incorrectly returns `undefined` instead of `null` when an undefined
+			// value is returned by an `execute` call
+			testedCapabilities.brokenExecuteUndefinedReturn = session.execute('return undefined;').then(function (value) {
+				return value !== null;
+			}, broken);
 
 			// At least Selendroid 0.9.0 always returns invalid element handles from JavaScript
 			testedCapabilities.brokenExecuteElementReturn = function () {
@@ -882,6 +892,10 @@ Server.prototype = {
 			return Promise.all(testedCapabilities);
 		}
 
+		if (capabilities._filled) {
+			return Promise.resolve(session);
+		}
+
 		return session.get('about:blank')
 			.then(discoverServerFeatures)
 			.then(addCapabilities)
@@ -893,6 +907,10 @@ Server.prototype = {
 			.then(discoverDefects)
 			.then(addCapabilities)
 			.finally(function () {
+				Object.defineProperty(capabilities, '_filled', {
+					value: true,
+					configurable: true
+				});
 				return session.get('about:blank').finally(function () {
 					return session;
 				});
