@@ -79,7 +79,9 @@ function createHttpRequest(method) {
 				return request(response.getHeader('Location'), {
 					method: 'GET',
 					headers: defaultRequestHeaders
-				}).then(handleResponse, handleResponse);
+				}).then(handleResponse, function (error) {
+					return handleResponse(error.response);
+				});
 			}
 
 			var responseType = response.getHeader('Content-Type');
