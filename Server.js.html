@@ -20,31 +20,31 @@
 			<ul class="modules">
 				
 <li data-member-id="module:leadfoot/Command" class="">
-	<a href="Command.html">leadfoot/Command</a>
+	<a href="module-leadfoot_Command.html">leadfoot/Command</a>
 </li>
 
 <li data-member-id="module:leadfoot/compat" class="icons-1">
-	<a href="compat.html"><span class="icon icon-deprecated" title="Deprecated"></span>leadfoot/compat</a>
+	<a href="module-leadfoot_compat.html"><span class="icon icon-deprecated" title="Deprecated"></span>leadfoot/compat</a>
 </li>
 
 <li data-member-id="module:leadfoot/Element" class="">
-	<a href="Element.html">leadfoot/Element</a>
+	<a href="module-leadfoot_Element.html">leadfoot/Element</a>
 </li>
 
 <li data-member-id="module:leadfoot/helpers/pollUntil" class="">
-	<a href="pollUntil.html">leadfoot/helpers/pollUntil</a>
+	<a href="module-leadfoot_helpers_pollUntil.html">leadfoot/helpers/pollUntil</a>
 </li>
 
 <li data-member-id="module:leadfoot/keys" class="">
-	<a href="keys.html">leadfoot/keys</a>
+	<a href="module-leadfoot_keys.html">leadfoot/keys</a>
 </li>
 
 <li data-member-id="module:leadfoot/Server" class="">
-	<a href="Server.html">leadfoot/Server</a>
+	<a href="module-leadfoot_Server.html">leadfoot/Server</a>
 </li>
 
 <li data-member-id="module:leadfoot/Session" class="">
-	<a href="Session.html">leadfoot/Session</a>
+	<a href="module-leadfoot_Session.html">leadfoot/Session</a>
 </li>
 
 				<li><a href="global.html">Globals</a></li>
@@ -104,7 +104,7 @@ function createHttpRequest(method) {
 		var kwArgs = lang.delegate(this.requestOptions, {
 			followRedirects: false,
 			handleAs: 'text',
-			headers: defaultRequestHeaders,
+			headers: lang.mixin({}, defaultRequestHeaders),
 			method: method
 		});
 
@@ -134,7 +134,7 @@ function createHttpRequest(method) {
 				return request(response.getHeader('Location'), {
 					method: 'GET',
 					headers: defaultRequestHeaders
-				}).then(handleResponse, handleResponse);
+				}).then(handleResponse);
 			}
 
 			var responseType = response.getHeader('Content-Type');
@@ -260,7 +260,7 @@ function createHttpRequest(method) {
 			}
 
 			return data;
-		}, function (error) {
+		}).catch(function (error) {
 			error.stack = error.message + util.trimStack(trace.stack);
 			throw error;
 		});

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Leadfoot docs: Module: leadfoot/helpers/pollUntil</title>
+	<link rel="stylesheet" href="styles/catalyst.css">
+</head>
+<body>
+	<h1 class="mainHeader"><a href="index.html" class="projectName">
+		
+			<img src="logo.png" class="projectLogo"
+				alt="Leadfoot" title="Leadfoot">
+		
+	</a></h1>
+	
+<nav class="mainMenu">
+	
+		<div class="modulesContainer">
+			<h2 class="subsection-title modules">Modules</h2>
+			<ul class="modules">
+				
+<li data-member-id="module:leadfoot/Command" class="">
+	<a href="module-leadfoot_Command.html">leadfoot/Command</a>
+</li>
+
+<li data-member-id="module:leadfoot/compat" class="icons-1">
+	<a href="module-leadfoot_compat.html"><span class="icon icon-deprecated" title="Deprecated"></span>leadfoot/compat</a>
+</li>
+
+<li data-member-id="module:leadfoot/Element" class="">
+	<a href="module-leadfoot_Element.html">leadfoot/Element</a>
+</li>
+
+<li data-member-id="module:leadfoot/helpers/pollUntil" class="active">
+	<a href="module-leadfoot_helpers_pollUntil.html">leadfoot/helpers/pollUntil</a>
+</li>
+
+<li data-member-id="module:leadfoot/keys" class="">
+	<a href="module-leadfoot_keys.html">leadfoot/keys</a>
+</li>
+
+<li data-member-id="module:leadfoot/Server" class="">
+	<a href="module-leadfoot_Server.html">leadfoot/Server</a>
+</li>
+
+<li data-member-id="module:leadfoot/Session" class="">
+	<a href="module-leadfoot_Session.html">leadfoot/Session</a>
+</li>
+
+				<li><a href="global.html">Globals</a></li>
+			</ul>
+		</div>
+	
+</nav>
+<div class="persistentTitle hidden"><a href="#overview">leadfoot/helpers/pollUntil</a></div><main class="mainContent doc-module">
+
+	<div class="section overview" id="overview">
+		<div class="classInfo">
+			<h1 class="title header">leadfoot/helpers/pollUntil</h1>
+
+			
+
+			
+		</div>
+
+		
+<div class="member kind-function" id="module:leadfoot/helpers/pollUntil">
+	
+		<h2 class="memberName">
+			<span class="type-signature"></span>(require("leadfoot/helpers/pollUntil"))<span class="signature">(poller:<span class="type-signature"> function|string</span>, args<span class="signature-attributes">opt</span>:<span class="type-signature"> Array.&lt;any></span>, timeout<span class="signature-attributes">opt</span>:<span class="type-signature"> number</span>, pollInterval<span class="signature-attributes">opt</span>:<span class="type-signature"> number</span>):</span><span class="type-signature"> function</span>
+			
+		</h2>
+	
+
+	<div class="memberInfo">
+		<div class="versionInfo">
+			
+
+			
+		</div>
+
+		
+
+		
+			<div class="description"><p>A <a href="module-leadfoot_Command.html">leadfoot/Command</a> helper that polls for a value within the client environment until the value exists
+or a timeout is reached.</p></div>
+		
+
+		<!-- object property -->
+			
+		<!-- /object property -->
+
+		
+
+		<!-- function -->
+			
+				<div class="tag table tag-parameters">
+					<h3 class="name">Parameters</h3>
+					
+
+<table class="parameters value">
+	<thead>
+		<tr>
+			<th class="name">Name</th>
+			<th class="type">Type</th>
+			<th class="attributes">Attributes</th>
+			
+			<th class="table-description">Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		
+			<tr>
+				
+					<td class="name"><code>poller</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">function</span>|<span class="param-type">string</span>
+					
+				</td>
+
+				
+				
+					<td class="attributes"></td>
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The poller function to execute on an interval. The function should return <code>null</code> or <code>undefined</code> if there is not a
+result. If the poller function throws, polling will halt.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>args</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">Array.&lt;any></span>
+					
+				</td>
+
+				
+				
+					<td class="attributes">optional</td>
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>An array of arguments to pass to the poller function when it is invoked. Only values that can be serialised to JSON,
+plus <a href="module-leadfoot_Element.html">leadfoot/Element</a> objects, can be specified as arguments.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>timeout</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">number</span>
+					
+				</td>
+
+				
+				
+					<td class="attributes">optional</td>
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The maximum amount of time to wait for a successful result, in milliseconds. If not specified, the current
+<code>executeAsync</code> maximum timeout for the session will be used.</p>
+						
+					</td>
+				
+			</tr>
+		
+			<tr>
+				
+					<td class="name"><code>pollInterval</code></td>
+				
+
+				<td class="type">
+					
+						<span class="param-type">number</span>
+					
+				</td>
+
+				
+				
+					<td class="attributes">optional</td>
+				
+
+				
+
+				
+					<td class="table-description">
+						<p>The amount of time to wait between calls to the poller function, in milliseconds. If not specified, defaults to 67ms.</p>
+						
+					</td>
+				
+			</tr>
+		
+	</tbody>
+</table>
+
+				</div>
+			
+
+			
+				<div class="tag list tag-returns">
+					<h3 class="name">Returns</h3>
+					<ul class="value">
+						
+							<li><p>A <a href="module-leadfoot_Command.html#then">leadfoot/Command#then</a> callback function that, when called, returns a promise that resolves to the
+value returned by the poller function on success and rejects on failure.</p></li>
+						
+					</ul>
+				</div>
+			
+
+			
+
+			
+
+			
+			
+
+			
+			
+		<!-- /function -->
+
+		<!-- education -->
+			
+
+			
+				<div class="tag tag-examples">
+					<h3 class="name">Examples</h3>
+					
+						<div class="value example">
+							
+							<pre class="prettyprint"><code>var Command = require('leadfoot/Command');
+var pollUntil = require('leadfoot/helpers/pollUntil');
+
+new Command(session)
+    .get('http://example.com')
+    .then(pollUntil('return document.getElementById("a");', 1000))
+    .then(function (elementA) {
+        // element was found
+    }, function (error) {
+        // element was not found
+    });</code></pre>
+						</div>
+					
+						<div class="value example">
+							
+							<pre class="prettyprint"><code>var Command = require('leadfoot/Command');
+var pollUntil = require('leadfoot/helpers/pollUntil');
+
+new Command(session)
+    .get('http://example.com')
+    .then(pollUntil(function (value) {
+        var element = document.getElementById('a');
+        return element &amp;&amp; element.value === value ? true : null;
+    }, [ 'foo' ], 1000))
+    .then(function () {
+        // value was set to 'foo'
+    }, function (error) {
+        // value was never set
+    });</code></pre>
+						</div>
+					
+				</div>
+			
+
+			
+			
+		<!-- /education -->
+
+		
+			<div class="tag scalar tag-source">
+				<h3 class="name">Source</h3>
+				<div class="value">
+					<a href="helpers_pollUntil.js.html">helpers/pollUntil.js</a>,
+					<a href="helpers_pollUntil.js.html#line59">line 59</a>
+				</div>
+			</div>
+		
+	</div>
+</div>
+
+
+		
+
+		
+
+		
+	</div>
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+</main>
+
+
+	<script src="scripts/prettify/prettify.js"></script>
+	<script src="scripts/prettify/lang-css.js"></script>
+	<script>prettyPrint();</script>
+	<script src="scripts/nav.js"></script>
+</body>
+</html>
