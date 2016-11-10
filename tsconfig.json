@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+	"module": "umd",
+	"moduleResolution": "node",
+	"declaration": true,
+	"noImplicitAny": true,
+	"noImplicitThis": true,
+	"removeComments": true,
+	"preserveConstEnums": true,
+	"allowSyntheticDefaultImports": true,
+	"sourceMap": true,
+	"outDir": "./dist",
+	"target": "ES5"
+  },
+  "include": [
+	"./src/**/*.ts",
+	"./tests/**/*.ts"
+  ]
+}
