@@ -3,8 +3,8 @@
  * @module leadfoot/util
  */
 
-var lang = require('dojo/lang');
-var Promise = require('dojo/Promise');
+import * as lang from 'dojo/lang';
+import Promise = require('dojo/Promise');
 
 /**
  * Creates a promise that resolves itself after `ms` milliseconds.
@@ -12,18 +12,18 @@ var Promise = require('dojo/Promise');
  * @param {number} ms Time until resolution in milliseconds.
  * @returns {Promise.<void>}
  */
-exports.sleep = function (ms) {
+export function sleep(ms: number): Promise<void> {
 	return new Promise(function (resolve, reject, progress, setCanceller) {
 		setCanceller(function (reason) {
 			clearTimeout(timer);
 			throw reason;
 		});
 
-		var timer = setTimeout(function () {
+		const timer = setTimeout(() => {
 			resolve();
 		}, ms);
 	});
-};
+}
 
 /**
  * Annotates the method with additional properties that provide guidance to {@link module:leadfoot/Command} about
@@ -33,9 +33,9 @@ exports.sleep = function (ms) {
  * @param {{ usesElement: boolean=, createsContext: boolean= }} properties
  * @returns {Function}
  */
-exports.forCommand = function (fn, properties) {
+export function forCommand(fn: Function, properties: { usesElement: boolean, createContext: boolean }): Function {
 	return lang.mixin(fn, properties);
-};
+}
 
 /**
  * Converts a function to a string representation suitable for use with the `execute` API endpoint.
@@ -43,7 +43,7 @@ exports.forCommand = function (fn, properties) {
  * @param {Function|string} fn
  * @returns {string}
  */
-exports.toExecuteString = function (fn) {
+export function toExecuteString(fn: Function|string): string {
 	if (typeof fn === 'function') {
 		// If someone runs code through Istanbul in the test runner, inline functions that are supposed to execute
 		// on the client will contain code coverage variables that will cause script execution failure. These
@@ -54,12 +54,12 @@ exports.toExecuteString = function (fn) {
 	}
 
 	return fn;
-};
+}
 
 /**
  * Removes the first line of a stack trace, which in V8 is the string representation of the object holding the stack
  * trace (which is garbage for captured stack traces).
  */
-exports.trimStack = function (stack) {
+export function trimStack(stack: string): string {
 	return stack.replace(/^[^\n]+/, '');
-};
+}

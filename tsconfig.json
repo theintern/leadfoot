@@ -12,6 +12,9 @@
 	"outDir": "./dist",
 	"target": "ES5"
   },
+  "files": [
+	  "./types/dojo2/dojo.d.ts"
+  ],
   "include": [
 	"./src/**/*.ts",
 	"./tests/**/*.ts"
