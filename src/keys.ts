@@ -11,7 +11,7 @@
  * @see {@link module:leadfoot/Session#pressKeys} for usage details.
  * @enum {string}
  */
-module.exports = {
+const keys = {
 	/** Releases all held modifier keys. */
 	'NULL': '\uE000',
 	/** OS-specific keystroke sequence that performs a cancel action. */
@@ -192,3 +192,5 @@ module.exports = {
 	'\uE03D': 'Command',
 	'\uE040': 'Zenkaku/hankaku'
 };
+
+export = keys;
