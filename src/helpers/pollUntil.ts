@@ -2,7 +2,9 @@
  * @module leadfoot/helpers/pollUntil
  */
 
-var util = require('../lib/util');
+import * as util from '../lib/util';
+import { Command } from '../lib/Command';
+import Promise = require('dojo/Promise');
 
 /**
  * A {@link module:leadfoot/Command} helper that polls for a value within the client environment until the value exists
@@ -56,7 +58,10 @@ var util = require('../lib/util');
  *         // value was never set
  *     });
  */
-module.exports = function (poller, args, timeout, pollInterval) {
+function pollUntil(poller: Function|string, args?: any[], timeout?: number, pollInterval?: number): () => Promise<any>;
+function pollUntil(poller: Function|string, timeout?: number, pollInterval?: number): () => Promise<any>;
+function pollUntil(...allArgs: any[]): () => Promise<any> {
+	let [ poller, args, timeout, pollInterval ] = allArgs;
 	if (typeof args === 'number') {
 		pollInterval = timeout;
 		timeout = args;
@@ -66,12 +71,14 @@ module.exports = function (poller, args, timeout, pollInterval) {
 	args = args || [];
 	pollInterval = pollInterval || 67;
 
-	return function () {
-		var session = this.session;
-		var originalTimeout;
+	return function (this: Commmand) {
+		const session = this.session;
+		let originalTimeout: number;
 
 		return session.getExecuteAsyncTimeout().then(function () {
-			function storeResult(result) {
+			let resultOrError: any;
+
+			function storeResult(result: any) {
 				resultOrError = result;
 			}
 
@@ -82,19 +89,17 @@ module.exports = function (poller, args, timeout, pollInterval) {
 				timeout = arguments[0];
 			}
 
-			var resultOrError;
-
 			return session.setExecuteAsyncTimeout(timeout)
 				.then(function () {
 					/* jshint maxlen:140 */
-					return session.executeAsync(/* istanbul ignore next */ function (poller, args, timeout, pollInterval, done) {
+					return session.executeAsync(/* istanbul ignore next */ function (poller: string|Function, args: any[], timeout: number, pollInterval: number, done: Function): void {
 						/* jshint evil:true */
-						poller = new Function(poller);
+						poller = <Function> new Function(<string> poller);
 
-						var endTime = Number(new Date()) + timeout;
+						const endTime = Number(new Date()) + timeout;
 
-						(function poll() {
-							var result = poller.apply(this, args);
+						(function poll(this: any) {
+							const result = poller.apply(this, args);
 
 							/*jshint evil:true */
 							if (result != null) {
@@ -116,7 +121,7 @@ module.exports = function (poller, args, timeout, pollInterval) {
 							throw resultOrError;
 						}
 						if (resultOrError === null) {
-							var error = new Error('Polling timed out with no result');
+							const error = new Error('Polling timed out with no result');
 							error.name = 'ScriptTimeout';
 							throw error;
 						}
@@ -130,4 +135,6 @@ module.exports = function (poller, args, timeout, pollInterval) {
 				});
 		});
 	};
-};
+}
+
+export = pollUntil;
