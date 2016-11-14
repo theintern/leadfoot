@@ -193,4 +193,4 @@ const keys = {
 	'\uE040': 'Zenkaku/hankaku'
 };
 
-export = keys;
+export default keys;

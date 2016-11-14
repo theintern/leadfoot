@@ -5,11 +5,33 @@
  * @module leadfoot/compat
  */
 
-var Command = require('./Command');
-var Promise = require('dojo/Promise');
-var pollUntil = require('./helpers/pollUntil');
-var strategies = require('./lib/strategies');
-var topic = require('dojo/topic');
+import Command from './Command';
+import Element from './Element';
+import Promise = require('dojo/Promise');
+import pollUntil = require('./helpers/pollUntil');
+import strategies from './lib/strategies';
+import * as topic from 'dojo/topic';
+
+/**
+ * Warns a user once that the method given by `name` is deprecated.
+ *
+ * @private
+ * @method
+ * @param {string} name The name of the old method.
+ * @param {string=} replacement Replacement instructions, if a direct replacement for the old method exists.
+ * @param {string=} extra Extra information about the deprecation.
+ */
+const warn = (function () {
+	const warned: { [key: string]: boolean; } = {};
+	return function (name: string, replacement?: string, extra?: string) {
+		if (warned[name]) {
+			return;
+		}
+
+		warned[name] = true;
+		topic.publish('/deprecated', name, replacement, extra);
+	};
+})();
 
 /**
  * Deprecates `fromMethod` for `toMethod` and returns the correct call to `toMethod`.
@@ -19,8 +41,8 @@ var topic = require('dojo/topic');
  * @param {string} toMethod
  * @returns {Function}
  */
-function deprecate(fromMethod, toMethod) {
-	return function () {
+function deprecate(fromMethod: string, toMethod: string): Function {
+	return function (this: any) {
 		warn('Command#' + fromMethod, 'Command#' + toMethod);
 		return this[toMethod].apply(this, arguments);
 	};
@@ -44,16 +66,15 @@ function deprecate(fromMethod, toMethod) {
  *
  * @returns {Function}
  */
-function deprecateElementSig(fromMethod, toMethod, fn) {
-	return function (element) {
+function deprecateElementSig(fromMethod: string, toMethod: string, fn: Function): Function {
+	return function (this: any, element?: Element, ...args: any[]) {
 		if (element && element.elementId) {
 			warn('Command#' + fromMethod + '(element)', 'Command#find then Command#' + fromMethod + ', or ' +
 				'Command#find then Command#then(function (element) { return element.' +
 				(toMethod || fromMethod) + '(); }');
 
-			var args = Array.prototype.slice.call(arguments, 1);
-			return new this.constructor(this, function () {
-				return element[toMethod || fromMethod].apply(this, args);
+			return new this.constructor(this, function (this: Element) {
+				return (<any> element)[toMethod || fromMethod].apply(this, args);
 			});
 		}
 
@@ -72,27 +93,6 @@ function deprecateElementSig(fromMethod, toMethod, fn) {
 function deprecateElementAndStandardSig(fromMethod, toMethod) {
 	return deprecateElementSig(fromMethod, toMethod, deprecate(fromMethod, toMethod));
 }
-
-/**
- * Warns a user once that the method given by `name` is deprecated.
- *
- * @private
- * @method
- * @param {string} name The name of the old method.
- * @param {string=} replacement Replacement instructions, if a direct replacement for the old method exists.
- * @param {string=} extra Extra information about the deprecation.
- */
-var warn = (function () {
-	var warned = {};
-	return function (name, replacement, extra) {
-		if (warned[name]) {
-			return;
-		}
-
-		warned[name] = true;
-		topic.publish('/deprecated', name, replacement, extra);
-	};
-})();
 
 var methods = {
 	get sessionID() {

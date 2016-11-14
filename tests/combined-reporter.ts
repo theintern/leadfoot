@@ -1,65 +1,64 @@
-define([
-	'intern',
-	'intern/lib/util',
-	'dojo/node!fs',
-	'dojo/node!istanbul/lib/collector',
-	'dojo/node!istanbul/lib/report/json',
-	'dojo/node!istanbul/lib/report/html',
-	'dojo/node!istanbul/lib/report/text',
-	'dojo/node!istanbul/index'
-], function (intern, util, fs, Collector, JsonReporter, LcovHtmlReporter, TextReporter) {
-	var collector = new Collector();
-	var reporters = [];
+import * as intern from 'intern';
+import * as util from 'intern/lib/util';
+import * as fs from 'dojo/node!fs';
+import Collector = require('dojo/node!istanbul/lib/collector');
+import JsonReporter = require('dojo/node!istanbul/lib/report/json');
+import LcovHtmlReporter = require('dojo/node!istanbul/lib/report/html');
+import TextReporter = require('dojo/node!istanbul/lib/report/text');
 
-	if (intern.mode === 'client') {
-		reporters = [ new JsonReporter() ];
-	}
-	else {
-		reporters = [ new TextReporter(), new LcovHtmlReporter() ];
-	}
+const collector = new Collector();
+const reporters: any = [];
 
-	return {
-		start: function () {
-			console.log('Running ' + intern.mode + ' tests…');
-		},
+if (intern.mode === 'client') {
+	reporters = [ new JsonReporter() ];
+}
+else {
+	reporters = [ new TextReporter(), new LcovHtmlReporter() ];
+}
 
-		'/session/start': function (remote) {
-			console.log('Testing ' + remote.environmentType);
-		},
+const reporter = {
+	start() {
+		console.log('Running ' + intern.mode + ' tests…');
+	},
 
-		'/coverage': function (sessionId, coverage) {
-			collector.add(coverage);
-		},
+	'/session/start'(remote) {
+		console.log('Testing ' + remote.environmentType);
+	},
 
-		'/error': function (error) {
-			util.logError(error);
-		},
+	'/coverage'(sessionId, coverage) {
+		collector.add(coverage);
+	},
 
-		'/launcher/start': function () {
-			console.log('Starting launcher');
-		},
+	'/error'(error) {
+		util.logError(error);
+	},
 
-		'/launcher/download/progress': function (launcher, progress) {
-			console.log('Download ' + (progress.received / progress.total * 100) + '% complete');
-		},
+	'/launcher/start'() {
+		console.log('Starting launcher');
+	},
 
-		'/launcher/status': function (launcher, status) {
-			console.log('Launcher: ' + status);
-		},
+	'/launcher/download/progress'(launcher, progress) {
+		console.log('Download ' + (progress.received / progress.total * 100) + '% complete');
+	},
 
-		'/test/fail': function (test) {
-			console.error('FAIL: ' + test.id);
-			util.logError(test.error);
-		},
+	'/launcher/status'(launcher, status) {
+		console.log('Launcher: ' + status);
+	},
 
-		stop: function () {
-			if (intern.mode === 'runner' && fs.existsSync('coverage-final.json')) {
-				collector.add(JSON.parse(fs.readFileSync('coverage-final.json')));
-			}
+	'/test/fail'(test) {
+		console.error('FAIL: ' + test.id);
+		util.logError(test.error);
+	},
 
-			reporters.forEach(function (reporter) {
-				reporter.writeReport(collector, true);
-			});
+	stop() {
+		if (intern.mode === 'runner' && fs.existsSync('coverage-final.json')) {
+			collector.add(JSON.parse(fs.readFileSync('coverage-final.json')));
 		}
-	};
-});
+
+		reporters.forEach(function (reporter) {
+			reporter.writeReport(collector, true);
+		});
+	}
+};
+
+export default reporter;

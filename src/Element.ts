@@ -4,25 +4,13 @@
  * @module leadfoot/Element
  */
 
-var findDisplayed = require('./lib/findDisplayed');
-var fs = require('fs');
-var strategies = require('./lib/strategies');
-var waitForDeleted = require('./lib/waitForDeleted');
-var util = require('./lib/util');
-
-/**
- * Delegates the HTTP request for a method to the underlying {@link module:leadfoot/Session} object.
- *
- * @private
- * @param {string} method
- * @returns {Promise.<any>}
- */
-function delegateToSession(method) {
-	return function (path, requestData, pathParts) {
-		path = 'element/' + encodeURIComponent(this._elementId) + '/' + path;
-		return this._session[method](path, requestData, pathParts);
-	};
-}
+import findDisplayed = require('./lib/findDisplayed');
+import fs = require('fs');
+import strategies from './lib/strategies';
+import waitForDeleted from './lib/waitForDeleted';
+import * as util from './lib/util';
+import Promise = require('dojo/Promise');
+import Session from './Session';
 
 function noop() {
 	// At least ios-driver 0.6.6 returns an empty object for methods that are supposed to return no value at all,
@@ -40,16 +28,14 @@ function noop() {
  * @param {module:leadfoot/Session} session
  * The session that the element belongs to.
  */
-function Element(elementId, session) {
-	this._elementId = elementId.ELEMENT || elementId.elementId || elementId;
-	this._session = session;
-}
-
-/**
- * @lends module:leadfoot/Element#
- */
-Element.prototype = {
-	constructor: Element,
+export type ElementOrElementId = { ELEMENT: string; } | Element | string;
+export default class Element {
+	private _elementId: string;
+	private _session: Session;
+	constructor(elementId: /*ElementOrElementId*/any, session: Session) {
+		this._elementId = elementId.ELEMENT || elementId.elementId || elementId;
+		this._session = session;
+	}
 
 	/**
 	 * The opaque, remote-provided ID of the element.
@@ -60,7 +46,7 @@ Element.prototype = {
 	 */
 	get elementId() {
 		return this._elementId;
-	},
+	}
 
 	/**
 	 * The session that the element belongs to.
@@ -71,14 +57,21 @@ Element.prototype = {
 	 */
 	get session() {
 		return this._session;
-	},
+	}
 
-	_get: delegateToSession('_get'),
-	_post: delegateToSession('_post'),
+	private _get(path: string, requestData?: any, pathParts?: any): Promise<any> {
+		path = 'element/' + encodeURIComponent(this._elementId) + '/' + path;
+		return this._session['_get'](path, requestData, pathParts);
+	}
 
-	toJSON: function () {
+	private _post(path: string, requestData?: any, pathParts?: any): Promise<any> {
+		path = 'element/' + encodeURIComponent(this._elementId) + '/' + path;
+		return this._session['_post'](path, requestData, pathParts);
+	}
+
+	toJSON() {
 		return { ELEMENT: this._elementId };
-	},
+	}
 
 	/**
 	 * Gets the first element within this element that matches the given query.
@@ -95,15 +88,15 @@ Element.prototype = {
 	 *
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
-	find: function (using, value) {
-		var session = this._session;
+	find(using: string, value: string): Promise<Element> {
+		const session = this._session;
 
 		if (using.indexOf('link text') !== -1 && this.session.capabilities.brokenWhitespaceNormalization) {
 			return this.session.execute(/* istanbul ignore next */ this.session._manualFindByLinkText, [
 				using, value, false, this
-			]).then(function (element) {
+			]).then(function (element: ElementOrElementId) {
 				if (!element) {
-					var error = new Error();
+					const error = new Error();
 					error.name = 'NoSuchElement';
 					throw error;
 				}
@@ -117,7 +110,7 @@ Element.prototype = {
 		}).then(function (element) {
 			return new Element(element, session);
 		});
-	},
+	}
 
 	/**
 	 * Gets all elements within this element that match the given query.
@@ -130,13 +123,13 @@ Element.prototype = {
 	 *
 	 * @returns {Promise.<module:leadfoot/Element[]>}
 	 */
-	findAll: function (using, value) {
-		var session = this._session;
+	findAll(using: string, value: string): Promise<Element[]> {
+		const session = this._session;
 
 		if (using.indexOf('link text') !== -1 && this.session.capabilities.brokenWhitespaceNormalization) {
 			return this.session.execute(/* istanbul ignore next */ this.session._manualFindByLinkText, [
 				using, value, true, this
-			]).then(function (elements) {
+			]).then(function (elements: ElementOrElementId[]) {
 				return elements.map(function (element) {
 					return new Element(element, session);
 				});
@@ -146,37 +139,36 @@ Element.prototype = {
 		return this._post('elements', {
 			using: using,
 			value: value
-		}).then(function (elements) {
+		}).then(function (elements: ElementOrElementId[]) {
 			return elements.map(function (element) {
 				return new Element(element, session);
 			});
 		});
-	},
+	}
 
 	/**
 	 * Clicks the element. This method works on both mouse and touch platforms.
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	click: function () {
-		var self = this;
-		return this._post('click').then(function () {
+	click(): Promise<void> {
+		return this._post('click').then(() => {
 			// ios-driver 0.6.6-SNAPSHOT April 2014 and MS Edge Driver 14316 do not wait until the default action for
 			// a click event occurs before returning
-			if (self.session.capabilities.touchEnabled || self.session.capabilities.returnsFromClickImmediately) {
+			if (this.session.capabilities.touchEnabled || this.session.capabilities.returnsFromClickImmediately) {
 				return util.sleep(500);
 			}
 		});
-	},
+	}
 
 	/**
 	 * Submits the element, if it is a form, or the form belonging to the element, if it is a form element.
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	submit: function () {
+	submit(): Promise<void> {
 		if (this.session.capabilities.brokenSubmitElement) {
-			return this.session.execute(/* istanbul ignore next */ function (element) {
+			return this.session.execute(/* istanbul ignore next */ function (element: any|HTMLFormElement) {
 				if (element.submit) {
 					element.submit();
 				}
@@ -187,7 +179,7 @@ Element.prototype = {
 		}
 
 		return this._post('submit').then(noop);
-	},
+	}
 
 	/**
 	 * Gets the visible text within the element. `<br>` elements are converted to line breaks in the returned
@@ -195,18 +187,15 @@ Element.prototype = {
 	 *
 	 * @returns {Promise.<string>}
 	 */
-	getVisibleText: function () {
-		var result = this._get('text');
+	getVisibleText(): Promise<string> {
+		const result = this._get('text');
 
 		if (this.session.capabilities.brokenWhitespaceNormalization) {
-			var self = this;
-			return result.then(function (text) {
-				return self.session._normalizeWhitespace(text);
-			});
+			return result.then(text => this.session._normalizeWhitespace(text));
 		}
 
 		return result;
-	},
+	}
 
 	/**
 	 * Types into the element. This method works the same as the {@link module:leadfoot/Session#pressKeys} method
@@ -222,21 +211,20 @@ Element.prototype = {
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	type: function (value) {
+	type(value: string|string[]): Promise<void> {
 		if (!Array.isArray(value)) {
 			value = [ value ];
 		}
 
 		if (this.session.capabilities.remoteFiles) {
-			var filename = value.join('');
+			const filename = value.join('');
 
 			// Check to see if the input is a filename; if so, upload the file and then post it's remote name into the
 			// field
 			try {
 				if (fs.statSync(filename).isFile()) {
-					var self = this;
-					return this.session._uploadFile(filename).then(function(uploadedFilename) {
-						return self._post('value', {
+					return this.session._uploadFile(filename).then((uploadedFilename: string) => {
+						return this._post('value', {
 							value: [ uploadedFilename ]
 						}).then(noop);
 					});
@@ -251,36 +239,35 @@ Element.prototype = {
 		return this._post('value', {
 			value: value
 		}).then(noop);
-	},
+	}
 
 	/**
 	 * Gets the tag name of the element. For HTML documents, the value is always lowercase.
 	 *
 	 * @returns {Promise.<string>}
 	 */
-	getTagName: function () {
-		var self = this;
-		return this._get('name').then(function (name) {
-			if (self.session.capabilities.brokenHtmlTagName) {
-				return self.session.execute(
+	getTagName(): Promise<string> {
+		return this._get('name').then((name: string) => {
+			if (this.session.capabilities.brokenHtmlTagName) {
+				return this.session.execute(
 					'return document.body && document.body.tagName === document.body.tagName.toUpperCase();'
-				).then(function (isHtml) {
+				).then(function (isHtml: boolean) {
 					return isHtml ? name.toLowerCase() : name;
 				});
 			}
 
 			return name;
 		});
-	},
+	}
 
 	/**
 	 * Clears the value of a form element.
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	clearValue: function () {
+	clearValue(): Promise<void> {
 		return this._post('clear').then(noop);
-	},
+	}
 
 	/**
 	 * Returns whether or not a form element is currently selected (for drop-down options and radio buttons), or
@@ -288,18 +275,18 @@ Element.prototype = {
 	 *
 	 * @returns {Promise.<boolean>}
 	 */
-	isSelected: function () {
+	isSelected(): Promise<boolean> {
 		return this._get('selected');
-	},
+	}
 
 	/**
 	 * Returns whether or not a form element can be interacted with.
 	 *
 	 * @returns {Promise.<boolean>}
 	 */
-	isEnabled: function () {
+	isEnabled(): Promise<boolean> {
 		return this._get('enabled');
-	},
+	}
 
 	/**
 	 * Gets a property or attribute of the element according to the WebDriver specification algorithm. Use of this
@@ -327,13 +314,12 @@ Element.prototype = {
 	 * @returns {Promise.<string>} The value of the attribute as a string, or `null` if no such property or
 	 * attribute exists.
 	 */
-	getSpecAttribute: function (name) {
-		var self = this;
-		return this._get('attribute/$0', null, [ name ]).then(function (value) {
-			if (self.session.capabilities.brokenNullGetSpecAttribute && (value === '' || value === undefined)) {
-				return self.session.execute(/* istanbul ignore next */ function (element, name) {
+	getSpecAttribute(name: string): Promise<string> {
+		return this._get('attribute/$0', null, [ name ]).then((value) => {
+			if (this.session.capabilities.brokenNullGetSpecAttribute && (value === '' || value === undefined)) {
+				return this.session.execute(/* istanbul ignore next */ function (element: HTMLElement, name: string) {
 					return element.hasAttribute(name);
-				}, [ self, name ]).then(function (hasAttribute) {
+				}, [ this, name ]).then(function (hasAttribute: boolean) {
 					return hasAttribute ? value : null;
 				});
 			}
@@ -348,7 +334,7 @@ Element.prototype = {
 
 			return value;
 		});
-	},
+	}
 
 	/**
 	 * Gets an attribute of the element.
@@ -357,9 +343,9 @@ Element.prototype = {
 	 * @param {string} name The name of the attribute.
 	 * @returns {Promise.<string>} The value of the attribute, or `null` if no such attribute exists.
 	 */
-	getAttribute: function (name) {
+	getAttribute(name: string): Promise<string> {
 		return this.session.execute('return arguments[0].getAttribute(arguments[1]);', [ this, name ]);
-	},
+	}
 
 	/**
 	 * Gets a property of the element.
@@ -368,9 +354,9 @@ Element.prototype = {
 	 * @param {string} name The name of the property.
 	 * @returns {Promise.<any>} The value of the property.
 	 */
-	getProperty: function (name) {
+	getProperty(name: string): Promise<any> {
 		return this.session.execute('return arguments[0][arguments[1]];', [ this, name ]);
-	},
+	}
 
 	/**
 	 * Determines if this element is equal to another element.
@@ -378,21 +364,20 @@ Element.prototype = {
 	 * @param {module:leadfoot/Element} other
 	 * @returns {Promise.<boolean>}
 	 */
-	equals: function (other) {
-		var elementId = other.elementId || other;
-		var self = this;
-		return this._get('equals/$0', null, [ elementId ]).catch(function (error) {
+	equals(other: Element): Promise<boolean> {
+		const elementId = other.elementId || other;
+		return this._get('equals/$0', null, [ elementId ]).catch((error) => {
 			// At least Selendroid 0.9.0 does not support this command;
 			// At least ios-driver 0.6.6-SNAPSHOT April 2014 fails
 			if (error.name === 'UnknownCommand' ||
 				(error.name === 'UnknownError' && error.message.indexOf('bug.For input string:') > -1)
 			) {
-				return self.session.execute('return arguments[0] === arguments[1];', [ self, other ]);
+				return this.session.execute('return arguments[0] === arguments[1];', [ this, other ]);
 			}
 
 			throw error;
 		});
-	},
+	}
 
 	/**
 	 * Returns whether or not the element would be visible to an actual user. This means that the following types
@@ -406,35 +391,34 @@ Element.prototype = {
 	 *
 	 * @returns {Promise.<boolean>}
 	 */
-	isDisplayed: function () {
-		var self = this;
-		return this._get('displayed').then(function (isDisplayed) {
+	isDisplayed(): Promise<boolean> {
+		return this._get('displayed').then((isDisplayed: boolean) => {
 
 			if (isDisplayed && (
-				self.session.capabilities.brokenElementDisplayedOpacity ||
-				self.session.capabilities.brokenElementDisplayedOffscreen
+				this.session.capabilities.brokenElementDisplayedOpacity ||
+				this.session.capabilities.brokenElementDisplayedOffscreen
 			)) {
-				return self.session.execute(/* istanbul ignore next */ function (element) {
-					var scrollX = document.documentElement.scrollLeft || document.body.scrollLeft;
-					var scrollY = document.documentElement.scrollTop || document.body.scrollTop;
+				return this.session.execute(/* istanbul ignore next */ function (element: any) {
+					const scrollX = document.documentElement.scrollLeft || document.body.scrollLeft;
+					const scrollY = document.documentElement.scrollTop || document.body.scrollTop;
 					do {
 						if (window.getComputedStyle(element, null).opacity === '0') {
 							return false;
 						}
 
-						var bbox = element.getBoundingClientRect();
+						const bbox = element.getBoundingClientRect();
 						if (bbox.right + scrollX <= 0 || bbox.bottom + scrollY <= 0) {
 							return false;
 						}
 					}
 					while ((element = element.parentNode) && element.nodeType === 1);
 					return true;
-				}, [ self ]);
+				}, [ this ]);
 			}
 
 			return isDisplayed;
 		});
-	},
+	}
 
 	/**
 	 * Gets the position of the element relative to the top-left corner of the document, taking into account
@@ -442,39 +426,37 @@ Element.prototype = {
 	 *
 	 * @returns {Promise.<{ x: number, y: number }>}
 	 */
-	getPosition: function () {
+	getPosition(): Promise<{ x: number, y: number }> {
 		if (this.session.capabilities.brokenElementPosition) {
 			/* jshint browser:true */
-			return this.session.execute(/* istanbul ignore next */ function (element) {
-				var bbox = element.getBoundingClientRect();
-				var scrollX = document.documentElement.scrollLeft || document.body.scrollLeft;
-				var scrollY = document.documentElement.scrollTop || document.body.scrollTop;
+			return this.session.execute(/* istanbul ignore next */ function (element: any) {
+				const bbox = element.getBoundingClientRect();
+				const scrollX = document.documentElement.scrollLeft || document.body.scrollLeft;
+				const scrollY = document.documentElement.scrollTop || document.body.scrollTop;
 
 				return { x: scrollX + bbox.left, y: scrollY + bbox.top };
 			}, [ this ]);
 		}
 
-		return this._get('location').then(function (position) {
+		return this._get('location').then(function (position: { x: number, y: number }) {
 			// At least FirefoxDriver 2.41.0 incorrectly returns an object with additional `class` and `hCode`
 			// properties
 			return { x: position.x, y: position.y };
 		});
-	},
+	}
 
 	/**
 	 * Gets the size of the element, taking into account CSS transformations (if they are supported).
 	 *
 	 * @returns {Promise.<{ width: number, height: number }>}
 	 */
-	getSize: function () {
-		function getUsingExecute() {
-			return self.session.execute(/* istanbul ignore next */ function (element) {
-				var bbox = element.getBoundingClientRect();
+	getSize(): Promise<{ width: number, height: number }> {
+		const getUsingExecute = () => {
+			return this.session.execute(/* istanbul ignore next */ function (element: any) {
+				const bbox = element.getBoundingClientRect();
 				return { width: bbox.right - bbox.left, height: bbox.bottom - bbox.top };
-			}, [ self ]);
-		}
-
-		var self = this;
+			}, [ this ]);
+		};
 
 		if (this.session.capabilities.brokenCssTransformedSize) {
 			return getUsingExecute();
@@ -491,7 +473,7 @@ Element.prototype = {
 			// At least ChromeDriver 2.9 incorrectly returns an object with an additional `toString` property
 			return { width: dimensions.width, height: dimensions.height };
 		});
-	},
+	}
 
 	/**
 	 * Gets a CSS computed property value for the element.
@@ -501,15 +483,14 @@ Element.prototype = {
 	 *
 	 * @returns {Promise.<string>}
 	 */
-	getComputedStyle: function (propertyName) {
-		function manualGetStyle() {
-			return self.session.execute(/* istanbul ignore next */ function (element, propertyName) {
-				return window.getComputedStyle(element, null)[propertyName];
-			}, [ self, propertyName ]);
-		}
+	getComputedStyle(propertyName: string): Promise<string> {
+		const manualGetStyle = () => {
+			return this.session.execute(/* istanbul ignore next */ function (element: any, propertyName: string) {
+				return (<any> window.getComputedStyle(element, null))[propertyName];
+			}, [ this, propertyName ]);
+		};
 
-		var self = this;
-		var promise;
+		let promise: Promise<string>;
 
 		if (this.session.capabilities.brokenComputedStyles) {
 			promise = manualGetStyle();
@@ -542,7 +523,7 @@ Element.prototype = {
 			return value != null ? value : '';
 		});
 	}
-};
+}
 
 /**
  * Gets the first element inside this element matching the given CSS class name.
@@ -884,5 +865,3 @@ findDisplayed.applyTo(Element.prototype);
  * @returns {Promise.<void>}
  */
 waitForDeleted.applyTo(Element.prototype);
-
-module.exports = Element;

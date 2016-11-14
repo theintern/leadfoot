@@ -13,7 +13,7 @@ import Promise = require('dojo/Promise');
  * @returns {Promise.<void>}
  */
 export function sleep(ms: number): Promise<void> {
-	return new Promise(function (resolve, reject, progress, setCanceller) {
+	return new Promise<void>(function (resolve, reject, progress, setCanceller) {
 		setCanceller(function (reason) {
 			clearTimeout(timer);
 			throw reason;
@@ -33,7 +33,7 @@ export function sleep(ms: number): Promise<void> {
  * @param {{ usesElement: boolean=, createsContext: boolean= }} properties
  * @returns {Function}
  */
-export function forCommand(fn: Function, properties: { usesElement: boolean, createContext: boolean }): Function {
+export function forCommand(fn: Function, properties: { usesElement?: boolean, createsContext?: boolean }): Function {
 	return lang.mixin(fn, properties);
 }
 
@@ -62,4 +62,14 @@ export function toExecuteString(fn: Function|string): string {
  */
 export function trimStack(stack: string): string {
 	return stack.replace(/^[^\n]+/, '');
+}
+
+export function applyMixins(derivedCtor: any, baseCtors: any[], includePrivates: boolean = true): void {
+	baseCtors.forEach(baseCtor => {
+		Object.getOwnPropertyNames(baseCtor.prototype).forEach(name => {
+			if (includePrivates || name.charAt(0) !== '_') {
+				derivedCtor.prototype[name] = baseCtor.prototype[name];
+			}
+		});
+	});
 }

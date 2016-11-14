@@ -1,24 +1,24 @@
-var Promise = require('dojo/Promise');
-var statusCodes = require('./statusCodes');
+import Promise = require('dojo/Promise');
+import statusCodes from './statusCodes';
 
-module.exports = {
-	applyTo: function (prototype) {
-		prototype.waitForDeleted = function (strategy, value) {
-			var self = this;
-			var session = this.session || this;
-			var originalTimeout;
+const waitForDeleted = {
+	applyTo: function (prototype: any) {
+		prototype.waitForDeleted = function (strategy: string, value: string): Promise<void> {
+			const self = this;
+			const session = this.session || this;
+			let originalTimeout: number;
 
-			return session.getTimeout('implicit').then(function (value) {
+			return session.getTimeout('implicit').then(function (value: number) {
 				originalTimeout = value;
 				return session.setTimeout('implicit', 0);
 			}).then(function () {
-				var dfd = new Promise.Deferred();
-				var startTime = Date.now();
+				const dfd = new Promise.Deferred();
+				const startTime = Date.now();
 
 				(function poll() {
 					if (Date.now() - startTime > originalTimeout) {
-						var always = function () {
-							var error = new Error();
+						const always = function () {
+							const error = new Error();
 							error.status = 21;
 							error.name = statusCodes[error.status][0];
 							error.message = statusCodes[error.status][1];
@@ -29,7 +29,7 @@ module.exports = {
 					}
 
 					self.find(strategy, value).then(poll, function (error) {
-						var always = function () {
+						const always = function () {
 							/* istanbul ignore else: other errors should never occur during normal operation */
 							if (error.name === 'NoSuchElement') {
 								dfd.resolve();
@@ -47,3 +47,5 @@ module.exports = {
 		};
 	}
 };
+
+export default waitForDeleted;

@@ -2,55 +2,23 @@
  * @module leadfoot/Command
  */
 
-var Element = require('./Element');
-var Promise = require('dojo/Promise');
-var strategies = require('./lib/strategies');
-var Session = require('./Session');
-var util = require('./lib/util');
+import * as util from './lib/util';
+import Element from './Element';
+import Promise = require('dojo/Promise');
+import Session from './Session';
+import chaiAsPromised = require('chai-as-promised');
+import strategies from './lib/strategies';
 
-/**
- * Creates a function that, when called, creates a new Command that retrieves elements from the parent context and
- * uses them as the context for the newly created Command.
- *
- * @private
- * @param {string} method
- * @returns {Function}
- */
-function createElementMethod(method) {
-	return function () {
-		var args = arguments;
-
-		return new this.constructor(this, function (setContext) {
-			var parentContext = this._context;
-			var promise;
-
-			if (parentContext.length && parentContext.isSingle) {
-				promise = parentContext[0][method].apply(parentContext[0], args);
-			}
-			else if (parentContext.length) {
-				promise = Promise.all(parentContext.map(function (element) {
-					return element[method].apply(element, args);
-				})).then(function (elements) {
-					// findAll against an array context will result in arrays of arrays; flatten into a single
-					// array of elements. It would also be possible to resort in document order but other parallel
-					// operations could not be sorted so we just don't do it anywhere and say not to rely in
-					// a particular return order for results
-					return Array.prototype.concat.apply([], elements);
-				});
-			}
-			else {
-				promise = this.session[method].apply(this.session, args);
-			}
-
-			return promise.then(function (newContext) {
-				setContext(newContext);
-				return newContext;
-			});
-		});
-	};
+export interface SetContextMethod {
+	(context: Element|Element[]): void;
 }
 
-var TOP_CONTEXT = [];
+export interface Context extends Array<Command> {
+	isSingle?: boolean;
+	depth?: number;
+}
+
+const TOP_CONTEXT: Context = [];
 TOP_CONTEXT.isSingle = true;
 TOP_CONTEXT.depth = 0;
 
@@ -331,79 +299,80 @@ TOP_CONTEXT.depth = 0;
  * @borrows module:leadfoot/Element#getSize as module:leadfoot/Command#getSize
  * @borrows module:leadfoot/Element#getComputedStyle as module:leadfoot/Command#getComputedStyle
  */
-function Command(parent, initialiser, errback) {
-	var self = this;
-	var session;
+export default class Command {
+	private _parent: Command;
+	private _session: Session;
+	private _context: Element|Element[];
+	private _promise: Promise<any>;
 
-	function setContext(context) {
-		if (!Array.isArray(context)) {
-			context = [ context ];
-			context.isSingle = true;
+	constructor(parent, initialiser?: any, errback?: any) {
+		const self = this;
+		let session;
+		const trace: any = {};
+
+		function setContext(context) {
+			if (!Array.isArray(context)) {
+				context = [ context ];
+				context.isSingle = true;
+			}
+
+			// If the context being set has depth, then it is coming from `Command#end`,
+			// or someone smart knows what they are doing; do not change the depth
+			if (!('depth' in context)) {
+				context.depth = parent ? parent.context.depth + 1 : 0;
+			}
+
+			self._context = context;
 		}
 
-		// If the context being set has depth, then it is coming from `Command#end`,
-		// or someone smart knows what they are doing; do not change the depth
-		if (!('depth' in context)) {
-			context.depth = parent ? parent.context.depth + 1 : 0;
+		function fixStack(error: any) {
+			// TODO: fix error type
+			error.stack = error.stack + util.trimStack(trace.stack);
+			throw error;
 		}
 
-		self._context = context;
-	}
-
-	function fixStack(error) {
-		error.stack = error.stack + util.trimStack(trace.stack);
-		throw error;
-	}
-
-	if (parent && parent.session) {
-		this._parent = parent;
-		session = this._session = parent.session;
-	}
-	else if (parent && parent.sessionId) {
-		session = this._session = parent;
-		parent = null;
-	}
-	else {
-		throw new Error('A parent Command or Session must be provided to a new Command');
-	}
-
-	// Add any custom functions from the session to this command object so they can be accessed automatically
-	// using the fluid interfaces
-	// TODO: Test
-	for (var key in session) {
-		if (session[key] !== Session.prototype[key]) {
-			Command.addSessionMethod(this, key, session[key]);
+		if (parent && parent.session) {
+			this._parent = parent;
+			session = this._session = parent.session;
 		}
-	}
-
-	var trace = {};
-	Error.captureStackTrace(trace, Command);
-
-	this._promise = (parent ? parent.promise : Promise.resolve(undefined)).then(function (returnValue) {
-		self._context = parent ? parent.context : TOP_CONTEXT;
-		return returnValue;
-	}, function (error) {
-		self._context = parent ? parent.context : TOP_CONTEXT;
-		throw error;
-	}).then(
-		initialiser && function (returnValue) {
-			return Promise.resolve(returnValue)
-				.then(initialiser.bind(self, setContext))
-				.catch(fixStack);
-		},
-		errback && function (error) {
-			return Promise.reject(error)
-				.catch(errback.bind(self, setContext))
-				.catch(fixStack);
+		else if (parent && parent.sessionId) {
+			session = this._session = parent;
+			parent = null;
 		}
-	);
-}
+		else {
+			throw new Error('A parent Command or Session must be provided to a new Command');
+		}
 
-/**
- * @lends module:leadfoot/Command#
- */
-Command.prototype = {
-	constructor: Command,
+		// Add any custom functions from the session to this command object so they can be accessed automatically
+		// using the fluid interfaces
+		// TODO: Test
+		for (let key in session) {
+			if (session[key] !== Session.prototype[key]) {
+				Command.addSessionMethod(this, key, session[key]);
+			}
+		}
+
+		Error.captureStackTrace(trace, Command);
+
+		this._promise = (parent ? parent.promise : Promise.resolve(undefined)).then(function (returnValue) {
+			self._context = parent ? parent.context : TOP_CONTEXT;
+			return returnValue;
+		}, function (error) {
+			self._context = parent ? parent.context : TOP_CONTEXT;
+			throw error;
+		}).then(
+			initialiser && function (returnValue) {
+				return Promise.resolve(returnValue)
+					.then(initialiser.bind(self, setContext))
+					.catch(fixStack);
+			},
+			errback && function (error) {
+				return Promise.reject(error)
+					.catch(errback.bind(self, setContext))
+					.catch(fixStack);
+			}
+		);
+	}
 
 	/**
 	 * The parent Command of the Command, if one exists.
@@ -414,7 +383,7 @@ Command.prototype = {
 	 */
 	get parent() {
 		return this._parent;
-	},
+	}
 
 	/**
 	 * The parent Session of the Command.
@@ -425,7 +394,7 @@ Command.prototype = {
 	 */
 	get session() {
 		return this._session;
-	},
+	}
 
 	/**
 	 * The filtered elements that will be used if an element-specific method is invoked. Note that this property is not
@@ -443,7 +412,7 @@ Command.prototype = {
 	 */
 	get context() {
 		return this._context;
-	},
+	}
 
 	/**
 	 * The underlying Promise for the Command.
@@ -454,7 +423,7 @@ Command.prototype = {
 	 */
 	get promise() {
 		return this._promise;
-	},
+	}
 
 	/**
 	 * Pauses execution of the next command in the chain for `ms` milliseconds.
@@ -462,11 +431,11 @@ Command.prototype = {
 	 * @param {number} ms Time to delay, in milliseconds.
 	 * @returns {module:leadfoot/Command.<void>}
 	 */
-	sleep: function (ms) {
-		return new this.constructor(this, function () {
+	sleep(ms: number) {
+		return new Command(this, function () {
 			return util.sleep(ms);
 		});
-	},
+	}
 
 	/**
 	 * Ends the most recent filtering operation in the current Command chain and returns the set of matched elements
@@ -486,12 +455,12 @@ Command.prototype = {
 	 * @param {number=} numCommandsToPop The number of element contexts to pop. Defaults to 1.
 	 * @returns {module:leadfoot/Command.<void>}
 	 */
-	end: function (numCommandsToPop) {
+	end(numCommandsToPop) {
 		numCommandsToPop = numCommandsToPop || 1;
 
-		return new this.constructor(this, function (setContext) {
-			var command = this;
-			var depth = this.context.depth;
+		return new Command(this, function (setContext) {
+			let command = this;
+			let depth = this.context.depth;
 
 			while (depth && numCommandsToPop && (command = command.parent)) {
 				if (command.context.depth < depth) {
@@ -502,7 +471,7 @@ Command.prototype = {
 
 			setContext(command.context);
 		});
-	},
+	}
 
 	/**
 	 * Adds a callback to be invoked once the previously chained operation has completed.
@@ -521,14 +490,14 @@ Command.prototype = {
 	 * @param {Function=} errback
 	 * @returns {module:leadfoot/Command.<any>}
 	 */
-	then: function (callback, errback) {
+	then(callback, errback) {
 		function runCallback(command, callback, value, setContext) {
-			var returnValue = callback.call(command, value, setContext);
+			const returnValue = callback.call(command, value, setContext);
 
 			// If someone returns `this` (or a chain starting from `this`) from the callback, it will cause a deadlock
 			// where the child command is waiting for the child command to resolve
 			if (returnValue instanceof command.constructor) {
-				var maybeCommand = returnValue;
+				let maybeCommand = returnValue;
 				do {
 					if (maybeCommand === command) {
 						throw new Error('Deadlock: do not use `return this` from a Command callback');
@@ -539,12 +508,12 @@ Command.prototype = {
 			return returnValue;
 		}
 
-		return new this.constructor(this, callback && function (setContext, value) {
+		return new Command(this, callback && function (setContext, value) {
 			return runCallback(this, callback, value, setContext);
 		}, errback && function (setContext, value) {
 			return runCallback(this, errback, value, setContext);
 		});
-	},
+	}
 
 	/**
 	 * Adds a callback to be invoked when any of the previously chained operations have failed.
@@ -552,9 +521,9 @@ Command.prototype = {
 	 * @param {Function} errback
 	 * @returns {module:leadfoot/Command.<any>}
 	 */
-	catch: function (errback) {
+	catch(errback) {
 		return this.then(null, errback);
-	},
+	}
 
 	/**
 	 * Adds a callback to be invoked once the previously chained operations have resolved.
@@ -562,9 +531,9 @@ Command.prototype = {
 	 * @param {Function} callback
 	 * @returns {module:leadfoot/Command.<any>}
 	 */
-	finally: function (callback) {
+	finally(callback) {
 		return this.then(callback, callback);
-	},
+	}
 
 	/**
 	 * Cancels all outstanding chained operations of the Command. Calling this method will cause this command and all
@@ -572,131 +541,173 @@ Command.prototype = {
 	 *
 	 * @returns {module:leadfoot/Command.<void>}
 	 */
-	cancel: function () {
+	cancel(): this {
 		this._promise.cancel.apply(this._promise, arguments);
 		return this;
-	},
+	}
 
-	find: createElementMethod('find'),
-	findAll: createElementMethod('findAll'),
-	findDisplayed: createElementMethod('findDisplayed')
-};
+	/**
+	 * creates a new Command that retrieves elements from the parent context and
+	 * uses them as the context for the newly created Command.
+	 *
+	 * @private
+	 * @param {string} method
+	 * @returns {Command}
+	 */
+	private _createElementMethod(method: string, ...args: any[]): Command {
+		return new Command(this, function (setContext: SetContextMethod) {
+			const parentContext = this._context;
+			let promise: Promise<any>;
 
-/**
- * Augments `target` with a conversion of the `originalFn` method that enables its use with a Command object.
- * This can be used to easily add new methods from any custom object that implements the Session API to any target
- * object that implements the Command API.
- *
- * Functions that are copied may have the following extra properties in order to change the way that Command works
- * with these functions:
- *
- * - `createsContext` (boolean): If this property is specified, the return value from the function will be used as
- *   the new context for the returned Command.
- * - `usesElement` (boolean): If this property is specified, element(s) from the current context will be used as
- *   the first argument to the function, if the explicitly specified first argument is not already an element.
- *
- * @memberOf module:leadfoot/Command
- * @param {module:leadfoot/Command} target
- * @param {string} key
- * @param {Function} originalFn
- */
-Command.addSessionMethod = function (target, key, originalFn) {
-	// Checking for private/non-functions here deduplicates this logic; otherwise it would need to exist in both
-	// the Command constructor (for copying functions from sessions) as well as the Command factory below
-	if (key.charAt(0) !== '_' && !target[key] && typeof originalFn === 'function') {
-		target[key] = function () {
-			var args = arguments;
+			if (parentContext.length && parentContext.isSingle) {
+				promise = parentContext[0][method].apply(parentContext[0], args);
+			}
+			else if (parentContext.length) {
+				promise = Promise.all(parentContext.map(function (element) {
+					return element[method].apply(element, args);
+				})).then(function (elements) {
+					// findAll against an array context will result in arrays of arrays; flatten into a single
+					// array of elements. It would also be possible to resort in document order but other parallel
+					// operations could not be sorted so we just don't do it anywhere and say not to rely in
+					// a particular return order for results
+					return Array.prototype.concat.apply([], elements);
+				});
+			}
+			else {
+				promise = this.session[method].apply(this.session, args);
+			}
 
-			return new this.constructor(this, function (setContext) {
-				var parentContext = this._context;
-				var session = this._session;
-				// The function may have come from a session object prototype but have been overridden on the actual
-				// session instance; in such a case, the overridden function should be used instead of the one from
-				// the original source object. The original source object may still be used, however, if the
-				// function is being added like a mixin and does not exist on the actual session object for this
-				// session
-				var fn = session[key] || originalFn;
+			return promise.then(function (newContext) {
+				setContext(newContext);
+				return newContext;
+			});
+		});
+	}
 
-				if (fn.usesElement && parentContext.length && (!args[0] || !args[0].elementId)) {
-					var promise;
-					// Defer converting arguments into an array until it is necessary to avoid overhead
-					args = Array.prototype.slice.call(args, 0);
+	find(...args: any[]) {
+		return this._createElementMethod('find', args);
+	}
+
+	findAll(...args: any[]) {
+		return this._createElementMethod('findAll', args);
+	}
+
+	findDisplayed(...args: any[]) {
+		return this._createElementMethod('findDisplayed', args);
+	}
+
+	/**
+	 * Augments `target` with a conversion of the `originalFn` method that enables its use with a Command object.
+	 * This can be used to easily add new methods from any custom object that implements the Session API to any target
+	 * object that implements the Command API.
+	 *
+	 * Functions that are copied may have the following extra properties in order to change the way that Command works
+	 * with these functions:
+	 *
+	 * - `createsContext` (boolean): If this property is specified, the return value from the function will be used as
+	 *   the new context for the returned Command.
+	 * - `usesElement` (boolean): If this property is specified, element(s) from the current context will be used as
+	 *   the first argument to the function, if the explicitly specified first argument is not already an element.
+	 *
+	 * @memberOf module:leadfoot/Command
+	 * @param {module:leadfoot/Command} target
+	 * @param {string} key
+	 * @param {Function} originalFn
+	 */
+	static addSessionMethod(target: Command, key: string, originalFn: Function): void {
+		// Checking for private/non-functions here deduplicates this logic; otherwise it would need to exist in both
+		// the Command constructor (for copying functions from sessions) as well as the Command factory below
+		if (key.charAt(0) !== '_' && !target[key] && typeof originalFn === 'function') {
+			target[key] = function (...args: any[]): Command {
+				return new Command(this, function (setContext) {
+					const parentContext = this._context;
+					const session = this._session;
+					let promise;
+					// The function may have come from a session object prototype but have been overridden on the actual
+					// session instance; in such a case, the overridden function should be used instead of the one from
+					// the original source object. The original source object may still be used, however, if the
+					// function is being added like a mixin and does not exist on the actual session object for this
+					// session
+					const fn = session[key] || originalFn;
+
+					if (fn.usesElement && parentContext.length && (!args[0] || !args[0].elementId)) {
+						// Defer converting arguments into an array until it is necessary to avoid overhead
+						args = Array.prototype.slice.call(args, 0);
+
+						if (parentContext.isSingle) {
+							promise = fn.apply(session, [ parentContext[0] ].concat(args));
+						}
+						else {
+							promise = Promise.all(parentContext.map(function (element) {
+								return fn.apply(session, [ element ].concat(args));
+							}));
+						}
+					}
+					else {
+						promise = fn.apply(session, args);
+					}
+
+					if (fn.createsContext) {
+						promise = promise.then(function (newContext) {
+							setContext(newContext);
+							return newContext;
+						});
+					}
+
+					return promise;
+				});
+			};
+		}
+	}
+
+	/**
+	 * Augments `target` with a method that will call `key` on all context elements stored within `target`.
+	 * This can be used to easily add new methods from any custom object that implements the Element API to any target
+	 * object that implements the Command API.
+	 *
+	 * Functions that are copied may have the following extra properties in order to change the way that Command works
+	 * with these functions:
+	 *
+	 * - `createsContext` (boolean): If this property is specified, the return value from the function will be used as
+	 *   the new context for the returned Command.
+	 *
+	 * @memberOf module:leadfoot/Command
+	 * @param {module:leadfoot/Command} target
+	 * @param {string} key
+	 */
+	static addElementMethod(target: Command, key: string): void {
+		if (key.charAt(0) !== '_') {
+			// some methods, like `click`, exist on both Session and Element; deduplicate these methods by appending the
+			// element ones with 'Element'
+			const targetKey = key + (target[key] ? 'Element' : '');
+			target[targetKey] = function (...args: any[]): Command {
+				return new Command(this, function (setContext) {
+					const parentContext = this._context;
+					let promise;
+					let fn = parentContext[0] && parentContext[0][key];
 
 					if (parentContext.isSingle) {
-						promise = fn.apply(session, [ parentContext[0] ].concat(args));
+						promise = fn.apply(parentContext[0], args);
 					}
 					else {
 						promise = Promise.all(parentContext.map(function (element) {
-							return fn.apply(session, [ element ].concat(args));
+							return element[key].apply(element, args);
 						}));
 					}
-				}
-				else {
-					promise = fn.apply(session, args);
-				}
 
-				if (fn.createsContext) {
-					promise = promise.then(function (newContext) {
-						setContext(newContext);
-						return newContext;
-					});
-				}
+					if (fn && fn.createsContext) {
+						promise = promise.then(function (newContext) {
+							setContext(newContext);
+							return newContext;
+						});
+					}
 
-				return promise;
-			});
-		};
+					return promise;
+				});
+			};
+		}
 	}
-};
-
-/**
- * Augments `target` with a method that will call `key` on all context elements stored within `target`.
- * This can be used to easily add new methods from any custom object that implements the Element API to any target
- * object that implements the Command API.
- *
- * Functions that are copied may have the following extra properties in order to change the way that Command works
- * with these functions:
- *
- * - `createsContext` (boolean): If this property is specified, the return value from the function will be used as
- *   the new context for the returned Command.
- *
- * @memberOf module:leadfoot/Command
- * @param {module:leadfoot/Command} target
- * @param {string} key
- */
-Command.addElementMethod = function (target, key) {
-	if (key.charAt(0) !== '_') {
-		// some methods, like `click`, exist on both Session and Element; deduplicate these methods by appending the
-		// element ones with 'Element'
-		var targetKey = key + (target[key] ? 'Element' : '');
-		target[targetKey] = function () {
-			var args = arguments;
-
-			return new this.constructor(this, function (setContext) {
-				var parentContext = this._context;
-				var promise;
-				var fn = parentContext[0] && parentContext[0][key];
-
-				if (parentContext.isSingle) {
-					promise = fn.apply(parentContext[0], args);
-				}
-				else {
-					promise = Promise.all(parentContext.map(function (element) {
-						return element[key].apply(element, args);
-					}));
-				}
-
-				if (fn && fn.createsContext) {
-					promise = promise.then(function (newContext) {
-						setContext(newContext);
-						return newContext;
-					});
-				}
-
-				return promise;
-			});
-		};
-	}
-};
+}
 
 // Element retrieval strategies must be applied directly to Command because it has its own custom
 // find/findAll methods that operate based on the Command’s context, so can’t simply be delegated to the
@@ -704,31 +715,23 @@ Command.addElementMethod = function (target, key) {
 strategies.applyTo(Command.prototype);
 
 (function () {
-	var key;
-	for (key in Session.prototype) {
+	for (let key in Session.prototype) {
 		Command.addSessionMethod(Command.prototype, key, Session.prototype[key]);
 	}
 
-	for (key in Element.prototype) {
+	for (let key in Element.prototype) {
 		Command.addElementMethod(Command.prototype, key);
 	}
 })();
 
-try {
-	var chaiAsPromised = require('chai-as-promised');
-}
-catch (error) {}
-
 // TODO: Add unit test
 if (chaiAsPromised) {
-	chaiAsPromised.transferPromiseness = function (assertion, promise) {
+	(<any> chaiAsPromised).transferPromiseness = function (assertion, promise) {
 		assertion.then = promise.then.bind(promise);
-		for (var method in promise) {
+		for (let method in promise) {
 			if (typeof promise[method] === 'function') {
 				assertion[method] = promise[method].bind(promise);
 			}
 		}
 	};
 }
-
-module.exports = Command;

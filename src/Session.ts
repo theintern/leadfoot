@@ -3,18 +3,32 @@
  * @module leadfoot/Session
  */
 
-var Element = require('./Element');
-var findDisplayed = require('./lib/findDisplayed');
-var fs = require('fs');
-var JsZip = require('jszip');
-var lang = require('dojo/lang');
-var path = require('path');
-var Promise = require('dojo/Promise');
-var statusCodes = require('./lib/statusCodes');
-var storage = require('./lib/storage');
-var strategies = require('./lib/strategies');
-var util = require('./lib/util');
-var waitForDeleted = require('./lib/waitForDeleted');
+import LeadfootElement, { ElementOrElementId } from './Element';
+import Server from './Server';
+import findDisplayed = require('./lib/findDisplayed');
+import * as fs from 'fs';
+import JsZip = require('jszip');
+import * as lang from 'dojo/lang';
+import * as path from 'path';
+import Promise = require('dojo/Promise');
+import statusCodes from './lib/statusCodes';
+import storage from './lib/storage';
+import strategies from './lib/strategies';
+import * as util from './lib/util';
+import waitForDeleted from './lib/waitForDeleted';
+import { Capabilities, GeoLocation, LogEntry, WebDriverCookie } from './interfaces';
+
+/**
+ * Decorator for the {@link module:leadfoot/lib/util#forCommand} method
+ */
+function forCommand(properties: { usesElement?: boolean, createsContext?: boolean }) {
+	return function (target: any, property: string, descriptor: PropertyDescriptor) {
+		const fn = <Function> target[property];
+		descriptor.value = function () {
+			return util.forCommand(fn, properties);
+		};
+	};
+}
 
 /**
  * Finds and converts serialised DOM element objects into fully-featured typed Elements.
@@ -24,18 +38,18 @@ var waitForDeleted = require('./lib/waitForDeleted');
  * @param value An object or array that may be, or may contain, serialised DOM element objects.
  * @returns The input value, with all serialised DOM element objects converted to typed Elements.
  */
-function convertToElements(session, value) {
+function convertToElements(session: Session, value: any) {
 	// TODO: Unit test elements attached to objects
-	function convert(value) {
+	function convert(value: any) {
 		if (Array.isArray(value)) {
 			value = value.map(convert);
 		}
 		else if (typeof value === 'object' && value !== null) {
 			if (value.ELEMENT) {
-				value = new Element(value, session);
+				value = new LeadfootElement(value, session);
 			}
 			else {
-				for (var k in value) {
+				for (let k in value) {
 					value[k] = convert(value[k]);
 				}
 			}
@@ -47,71 +61,6 @@ function convertToElements(session, value) {
 	return convert(value);
 }
 
-
-/**
- * Delegates the HTTP request for a method to the underlying {@link module:leadfoot/Server} object.
- *
- * @private
- * @param {string} method
- * @returns {function(string, Object, Array.<string>=): Promise.<{ sessionId: string, status: number, value: any }>}
- */
-function delegateToServer(method) {
-	return function (path, requestData, pathParts) {
-		var self = this;
-		path = 'session/' + this._sessionId + (path ? ('/' + path) : '');
-
-		return new Promise(function (resolve, reject, progress, setCanceller) {
-			var cancelled = false;
-			setCanceller(function (reason) {
-				cancelled = true;
-				throw reason;
-			});
-
-			// The promise is cleared from `_nextRequest` once it has been resolved in order to avoid
-			// infinitely long chains of promises retaining values that are not used any more
-			var thisRequest;
-			function clearNextRequest() {
-				if (self._nextRequest === thisRequest) {
-					self._nextRequest = null;
-				}
-			}
-
-			function runRequest() {
-				// `runRequest` is normally called once the previous request is finished. If this request
-				// is cancelled before the previous request is finished, then it should simply never run.
-				// (This Promise will have been rejected already by the cancellation.)
-				if (cancelled) {
-					clearNextRequest();
-					return;
-				}
-
-				var response = self._server[method](path, requestData, pathParts).then(returnValue);
-				response.finally(clearNextRequest);
-
-				// The value of the response always needs to be taken directly from the server call
-				// rather than from the chained `_nextRequest` promise, since if an undefined value is
-				// returned by the server call and that value is returned through `finally(runRequest)`,
-				// the *previous* Promise’s resolved value will be used as the resolved value, which is
-				// wrong
-				resolve(response);
-
-				return response;
-			}
-
-			// At least ChromeDriver 2.19 will just hard close connections if parallel requests are made to the server,
-			// so any request sent to the server for a given session must be serialised. Other servers like Selendroid
-			// have been known to have issues with parallel requests as well, so serialisation is applied universally,
-			// even though it has negative performance implications
-			if (self._nextRequest) {
-				thisRequest = self._nextRequest = self._nextRequest.finally(runRequest);
-			}
-			else {
-				thisRequest = self._nextRequest = runRequest();
-			}
-		});
-	};
-}
-
 /**
  * As of Selenium 2.40.0 (March 2014), all drivers incorrectly transmit an UnknownError instead of a
  * JavaScriptError when user code fails to execute correctly. This method corrects this status code, under the
@@ -119,10 +68,10 @@ function delegateToServer(method) {
  *
  * @private
  */
-function fixExecuteError(error) {
+function fixExecuteError(error: any) {
 	if (error.name === 'UnknownError') {
 		error.status = 17;
-		error.name = statusCodes[error.status][0];
+		error.name = (<any> statusCodes)[error.status][0];
 	}
 
 	throw error;
@@ -144,9 +93,9 @@ function noop() {
  * @param {Array} target
  * @param {Object} source
  */
-function pushCookieProperties(target, source) {
+function pushCookieProperties(target: any[], source: any): void {
 	Object.keys(source).forEach(function (key) {
-		var value = source[key];
+		let value = source[key];
 
 		if (key === 'name' || key === 'value' || (key === 'domain' && value === 'http')) {
 			return;
@@ -162,7 +111,7 @@ function pushCookieProperties(target, source) {
 			}
 
 			if (value instanceof Date) {
-				value = Date.toUTCString();
+				value = (<any> Date).toUTCString();
 			}
 
 			target.push('expires=' + encodeURIComponent(value));
@@ -180,7 +129,7 @@ function pushCookieProperties(target, source) {
  * @param {Object} response JsonWireProtocol response object.
  * @returns {any} The actual response value.
  */
-function returnValue(response) {
+function returnValue(response: any): any {
 	return response.value;
 }
 
@@ -191,11 +140,11 @@ function returnValue(response) {
  * @private
  * @param {Array.<string>} keys Keys to type.
  */
-function simulateKeys(keys) {
-	var target = document.activeElement;
+function simulateKeys(keys: string[]): void {
+	const target = <any> document.activeElement;
 
-	function dispatch(kwArgs) {
-		var event = document.createEvent('KeyboardEvent');
+	function dispatch(kwArgs: any) {
+		const event = document.createEvent('KeyboardEvent');
 		event.initKeyboardEvent(
 			kwArgs.type,
 			kwArgs.bubbles || true,
@@ -212,7 +161,7 @@ function simulateKeys(keys) {
 	}
 
 	function dispatchInput() {
-		var event = document.createEvent('Event');
+		const event = document.createEvent('Event');
 		event.initEvent('input', true, false);
 		return target.dispatchEvent(event);
 	}
@@ -221,9 +170,9 @@ function simulateKeys(keys) {
 		return keys.split('');
 	}));
 
-	for (var i = 0, j = keys.length; i < j; ++i) {
-		var key = keys[i];
-		var performDefault = true;
+	for (let i = 0, j = keys.length; i < j; ++i) {
+		let key = keys[i];
+		let performDefault = true;
 
 		performDefault = dispatch({ type: 'keydown', cancelable: true, key: key });
 		performDefault = performDefault && dispatch({ type: 'keypress', cancelable: true, key: key });
@@ -235,9 +184,9 @@ function simulateKeys(keys) {
 				dispatchInput();
 			}
 			else if (target.isContentEditable) {
-				var node = document.createTextNode(key);
-				var selection = window.getSelection();
-				var range = selection.getRangeAt(0);
+				let node = document.createTextNode(key);
+				let selection = window.getSelection();
+				let range = selection.getRangeAt(0);
 				range.deleteContents();
 				range.insertNode(node);
 				range.setStartAfter(node);
@@ -258,11 +207,11 @@ function simulateKeys(keys) {
  * @private
  * @param {Object} kwArgs Parameters for the mouse event.
  */
-function simulateMouse(kwArgs) {
-	var position = kwArgs.position;
+function simulateMouse(kwArgs: any) {
+	let position = kwArgs.position;
 
-	function dispatch(kwArgs) {
-		var event = document.createEvent('MouseEvents');
+	function dispatch(kwArgs: any) {
+		const event = document.createEvent('MouseEvents');
 		event.initMouseEvent(
 			kwArgs.type,
 			kwArgs.bubbles || true,
@@ -284,7 +233,7 @@ function simulateMouse(kwArgs) {
 		return kwArgs.target.dispatchEvent(event);
 	}
 
-	function click(target, button, detail) {
+	function click(target: any, button: any, detail: any) {
 		if (!down(target, button)) {
 			return false;
 		}
@@ -302,7 +251,7 @@ function simulateMouse(kwArgs) {
 		});
 	}
 
-	function down(target, button) {
+	function down(target: any, button: any) {
 		return dispatch({
 			button: button,
 			cancelable: true,
@@ -311,7 +260,7 @@ function simulateMouse(kwArgs) {
 		});
 	}
 
-	function up(target, button) {
+	function up(target: any, button: any) {
 		return dispatch({
 			button: button,
 			cancelable: true,
@@ -320,9 +269,9 @@ function simulateMouse(kwArgs) {
 		});
 	}
 
-	function move(currentElement, newElement, xOffset, yOffset) {
+	function move(currentElement: Element, newElement: Element, xOffset: number, yOffset: number) {
 		if (newElement) {
-			var bbox = newElement.getBoundingClientRect();
+			const bbox = newElement.getBoundingClientRect();
 
 			if (xOffset == null) {
 				xOffset = (bbox.right - bbox.left) * 0.5;
@@ -338,7 +287,7 @@ function simulateMouse(kwArgs) {
 			position.x += xOffset || 0;
 			position.y += yOffset || 0;
 
-			newElement = document.elementFromPoint(position.x, position.y);
+			newElement = <HTMLElement> document.elementFromPoint(position.x, position.y);
 		}
 
 		if (currentElement !== newElement) {
@@ -353,7 +302,7 @@ function simulateMouse(kwArgs) {
 		return position;
 	}
 
-	var target = document.elementFromPoint(position.x, position.y);
+	const target = document.elementFromPoint(position.x, position.y);
 
 	if (kwArgs.action === 'mousemove') {
 		return move(target, kwArgs.element, kwArgs.xOffset, kwArgs.yOffset);
@@ -386,40 +335,38 @@ function simulateMouse(kwArgs) {
 	}
 }
 
-/**
- * A Session represents a connection to a remote environment that can be driven programmatically.
- *
- * @constructor module:leadfoot/Session
- * @param {string} sessionId The ID of the session, as provided by the remote.
- * @param {module:leadfoot/Server} server The server that the session belongs to.
- * @param {Capabilities} capabilities A map of bugs and features that the remote environment exposes.
- */
-function Session(sessionId, server, capabilities) {
-	this._sessionId = sessionId;
-	this._server = server;
-	this._capabilities = capabilities;
-	this._closedWindows = {};
-	this._timeouts = {
-		script: Promise.resolve(0),
-		implicit: Promise.resolve(0),
-		'page load': Promise.resolve(Infinity)
-	};
-}
-
-/**
- * @lends module:leadfoot/Session#
- */
-Session.prototype = {
-	constructor: Session,
-
-	_movedToElement: false,
-	_lastMousePosition: null,
-	_lastAltitude: null,
-	_closedWindows: null,
-
+export default class Session {
+	private _sessionId: string;
+	private _server: Server;
+	private _capabilities: Capabilities;
+	private _closedWindows: any = null; // TODO: find correct type
 	// TODO: Timeouts are held so that we can fiddle with the implicit wait timeout to add efficient `waitFor`
 	// and `waitForDeleted` convenience methods. Technically only the implicit timeout is necessary.
-	_timeouts: {},
+	private _timeouts: any = {}; // TODO: find correct type
+	private _movedToElement: boolean = false;
+	private _lastMousePosition: any = null;
+	private _lastAltitude: any = null;
+	private _nextRequest: Promise<any>;
+
+	/**
+	 * A Session represents a connection to a remote environment that can be driven programmatically.
+	 *
+	 * @constructor module:leadfoot/Session
+	 * @param {string} sessionId The ID of the session, as provided by the remote.
+	 * @param {module:leadfoot/Server} server The server that the session belongs to.
+	 * @param {Capabilities} capabilities A map of bugs and features that the remote environment exposes.
+	 */
+	constructor(sessionId: string, server: Server, capabilities: Capabilities) {
+		this._sessionId = sessionId;
+		this._server = server;
+		this._capabilities = capabilities;
+		this._closedWindows = {};
+		this._timeouts = {
+			script: Promise.resolve(0),
+			implicit: Promise.resolve(0),
+			'page load': Promise.resolve(Infinity)
+		};
+	}
 
 	/**
 	 * Information about the available features and bugs in the remote environment.
@@ -430,7 +377,7 @@ Session.prototype = {
 	 */
 	get capabilities() {
 		return this._capabilities;
-	},
+	}
 
 	/**
 	 * The current session ID.
@@ -441,7 +388,7 @@ Session.prototype = {
 	 */
 	get sessionId() {
 		return this._sessionId;
-	},
+	}
 
 	/**
 	 * The Server that the session runs on.
@@ -452,11 +399,84 @@ Session.prototype = {
 	 */
 	get server() {
 		return this._server;
-	},
+	}
 
-	_get: delegateToServer('_get'),
-	_post: delegateToServer('_post'),
-	_delete: delegateToServer('_delete'),
+	/**
+	 * Delegates the HTTP request for a method to the underlying {@link module:leadfoot/Server} object.
+	 *
+	 * @private
+	 * @param {string} method
+	 * @param {string} path
+	 * @param {Object} requestData
+	 * @param {string[]} [pathParts]
+	 * @returns {Promise.<{ sessionId: string, status: number, value: any }>}
+	 */
+	private _delegateToServer(method: string, path: string, requestData: any, pathParts?: string[]): Promise<any> {
+		path = 'session/' + this._sessionId + (path ? ('/' + path) : '');
+
+		return new Promise((resolve, reject, progress, setCanceller) => {
+			let cancelled = false;
+			const self = this;
+			setCanceller(function (reason: Error|string) {
+				cancelled = true;
+				throw reason;
+			});
+
+			// The promise is cleared from `_nextRequest` once it has been resolved in order to avoid
+			// infinitely long chains of promises retaining values that are not used any more
+			let thisRequest: Promise<any>;
+			function clearNextRequest() {
+				if (self._nextRequest === thisRequest) {
+					self._nextRequest = null;
+				}
+			}
+
+			function runRequest() {
+				// `runRequest` is normally called once the previous request is finished. If this request
+				// is cancelled before the previous request is finished, then it should simply never run.
+				// (This Promise will have been rejected already by the cancellation.)
+				if (cancelled) {
+					clearNextRequest();
+					return;
+				}
+
+				const response = (<any> self._server)[method](path, requestData, pathParts).then(returnValue);
+				response.finally(clearNextRequest);
+
+				// The value of the response always needs to be taken directly from the server call
+				// rather than from the chained `_nextRequest` promise, since if an undefined value is
+				// returned by the server call and that value is returned through `finally(runRequest)`,
+				// the *previous* Promise’s resolved value will be used as the resolved value, which is
+				// wrong
+				resolve(response);
+
+				return response;
+			}
+
+			// At least ChromeDriver 2.19 will just hard close connections if parallel requests are made to the server,
+			// so any request sent to the server for a given session must be serialised. Other servers like Selendroid
+			// have been known to have issues with parallel requests as well, so serialisation is applied universally,
+			// even though it has negative performance implications
+			if (self._nextRequest) {
+				thisRequest = self._nextRequest = self._nextRequest.finally(runRequest);
+			}
+			else {
+				thisRequest = self._nextRequest = runRequest();
+			}
+		});
+	}
+
+	private _get(path: string, requestData?: any, pathParts?: string[]): Promise<any> {
+		return this._delegateToServer('_get', path, requestData, pathParts);
+	}
+
+	private _post(path: string, requestData?: any, pathParts?: string[]): Promise<any> {
+		return this._delegateToServer('_post', path, requestData, pathParts);
+	}
+
+	private _delete(path: string, requestData?: any, pathParts?: string[]): Promise<any> {
+		return this._delegateToServer('_delete', path, requestData, pathParts);
+	}
 
 	/**
 	 * Gets the current value of a timeout for the session.
@@ -464,9 +484,9 @@ Session.prototype = {
 	 * @param {string} type The type of timeout to retrieve. One of 'script', 'implicit', or 'page load'.
 	 * @returns {Promise.<number>} The timeout, in milliseconds.
 	 */
-	getTimeout: function (type) {
+	getTimeout(type: string): Promise<number> {
 		return this._timeouts[type];
-	},
+	}
 
 	/**
 	 * Sets the value of a timeout for the session.
@@ -480,7 +500,7 @@ Session.prototype = {
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	setTimeout: function (type, ms) {
+	setTimeout(type: string, ms: number): Promise<void> {
 		// Infinity cannot be serialised by JSON
 		if (ms === Infinity) {
 			// It seems that at least ChromeDriver 2.10 has a limit here that is near the 32-bit signed integer limit,
@@ -493,19 +513,18 @@ Session.prototype = {
 			ms = 1;
 		}
 
-		var self = this;
-		var promise = this._post('timeouts', {
+		const promise = this._post('timeouts', {
 			type: type,
 			ms: ms
-		}).catch(function (error) {
+		}).catch(error => {
 			// Appium as of April 2014 complains that `timeouts` is unsupported, so try the more specific
 			// endpoints if they exist
 			if (error.name === 'UnknownCommand') {
 				if (type === 'script') {
-					return self._post('timeouts/async_script', { ms: ms });
+					return this._post('timeouts/async_script', { ms: ms });
 				}
 				else if (type === 'implicit') {
-					return self._post('timeouts/implicit_wait', { ms: ms });
+					return this._post('timeouts/implicit_wait', { ms: ms });
 				}
 			}
 
@@ -517,52 +536,50 @@ Session.prototype = {
 		});
 
 		return promise;
-	},
+	}
 
 	/**
 	 * Gets the identifier for the window that is currently focused.
 	 *
 	 * @returns {Promise.<string>} A window handle identifier that can be used with other window handling functions.
 	 */
-	getCurrentWindowHandle: function () {
-		var self = this;
-		return this._get('window_handle').then(function (handle) {
-			if (self.capabilities.brokenDeleteWindow && self._closedWindows[handle]) {
-				var error = new Error();
+	getCurrentWindowHandle(): Promise<string> {
+		return this._get('window_handle').then(handle => {
+			if (this.capabilities.brokenDeleteWindow && this._closedWindows[handle]) {
+				const error: any = new Error();
 				error.status = 23;
-				error.name = statusCodes[error.status][0];
-				error.message = statusCodes[error.status][1];
+				error.name = (<any> statusCodes)[error.status][0];
+				error.message = (<any> statusCodes)[error.status][1];
 				throw error;
 			}
 
 			return handle;
 		});
-	},
+	}
 
 	/**
 	 * Gets a list of identifiers for all currently open windows.
 	 *
 	 * @returns {Promise.<string[]>}
 	 */
-	getAllWindowHandles: function () {
-		var self = this;
-		return this._get('window_handles').then(function (handles) {
-			if (self.capabilities.brokenDeleteWindow) {
-				return handles.filter(function (handle) { return !self._closedWindows[handle]; });
+	getAllWindowHandles(): Promise<string[]> {
+		return this._get('window_handles').then((handles: string[]) => {
+			if (this.capabilities.brokenDeleteWindow) {
+				return handles.filter(handle => { return !this._closedWindows[handle]; });
 			}
 
 			return handles;
 		});
-	},
+	}
 
 	/**
 	 * Gets the URL that is loaded in the focused window/frame.
 	 *
 	 * @returns {Promise.<string>}
 	 */
-	getCurrentUrl: function () {
+	getCurrentUrl(): Promise<string> {
 		return this._get('url');
-	},
+	}
 
 	/**
 	 * Navigates the focused window/frame to a new URL.
@@ -570,7 +587,7 @@ Session.prototype = {
 	 * @param {string} url
 	 * @returns {Promise.<void>}
 	 */
-	get: function (url) {
+	get(url: string): Promise<void> {
 		this._movedToElement = false;
 
 		if (this.capabilities.brokenMouseEvents) {
@@ -580,39 +597,39 @@ Session.prototype = {
 		return this._post('url', {
 			url: url
 		}).then(noop);
-	},
+	}
 
 	/**
 	 * Navigates the focused window/frame forward one page using the browser’s navigation history.
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	goForward: function () {
+	goForward(): Promise<void> {
 		// TODO: SPEC: Seems like this and `back` should return the newly navigated URL.
 		return this._post('forward').then(noop);
-	},
+	}
 
 	/**
 	 * Navigates the focused window/frame back one page using the browser’s navigation history.
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	goBack: function () {
+	goBack(): Promise<void> {
 		return this._post('back').then(noop);
-	},
+	}
 
 	/**
 	 * Reloads the current browser window/frame.
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	refresh: function () {
+	refresh(): Promise<void> {
 		if (this.capabilities.brokenRefresh) {
 			return this.execute('location.reload();');
 		}
 
 		return this._post('refresh').then(noop);
-	},
+	}
 
 	/**
 	 * Executes JavaScript code within the focused window/frame. The code should return a value synchronously.
@@ -633,20 +650,20 @@ Session.prototype = {
 	 * The value returned by the remote code. Only values that can be serialised to JSON, plus DOM elements, can be
 	 * returned.
 	 */
-	execute: function (script, args) {
+	execute(script: Function|string, args?: any[]): Promise<any> {
 		// At least FirefoxDriver 2.40.0 will throw a confusing NullPointerException if args is not an array;
 		// provide a friendlier error message to users that accidentally pass a non-array
 		if (typeof args !== 'undefined' && !Array.isArray(args)) {
 			throw new Error('Arguments passed to execute must be an array');
 		}
 
-		var result = this._post('execute', {
+		let result = this._post('execute', {
 			script: util.toExecuteString(script),
 			args: args || []
-		}).then(lang.partial(convertToElements, this), fixExecuteError);
+		}).then(<any> lang.partial(convertToElements, this), fixExecuteError);
 
 		if (this.capabilities.brokenExecuteUndefinedReturn) {
-			result = result.then(function (value) {
+			result = result.then(function (value: any) {
 				if (value === undefined) {
 					value = null;
 				}
@@ -656,7 +673,7 @@ Session.prototype = {
 		}
 
 		return result;
-	},
+	}
 
 	/**
 	 * Executes JavaScript code within the focused window/frame. The code must invoke the provided callback in
@@ -683,7 +700,7 @@ Session.prototype = {
 	 * The value returned by the remote code. Only values that can be serialised to JSON, plus DOM elements, can be
 	 * returned.
 	 */
-	executeAsync: function (script, args) {
+	executeAsync(script: Function|string, args?: any[]): Promise<any> {
 		// At least FirefoxDriver 2.40.0 will throw a confusing NullPointerException if args is not an array;
 		// provide a friendlier error message to users that accidentally pass a non-array
 		if (typeof args !== 'undefined' && !Array.isArray(args)) {
@@ -693,20 +710,20 @@ Session.prototype = {
 		return this._post('execute_async', {
 			script: util.toExecuteString(script),
 			args: args || []
-		}).then(lang.partial(convertToElements, this), fixExecuteError);
-	},
+		}).then(<any> lang.partial(convertToElements, this), fixExecuteError);
+	}
 
 	/**
 	 * Gets a screenshot of the focused window and returns it in PNG format.
 	 *
 	 * @returns {Promise.<Buffer>} A buffer containing a PNG image.
 	 */
-	takeScreenshot: function () {
+	takeScreenshot(): Promise<Buffer> {
 		return this._get('screenshot').then(function (data) {
 			/*jshint node:true */
 			return new Buffer(data, 'base64');
 		});
-	},
+	}
 
 	/**
 	 * Gets a list of input method editor engines available to the remote environment.
@@ -714,9 +731,9 @@ Session.prototype = {
 	 *
 	 * @returns {Promise.<string[]>}
 	 */
-	getAvailableImeEngines: function () {
+	getAvailableImeEngines(): Promise<string[]> {
 		return this._get('ime/available_engines');
-	},
+	}
 
 	/**
 	 * Gets the currently active input method editor for the remote environment.
@@ -724,9 +741,9 @@ Session.prototype = {
 	 *
 	 * @returns {Promise.<string>}
 	 */
-	getActiveImeEngine: function () {
+	getActiveImeEngine(): Promise<string> {
 		return this._get('ime/active_engine');
-	},
+	}
 
 	/**
 	 * Returns whether or not an input method editor is currently active in the remote environment.
@@ -734,9 +751,9 @@ Session.prototype = {
 	 *
 	 * @returns {Promise.<boolean>}
 	 */
-	isImeActivated: function () {
+	isImeActivated(): Promise<boolean> {
 		return this._get('ime/activated');
-	},
+	}
 
 	/**
 	 * Deactivates any active input method editor in the remote environment.
@@ -744,9 +761,9 @@ Session.prototype = {
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	deactivateIme: function () {
+	deactivateIme(): Promise<void> {
 		return this._post('ime/deactivate');
-	},
+	}
 
 	/**
 	 * Activates an input method editor in the remote environment.
@@ -755,11 +772,11 @@ Session.prototype = {
 	 * @param {string} engine The type of IME to activate.
 	 * @returns {Promise.<void>}
 	 */
-	activateIme: function (engine) {
+	activateIme(engine: string): Promise<void> {
 		return this._post('ime/activate', {
 			engine: engine
 		});
-	},
+	}
 
 	/**
 	 * Switches the currently focused frame to a new frame.
@@ -771,11 +788,11 @@ Session.prototype = {
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	switchToFrame: function (id) {
+	switchToFrame(id: string|number|Element): Promise<void> {
 		return this._post('frame', {
 			id: id
 		}).then(noop);
-	},
+	}
 
 	/**
 	 * Switches the currently focused window to a new window.
@@ -788,46 +805,45 @@ Session.prototype = {
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	switchToWindow: function (handle) {
+	switchToWindow(handle: string): Promise<void> {
 		return this._post('window', {
 			// TODO: Note that in the W3C standard, the property is 'handle'
 			name: handle
 		}).then(noop);
-	},
+	}
 
 	/**
 	 * Switches the currently focused frame to the parent of the currently focused frame.
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	switchToParentFrame: function () {
-		var self = this;
-		return this._post('frame/parent').catch(function (error) {
+	switchToParentFrame(): Promise<void> {
+		return this._post('frame/parent').catch(error => {
 			// At least FirefoxDriver 2.40.0 does not implement this command, but we can fake it by retrieving
 			// the parent frame element using JavaScript and switching to it directly by reference
 			// At least Selendroid 0.9.0 also does not support this command, but unfortunately throws an incorrect
 			// error so it looks like a fatal error; see https://github.com/selendroid/selendroid/issues/364
 			if (error.name === 'UnknownCommand' ||
 				(
-					self.capabilities.browserName === 'selendroid' &&
+					this.capabilities.browserName === 'selendroid' &&
 					error.message.indexOf('Error occured while communicating with selendroid server') > -1
 				)
 			) {
-				if (self.capabilities.scriptedParentFrameCrashesBrowser) {
+				if (this.capabilities.scriptedParentFrameCrashesBrowser) {
 					throw error;
 				}
 
-				return self.execute('return window.parent.frameElement;').then(function (parent) {
+				return this.execute('return window.parent.frameElement;').then(parent => {
 					// TODO: Using `null` if no parent frame was returned keeps the request from being invalid,
 					// but may be incorrect and may cause incorrect frame retargeting on certain platforms;
 					// At least Selendroid 0.9.0 fails both commands
-					return self.switchToFrame(parent || null);
+					return this.switchToFrame(parent || null);
 				});
 			}
 
 			throw error;
 		}).then(noop);
-	},
+	}
 
 	/**
 	 * Closes the currently focused window. In most environments, after the window has been closed, it is necessary
@@ -835,31 +851,30 @@ Session.prototype = {
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	closeCurrentWindow: function () {
+	closeCurrentWindow(): Promise<void> {
+		const self = this;
 		function manualClose() {
-			return self.getCurrentWindowHandle().then(function (handle) {
+			return self.getCurrentWindowHandle().then(function (handle: any) {
 				return self.execute('window.close();').then(function () {
 					self._closedWindows[handle] = true;
 				});
 			});
 		}
 
-		var self = this;
-
-		if (self.capabilities.brokenDeleteWindow) {
+		if (this.capabilities.brokenDeleteWindow) {
 			return manualClose();
 		}
 
-		return this._delete('window').catch(function (error) {
+		return this._delete('window').catch(error => {
 			// ios-driver 0.6.6-SNAPSHOT April 2014 does not implement close window command
 			if (error.name === 'UnknownCommand') {
-				self.capabilities.brokenDeleteWindow = true;
+				this.capabilities.brokenDeleteWindow = true;
 				return manualClose();
 			}
 
 			throw error;
 		}).then(noop);
-	},
+	}
 
 	/**
 	 * Sets the dimensions of a window.
@@ -876,14 +891,18 @@ Session.prototype = {
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	setWindowSize: function (windowHandle, width, height) {
+	setWindowSize(width: number, height: number): Promise<void>;
+	setWindowSize(windowHandle: string, width: number, height: number): Promise<void>;
+	setWindowSize(...args: any[]): Promise<void> {
+		let [windowHandle, width, height ] = args;
+
 		if (typeof height === 'undefined') {
 			height = width;
 			width = windowHandle;
 			windowHandle = null;
 		}
 
-		var data = {
+		const data = {
 			width: width,
 			height: height
 		};
@@ -895,16 +914,15 @@ Session.prototype = {
 			else {
 				// User provided a window handle; get the current handle, switch to the new one, get the size, then
 				// switch back to the original handle.
-				var self = this;
-				var error;
-				return this.getCurrentWindowHandle().then(function (originalHandle) {
-					return self.switchToWindow(windowHandle).then(function () {
+				let error: Error;
+				return this.getCurrentWindowHandle().then(originalHandle => {
+					return this.switchToWindow(windowHandle).then(() => {
 						return this._post('window/size', data);
 					}).catch(function (_error) {
 						error = error;
-					}).then(function () {
-						return self.switchToWindow(originalHandle);
-					}).then(function () {
+					}).then(() => {
+						return this.switchToWindow(originalHandle);
+					}).then(() => {
 						if (error) {
 							throw error;
 						}
@@ -921,7 +939,7 @@ Session.prototype = {
 				height: height
 			}, [ windowHandle ]).then(noop);
 		}
-	},
+	}
 
 	/**
 	 * Gets the dimensions of a window.
@@ -933,7 +951,7 @@ Session.prototype = {
 	 * @returns {Promise.<{ width: number, height: number }>}
 	 * An object describing the width and height of the window, in CSS pixels.
 	 */
-	getWindowSize: function (windowHandle) {
+	getWindowSize(windowHandle?: string): Promise<{ width: number, height: number }> {
 		if (this.capabilities.implicitWindowHandles) {
 			if (windowHandle == null) {
 				return this._get('window/size');
@@ -941,19 +959,18 @@ Session.prototype = {
 			else {
 				// User provided a window handle; get the current handle, switch to the new one, get the size, then
 				// switch back to the original handle.
-				var self = this;
-				var error;
-				var size;
-				return this.getCurrentWindowHandle().then(function (originalHandle) {
-					return self.switchToWindow(windowHandle).then(function () {
-						return self._get('window/size');
-					}).then(function (_size) {
+				let error: Error;
+				let size: { width: number, height: number };
+				return this.getCurrentWindowHandle().then(originalHandle => {
+					return this.switchToWindow(windowHandle).then(() => {
+						return this._get('window/size');
+					}).then((_size) => {
 						size = _size;
-					}, function (_error) {
+					}, (_error) => {
 						error = _error;
-					}).then(function () {
-						return self.switchToWindow(originalHandle);
-					}).then(function () {
+					}).then(() => {
+						return this.switchToWindow(originalHandle);
+					}).then(() => {
 						if (error) {
 							throw error;
 						}
@@ -968,7 +985,7 @@ Session.prototype = {
 			}
 			return this._get('window/$0/size', null, [ windowHandle ]);
 		}
-	},
+	}
 
 	/**
 	 * Sets the position of a window.
@@ -987,7 +1004,11 @@ Session.prototype = {
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	setWindowPosition: function (windowHandle, x, y) {
+	setWindowPosition(x: number, y: number): Promise<void>;
+	setWindowPosition(windowHandle: string, x: number, y: number): Promise<void>;
+	setWindowPosition(...args: any[]): Promise<void> {
+		let [ windowHandle, x, y ] = args;
+
 		if (typeof y === 'undefined') {
 			y = x;
 			x = windowHandle;
@@ -998,7 +1019,7 @@ Session.prototype = {
 			x: x,
 			y: y
 		}, [ windowHandle ]).then(noop);
-	},
+	}
 
 	/**
 	 * Gets the position of a window.
@@ -1014,7 +1035,7 @@ Session.prototype = {
 	 * primary monitor. If a secondary monitor exists above or to the left of the primary monitor, these values
 	 * will be negative.
 	 */
-	getWindowPosition: function (windowHandle) {
+	getWindowPosition(windowHandle?: string): Promise<{ x: number, y: number }> {
 		if (typeof windowHandle === 'undefined') {
 			windowHandle = 'current';
 		}
@@ -1023,7 +1044,7 @@ Session.prototype = {
 			// At least InternetExplorerDriver 2.41.0 on IE9 returns an object containing extra properties
 			return { x: position.x, y: position.y };
 		});
-	},
+	}
 
 	/**
 	 * Maximises a window according to the platform’s window system behaviour.
@@ -1034,30 +1055,30 @@ Session.prototype = {
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	maximizeWindow: function (windowHandle) {
+	maximizeWindow(windowHandle?: string) {
 		if (typeof windowHandle === 'undefined') {
 			windowHandle = 'current';
 		}
 
 		return this._post('window/$0/maximize', null, [ windowHandle ]).then(noop);
-	},
+	}
 
 	/**
 	 * Gets all cookies set on the current page.
 	 *
 	 * @returns {Promise.<WebDriverCookie[]>}
 	 */
-	getCookies: function () {
-		return this._get('cookie').then(function (cookies) {
+	getCookies(): Promise<WebDriverCookie[]> {
+		return this._get('cookie').then(function (cookies: WebDriverCookie[]) {
 			// At least SafariDriver 2.41.0 returns cookies with extra class and hCode properties that should not
 			// exist
 			return cookies.map(function (badCookie) {
-				var cookie = {};
-				for (var key in badCookie) {
+				let cookie: any = {};
+				for (let key in badCookie) {
 					if (key === 'name' || key === 'value' || key === 'path' || key === 'domain' ||
 						key === 'secure' || key === 'httpOnly' || key === 'expiry'
 					) {
-						cookie[key] = badCookie[key];
+						cookie[key] = (<any> badCookie)[key];
 					}
 				}
 
@@ -1068,7 +1089,7 @@ Session.prototype = {
 				return cookie;
 			});
 		});
-	},
+	}
 
 	/**
 	 * Sets a cookie on the current page.
@@ -1076,9 +1097,7 @@ Session.prototype = {
 	 * @param {WebDriverCookie} cookie
 	 * @returns {Promise.<void>}
 	 */
-	setCookie: function (cookie) {
-		var self = this;
-
+	setCookie(cookie: WebDriverCookie): Promise<void> {
 		if (typeof cookie.expiry === 'string') {
 			cookie.expiry = new Date(cookie.expiry);
 		}
@@ -1086,10 +1105,11 @@ Session.prototype = {
 		if (cookie.expiry instanceof Date) {
 			cookie.expiry = cookie.expiry.valueOf() / 1000;
 		}
+		const self = this;
 
 		return this._post('cookie', {
 			cookie: cookie
-		}).catch(function (error) {
+		}).catch(function (error: any) {
 			// At least ios-driver 0.6.0-SNAPSHOT April 2014 does not know how to set cookies
 			if (error.name === 'UnknownCommand') {
 				// Per RFC6265 section 4.1.1, cookie names must match `token` (any US-ASCII character except for
@@ -1097,7 +1117,7 @@ Session.prototype = {
 				if (/[^A-Za-z0-9!#$%&'*+.^_`|~-]/.test(cookie.name)) {
 					error = new Error();
 					error.status = 25;
-					error.name = statusCodes[error.status[0]];
+					error.name = (<any> statusCodes)[error.status[0]];
 					error.message = 'Invalid cookie name';
 					throw error;
 				}
@@ -1105,32 +1125,32 @@ Session.prototype = {
 				if (/[^\u0021\u0023-\u002b\u002d-\u003a\u003c-\u005b\u005d-\u007e]/.test(cookie.value)) {
 					error = new Error();
 					error.status = 25;
-					error.name = statusCodes[error.status[0]];
+					error.name = (<any> statusCodes)[error.status[0]];
 					error.message = 'Invalid cookie value';
 					throw error;
 				}
 
-				var cookieToSet = [ cookie.name + '=' + cookie.value ];
+				const cookieToSet = [ cookie.name + '=' + cookie.value ];
 
 				pushCookieProperties(cookieToSet, cookie);
 
-				return self.execute(/* istanbul ignore next */ function (cookie) {
+				return self.execute(/* istanbul ignore next */ function (cookie: any) {
 					document.cookie = cookie;
 				}, [ cookieToSet.join(';') ]);
 			}
 
 			throw error;
 		}).then(noop);
-	},
+	}
 
 	/**
 	 * Clears all cookies for the current page.
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	clearCookies: function () {
+	clearCookies(): Promise<void> {
 		return this._delete('cookie').then(noop);
-	},
+	}
 
 	/**
 	 * Deletes a cookie on the current page.
@@ -1138,25 +1158,24 @@ Session.prototype = {
 	 * @param {string} name The name of the cookie to delete.
 	 * @returns {Promise.<void>}
 	 */
-	deleteCookie: function (name) {
+	deleteCookie(name: string): Promise<void> {
 		if (this.capabilities.brokenDeleteCookie) {
-			var self = this;
-			return this.getCookies().then(function (cookies) {
-				var cookie;
+			return this.getCookies().then(cookies => {
+				let cookie: any;
 				if (cookies.some(function (value) {
 					if (value.name === name) {
 						cookie = value;
 						return true;
 					}
 				})) {
-					var expiredCookie = [
+					const expiredCookie = [
 						cookie.name + '=',
 						'expires=Thu, 01 Jan 1970 00:00:00 GMT'
 					];
 
 					pushCookieProperties(expiredCookie, cookie);
 
-					return self.execute(/* istanbul ignore next */ function (expiredCookie) {
+					return this.execute(/* istanbul ignore next */ function (expiredCookie: any) {
 						document.cookie = expiredCookie + ';domain=' + encodeURIComponent(document.domain);
 					}, [ expiredCookie.join(';') ]);
 				}
@@ -1164,7 +1183,7 @@ Session.prototype = {
 		}
 
 		return this._delete('cookie/$0', null, [ name ]).then(noop);
-	},
+	}
 
 	/**
 	 * Gets the HTML loaded in the focused window/frame. This markup is serialised by the remote environment so
@@ -1172,7 +1191,7 @@ Session.prototype = {
 	 *
 	 * @returns {Promise.<string>}
 	 */
-	getPageSource: function () {
+	getPageSource(): Promise<string> {
 		if (this.capabilities.brokenPageSource) {
 			return this.execute(/* istanbul ignore next */ function () {
 				return document.documentElement.outerHTML;
@@ -1181,16 +1200,16 @@ Session.prototype = {
 		else {
 			return this._get('source');
 		}
-	},
+	}
 
 	/**
 	 * Gets the title of the top-level browsing context of the current window or tab.
 	 *
 	 * @returns {Promise.<string>}
 	 */
-	getPageTitle: function () {
+	getPageTitle(): Promise<string> {
 		return this._get('title');
-	},
+	}
 
 	/**
 	 * Gets the first element from the focused window/frame that matches the given query.
@@ -1209,28 +1228,26 @@ Session.prototype = {
 	 *
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
-	find: function (using, value) {
-		var self = this;
-
+	find(using: string, value: string): Promise<LeadfootElement> {
 		if (using.indexOf('link text') !== -1 && this.capabilities.brokenWhitespaceNormalization) {
 			return this.execute(/* istanbul ignore next */ this._manualFindByLinkText, [ using, value ])
-				.then(function (element) {
+				.then(element => {
 					if (!element) {
-						var error = new Error();
+						const error = new Error();
 						error.name = 'NoSuchElement';
 						throw error;
 					}
-					return new Element(element, self);
+					return new LeadfootElement(element, this);
 				});
 		}
 
 		return this._post('element', {
 			using: using,
 			value: value
-		}).then(function (element) {
-			return new Element(element, self);
+		}).then(element => {
+			return new LeadfootElement(element, this);
 		});
-	},
+	}
 
 	/**
 	 * Gets an array of elements from the focused window/frame that match the given query.
@@ -1243,14 +1260,12 @@ Session.prototype = {
 	 *
 	 * @returns {Promise.<module:leadfoot/Element[]>}
 	 */
-	findAll: function (using, value) {
-		var self = this;
-
+	findAll(using: string, value: string): Promise<LeadfootElement> {
 		if (using.indexOf('link text') !== -1 && this.capabilities.brokenWhitespaceNormalization) {
 			return this.execute(/* istanbul ignore next */ this._manualFindByLinkText, [ using, value, true ])
-				.then(function (elements) {
-					return elements.map(function (element) {
-						return new Element(element, self);
+				.then(elements => {
+					return elements.map((element: ElementOrElementId) => {
+						return new LeadfootElement(element, this);
 					});
 				});
 		}
@@ -1258,12 +1273,12 @@ Session.prototype = {
 		return this._post('elements', {
 			using: using,
 			value: value
-		}).then(function (elements) {
-			return elements.map(function (element) {
-				return new Element(element, self);
+		}).then(elements => {
+			return elements.map((element: ElementOrElementId) => {
+				return new LeadfootElement(element, this);
 			});
 		});
-	},
+	}
 
 	/**
 	 * Gets the currently focused element from the focused window/frame.
@@ -1271,20 +1286,19 @@ Session.prototype = {
 	 * @method
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
-	getActiveElement: util.forCommand(function () {
-		function getDocumentActiveElement() {
-			return self.execute('return document.activeElement;');
-		}
-
-		var self = this;
+	@forCommand({ createsContext: true })
+	getActiveElement() {
+		const getDocumentActiveElement = () => {
+			return this.execute('return document.activeElement;');
+		};
 
 		if (this.capabilities.brokenActiveElement) {
 			return getDocumentActiveElement();
 		}
 		else {
-			return this._post('element/active').then(function (element) {
+			return this._post('element/active').then((element: ElementOrElementId) => {
 				if (element) {
-					return new Element(element, self);
+					return new LeadfootElement(element, this);
 				}
 				// The driver will return `null` if the active element is the body element; for consistency with how
 				// the DOM `document.activeElement` property works, we’ll diverge and always return an element
@@ -1293,7 +1307,7 @@ Session.prototype = {
 				}
 			});
 		}
-	}, { createsContext: true }),
+	}
 
 	/**
 	 * Types into the focused window/frame/element.
@@ -1308,7 +1322,7 @@ Session.prototype = {
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	pressKeys: function (keys) {
+	pressKeys(keys: string|string[]): Promise<void> {
 		if (!Array.isArray(keys)) {
 			keys = [ keys ];
 		}
@@ -1320,18 +1334,18 @@ Session.prototype = {
 		return this._post('keys', {
 			value: keys
 		}).then(noop);
-	},
+	}
 
 	/**
 	 * Gets the current screen orientation.
 	 *
 	 * @returns {Promise.<string>} Either 'portrait' or 'landscape'.
 	 */
-	getOrientation: function () {
+	getOrientation(): Promise<'portrait'|'landscape'> {
 		return this._get('orientation').then(function (orientation) {
 			return orientation.toLowerCase();
 		});
-	},
+	}
 
 	/**
 	 * Sets the screen orientation.
@@ -1339,22 +1353,22 @@ Session.prototype = {
 	 * @param {string} orientation Either 'portrait' or 'landscape'.
 	 * @returns {Promise.<void>}
 	 */
-	setOrientation: function (orientation) {
+	setOrientation(orientation: string): Promise<void> {
 		orientation = orientation.toUpperCase();
 
 		return this._post('orientation', {
 			orientation: orientation
 		}).then(noop);
-	},
+	}
 
 	/**
 	 * Gets the text displayed in the currently active alert pop-up.
 	 *
 	 * @returns {Promise.<string>}
 	 */
-	getAlertText: function () {
+	getAlertText(): Promise<string> {
 		return this._get('alert_text');
-	},
+	}
 
 	/**
 	 * Types into the currently active prompt pop-up.
@@ -1362,7 +1376,7 @@ Session.prototype = {
 	 * @param {string|string[]} text The text to type into the pop-up’s input box.
 	 * @returns {Promise.<void>}
 	 */
-	typeInPrompt: function (text) {
+	typeInPrompt(text: string|string[]): Promise<void> {
 		if (Array.isArray(text)) {
 			text = text.join('');
 		}
@@ -1370,16 +1384,16 @@ Session.prototype = {
 		return this._post('alert_text', {
 			text: text
 		}).then(noop);
-	},
+	}
 
 	/**
 	 * Accepts an alert, prompt, or confirmation pop-up. Equivalent to clicking the 'OK' button.
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	acceptAlert: function () {
+	acceptAlert(): Promise<void> {
 		return this._post('accept_alert').then(noop);
-	},
+	}
 
 	/**
 	 * Dismisses an alert, prompt, or confirmation pop-up. Equivalent to clicking the 'OK' button of an alert pop-up
@@ -1387,9 +1401,9 @@ Session.prototype = {
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	dismissAlert: function () {
+	dismissAlert(): Promise<void> {
 		return this._post('dismiss_alert').then(noop);
-	},
+	}
 
 	/**
 	 * Moves the remote environment’s mouse cursor to the specified element or relative position. If the element is
@@ -1412,9 +1426,11 @@ Session.prototype = {
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	moveMouseTo: util.forCommand(function (element, xOffset, yOffset) {
-		var self = this;
-
+	moveMouseTo(xOffset: number, yOffset: number): Promise<void>;
+	moveMouseTo(element: LeadfootElement, xOffset: number, yOffset: number): Promise<void>;
+	@forCommand({ usesElement: true })
+	moveMouseTo(...args: any[]): Promise<void> {
+		let [ element, xOffset, yOffset ] = args;
 		if (typeof yOffset === 'undefined' && typeof xOffset !== 'undefined') {
 			yOffset = xOffset;
 			xOffset = element;
@@ -1424,12 +1440,12 @@ Session.prototype = {
 		if (this.capabilities.brokenMouseEvents) {
 			return this.execute(simulateMouse, [ {
 				action: 'mousemove',
-				position: self._lastMousePosition,
+				position: this._lastMousePosition,
 				element: element,
 				xOffset: xOffset,
 				yOffset: yOffset
-			} ]).then(function (newPosition) {
-				self._lastMousePosition = newPosition;
+			} ]).then(newPosition => {
+				this._lastMousePosition = newPosition;
 			});
 		}
 
@@ -1442,15 +1458,15 @@ Session.prototype = {
 		// top-left corner of the document
 		else if (!this._movedToElement) {
 			if (this.capabilities.brokenHtmlMouseMove) {
-				return this.execute('return document.body;').then(function (element) {
-					return element.getPosition().then(function (position) {
-						return self.moveMouseTo(element, xOffset - position.x, yOffset - position.y);
+				return this.execute('return document.body;').then(element => {
+					return element.getPosition().then((position: { x: number, y: number }) => {
+						return this.moveMouseTo(element, xOffset - position.x, yOffset - position.y);
 					});
 				});
 			}
 			else {
-				return this.execute('return document.documentElement;').then(function (element) {
-					return self.moveMouseTo(element, xOffset, yOffset);
+				return this.execute('return document.documentElement;').then(element => {
+					return this.moveMouseTo(element, xOffset, yOffset);
 				});
 			}
 		}
@@ -1459,10 +1475,10 @@ Session.prototype = {
 			element: element,
 			xoffset: xOffset,
 			yoffset: yOffset
-		}).then(function () {
-			self._movedToElement = true;
+		}).then(() => {
+			this._movedToElement = true;
 		});
-	}, { usesElement: true }),
+	}
 
 	/**
 	 * Clicks a mouse button at the point where the mouse cursor is currently positioned. This method may fail to
@@ -1474,7 +1490,7 @@ Session.prototype = {
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	clickMouseButton: function (button) {
+	clickMouseButton(button?: number): Promise<void> {
 		if (this.capabilities.brokenMouseEvents) {
 			return this.execute(simulateMouse, [ {
 				action: 'click',
@@ -1483,17 +1499,16 @@ Session.prototype = {
 			} ]).then(noop);
 		}
 
-		var self = this;
 		return this._post('click', {
 			button: button
-		}).then(function () {
+		}).then(() => {
 			// ios-driver 0.6.6-SNAPSHOT April 2014 does not wait until the default action for a click event occurs
 			// before returning
-			if (self.capabilities.touchEnabled) {
+			if (this.capabilities.touchEnabled) {
 				return util.sleep(300);
 			}
 		});
-	},
+	}
 
 	/**
 	 * Depresses a mouse button without releasing it.
@@ -1501,7 +1516,7 @@ Session.prototype = {
 	 * @param {number=} button The button to press. See {@link module:leadfoot/Session#click} for available options.
 	 * @returns {Promise.<void>}
 	 */
-	pressMouseButton: function (button) {
+	pressMouseButton(button?: number): Promise<void> {
 		if (this.capabilities.brokenMouseEvents) {
 			return this.execute(simulateMouse, [ {
 				action: 'mousedown',
@@ -1513,7 +1528,7 @@ Session.prototype = {
 		return this._post('buttondown', {
 			button: button
 		}).then(noop);
-	},
+	}
 
 	/**
 	 * Releases a previously depressed mouse button.
@@ -1521,7 +1536,7 @@ Session.prototype = {
 	 * @param {number=} button The button to press. See {@link module:leadfoot/Session#click} for available options.
 	 * @returns {Promise.<void>}
 	 */
-	releaseMouseButton: function (button) {
+	releaseMouseButton(button?: number): Promise<void> {
 		if (this.capabilities.brokenMouseEvents) {
 			return this.execute(simulateMouse, [ {
 				action: 'mouseup',
@@ -1533,14 +1548,14 @@ Session.prototype = {
 		return this._post('buttonup', {
 			button: button
 		}).then(noop);
-	},
+	}
 
 	/**
 	 * Double-clicks the primary mouse button.
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	doubleClick: function () {
+	doubleClick(): Promise<void> {
 		if (this.capabilities.brokenMouseEvents) {
 			return this.execute(simulateMouse, [ {
 				action: 'dblclick',
@@ -1549,16 +1564,15 @@ Session.prototype = {
 			} ]).then(noop);
 		}
 		else if (this.capabilities.brokenDoubleClick) {
-			var self = this;
-			return this.pressMouseButton().then(function () {
-				return self.releaseMouseButton();
-			}).then(function () {
-				return self._post('doubleclick');
+			return this.pressMouseButton().then(() => {
+				return this.releaseMouseButton();
+			}).then(() => {
+				return this._post('doubleclick');
 			});
 		}
 
 		return this._post('doubleclick').then(noop);
-	},
+	}
 
 	/**
 	 * Taps an element on a touch screen device. If the element is outside of the viewport, the remote driver will
@@ -1568,15 +1582,16 @@ Session.prototype = {
 	 * @param {module:leadfoot/Element} element The element to tap.
 	 * @returns {Promise.<void>}
 	 */
-	tap: util.forCommand(function (element) {
-		if (element) {
-			element = element.elementId;
-		}
+	@forCommand({ usesElement: true })
+	tap(element: LeadfootElement): Promise<void> {
+		// if (element) {
+		// 	element = element.elementId;
+		// }
 
 		return this._post('touch/click', {
-			element: element
+			element: element.elementId
 		}).then(noop);
-	}, { usesElement: true }),
+	}
 
 	/**
 	 * Depresses a new finger at the given point on a touch screen device without releasing it.
@@ -1585,14 +1600,14 @@ Session.prototype = {
 	 * @param {number} y The screen y-coordinate to press, maybe in device pixels.
 	 * @returns {Promise.<void>}
 	 */
-	pressFinger: function (x, y) {
+	pressFinger(x: number, y: number): Promise<void> {
 		// TODO: If someone specifies the same coordinates as as an existing finger, will it switch the active finger
 		// back to that finger instead of adding a new one?
 		return this._post('touch/down', {
 			x: x,
 			y: y
 		}).then(noop);
-	},
+	}
 
 	/**
 	 * Releases whatever finger exists at the given point on a touch screen device.
@@ -1601,12 +1616,12 @@ Session.prototype = {
 	 * @param {number} y The screen y-coordinate where a finger is pressed, maybe in device pixels.
 	 * @returns {Promise.<void>}
 	 */
-	releaseFinger: function (x, y) {
+	releaseFinger(x: number, y: number): Promise<void> {
 		return this._post('touch/up', {
 			x: x,
 			y: y
 		}).then(noop);
-	},
+	}
 
 	/**
 	 * Moves the last depressed finger to a new point on the touch screen.
@@ -1615,12 +1630,12 @@ Session.prototype = {
 	 * @param {number} y The screen y-coordinate to move to, maybe in device pixels.
 	 * @returns {Promise.<void>}
 	 */
-	moveFinger: function (x, y) {
+	moveFinger(x: number, y: number): Promise<void> {
 		return this._post('touch/move', {
 			x: x,
 			y: y
 		}).then(noop);
-	},
+	}
 
 	/**
 	 * Scrolls the currently focused window on a touch screen device.
@@ -1640,7 +1655,11 @@ Session.prototype = {
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	touchScroll: util.forCommand(function (element, xOffset, yOffset) {
+	touchScroll(xOffset: number, yOffset: number): Promise<void>;
+	touchScroll(element?: Element, xOffset?: number, yOffset?: number): Promise<void>;
+	@forCommand({ usesElement: true })
+	touchScroll(...args: any[]): Promise<void> {
+		let [ element, xOffset, yOffset ] = args;
 		if (typeof yOffset === 'undefined' && typeof xOffset !== 'undefined') {
 			yOffset = xOffset;
 			xOffset = element;
@@ -1648,10 +1667,10 @@ Session.prototype = {
 		}
 
 		if (this.capabilities.brokenTouchScroll) {
-			return this.execute(/* istanbul ignore next */ function (element, x, y) {
-				var rect = { left: window.scrollX, top: window.scrollY };
+			return this.execute(/* istanbul ignore next */ function (element: Element, x: number, y: number) {
+				const rect = { left: window.scrollX, top: window.scrollY };
 				if (element) {
-					var bbox = element.getBoundingClientRect();
+					const bbox = element.getBoundingClientRect();
 					rect.left += bbox.left;
 					rect.top += bbox.top;
 				}
@@ -1670,7 +1689,7 @@ Session.prototype = {
 			xoffset: xOffset,
 			yoffset: yOffset
 		}).then(noop);
-	}, { usesElement: true }),
+	}
 
 	/**
 	 * Performs a double-tap gesture on an element.
@@ -1679,15 +1698,16 @@ Session.prototype = {
 	 * @param {module:leadfoot/Element} element The element to double-tap.
 	 * @returns {Promise.<void>}
 	 */
-	doubleTap: util.forCommand(function (element) {
-		if (element) {
-			element = element.elementId;
-		}
+	@forCommand({ usesElement: true })
+	doubleTap(element: LeadfootElement): Promise<void> {
+		// if (element) {
+		// 	element = element.elementId;
+		// }
 
 		return this._post('touch/doubleclick', {
-			element: element
+			element: element.elementId
 		}).then(noop);
-	}, { usesElement: true }),
+	}
 
 	/**
 	 * Performs a long-tap gesture on an element.
@@ -1696,15 +1716,16 @@ Session.prototype = {
 	 * @param {module:leadfoot/Element} element The element to long-tap.
 	 * @returns {Promise.<void>}
 	 */
-	longTap: util.forCommand(function (element) {
-		if (element) {
-			element = element.elementId;
-		}
+	@forCommand({ usesElement: true })
+	longTap(element: LeadfootElement): Promise<void> {
+		// if (element) {
+		// 	element = element.elementId;
+		// }
 
 		return this._post('touch/longclick', {
-			element: element
+			element: element.elementId
 		}).then(noop);
-	}, { usesElement: true }),
+	}
 
 	/**
 	 * Flicks a finger. Note that this method is currently badly specified and highly dysfunctional and is only
@@ -1718,7 +1739,8 @@ Session.prototype = {
 	 * this value will be higher than expected.
 	 * @returns {Promise.<void>}
 	 */
-	flickFinger: util.forCommand(function (element, xOffset, yOffset, speed) {
+	@forCommand({ usesElement: true })
+	flickFinger(element: LeadfootElement, xOffset: number, yOffset: number, speed: number): Promise<void> {
 		if (typeof speed === 'undefined' && typeof yOffset === 'undefined' && typeof xOffset !== 'undefined') {
 			return this._post('touch/flick', {
 				xspeed: element,
@@ -1726,17 +1748,17 @@ Session.prototype = {
 			}).then(noop);
 		}
 
-		if (element) {
-			element = element.elementId;
-		}
+		// if (element) {
+		// 	element = element.elementId;
+		// }
 
 		return this._post('touch/flick', {
-			element: element,
+			element: element.elementId,
 			xoffset: xOffset,
 			yoffset: yOffset,
 			speed: speed
 		}).then(noop);
-	}, { usesElement: true }),
+	}
 
 	/**
 	 * Gets the current geographical location of the remote environment.
@@ -1745,19 +1767,18 @@ Session.prototype = {
 	 * Latitude and longitude are specified using standard WGS84 decimal latitude/longitude. Altitude is specified
 	 * as meters above the WGS84 ellipsoid. Not all environments support altitude.
 	 */
-	getGeolocation: function () {
-		var self = this;
-		return this._get('location').then(function (location) {
+	getGeolocation(): Promise<GeoLocation> {
+		return this._get('location').then(location => {
 			// ChromeDriver 2.9 ignores altitude being set and then returns 0; to match the Geolocation API
 			// specification, we will just pretend that altitude is not supported by the browser at all by
 			// changing the value to `null` if it is zero but the last set value was not zero
-			if (location.altitude === 0 && self._lastAltitude !== location.altitude) {
+			if (location.altitude === 0 && this._lastAltitude !== location.altitude) {
 				location.altitude = null;
 			}
 
 			return location;
 		});
-	},
+	}
 
 	/**
 	 * Sets the geographical location of the remote environment.
@@ -1768,7 +1789,7 @@ Session.prototype = {
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	setGeolocation: function (location) {
+	setGeolocation(location: GeoLocation): Promise<void> {
 		// TODO: Is it weird that this accepts an object argument? `setCookie` does too, but nothing else does.
 		if (location.altitude !== undefined) {
 			this._lastAltitude = location.altitude;
@@ -1777,7 +1798,7 @@ Session.prototype = {
 		return this._post('location', {
 			location: location
 		}).then(noop);
-	},
+	}
 
 	/**
 	 * Gets all logs from the remote environment of the given type. The logs in the remote environment are cleared
@@ -1791,15 +1812,15 @@ Session.prototype = {
 	 * @returns {Promise.<LogEntry[]>}
 	 * An array of log entry objects. Timestamps in log entries are Unix timestamps, in seconds.
 	 */
-	getLogsFor: function (type) {
+	getLogsFor(type: string): Promise<LogEntry[]> {
 		return this._post('log', {
 			type: type
 		}).then(function (logs) {
 			// At least Selendroid 0.9.0 returns logs as an array of strings instead of an array of log objects,
 			// which is a spec violation; see https://github.com/selendroid/selendroid/issues/366
 			if (logs && typeof logs[0] === 'string') {
-				return logs.map(function (log) {
-					var logData = /\[([^\]]+)\]\s*\[([^\]]+)\]\s*(.*)/.exec(log);
+				return logs.map(function (log: string) {
+					const logData = /\[([^\]]+)\]\s*\[([^\]]+)\]\s*(.*)/.exec(log);
 					if (logData) {
 						return {
 							timestamp: Date.parse(logData[1]) / 1000,
@@ -1818,20 +1839,20 @@ Session.prototype = {
 
 			return logs;
 		});
-	},
+	}
 
 	/**
 	 * Gets the types of logs that are currently available for retrieval from the remote environment.
 	 *
 	 * @returns {Promise.<string[]>}
 	 */
-	getAvailableLogTypes: function () {
+	getAvailableLogTypes(): Promise<string[]> {
 		if (this.capabilities.fixedLogTypes) {
 			return Promise.resolve(this.capabilities.fixedLogTypes);
 		}
 
 		return this._get('log/types');
-	},
+	}
 
 	/**
 	 * Gets the current state of the HTML5 application cache for the current page.
@@ -1840,18 +1861,18 @@ Session.prototype = {
 	 * The cache status. One of 0 (uncached), 1 (cached/idle), 2 (checking), 3 (downloading), 4 (update ready), 5
 	 * (obsolete).
 	 */
-	getApplicationCacheStatus: function () {
+	getApplicationCacheStatus(): Promise<number> {
 		return this._get('application_cache/status');
-	},
+	}
 
 	/**
 	 * Terminates the session. No more commands will be accepted by the remote after this point.
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	quit: function () {
+	quit(): Promise<void> {
 		return this._server.deleteSession(this._sessionId).then(noop);
-	},
+	}
 
 	/**
 	 * Searches a document or element subtree for links with the given normalized text. This method works for 'link text'
@@ -1865,20 +1886,21 @@ Session.prototype = {
 	 * @param {Element?} element A context element
 	 * @returns {Element|Element[]} The found element or elements
 	 */
-	_manualFindByLinkText: function (using, value, multiple, element) {
-		var check = using === 'link text' ? function (linkText, text) {
+	_manualFindByLinkText(using: string, value: string, multiple: boolean, element?: Element): Element|Element[] {
+		const check = using === 'link text' ? function (linkText: string, text: string): boolean {
 			return linkText === text;
-		} : function (linkText, text) {
+		} : function (linkText: string, text: string): boolean {
 			return linkText.indexOf(text) !== -1;
 		};
 
-		var links = (element || document).getElementsByTagName('a');
-		var linkText;
-		if (multiple) {
-			var found = [];
-		}
+		const links = (element || document).getElementsByTagName('a');
+		let linkText: string;
+		const found: Element[] = [];
+		// if (multiple) {
+		// 	var found = [];
+		// }
 
-		for (var i = 0; i < links.length; i++) {
+		for (let i = 0; i < links.length; i++) {
 			// Normalize the link text whitespace
 			linkText = links[i].innerText
 				.replace(/^\s+/, '')
@@ -1896,7 +1918,7 @@ Session.prototype = {
 		if (multiple) {
 			return found;
 		}
-	},
+	}
 
 	/**
 	 * Normalize whitespace in the same way that most browsers generate innerText.
@@ -1905,7 +1927,7 @@ Session.prototype = {
 	 * @returns {string} Text with leading and trailing whitespace removed, with inner runs of spaces changed to a
 	 * single space, and with "\r\n" pairs converted to "\n".
 	 */
-	_normalizeWhitespace: function (text) {
+	_normalizeWhitespace(text: string): string {
 		if (text) {
 			text = text
 				.replace(/^\s+/, '')
@@ -1915,7 +1937,7 @@ Session.prototype = {
 		}
 
 		return text;
-	},
+	}
 
 	/**
 	 * Uploads a file to a remote Selenium server for use when testing file uploads. This API is not part of the
@@ -1926,22 +1948,19 @@ Session.prototype = {
 	 * @private
 	 * @returns {Promise.<string>}
 	 */
-	_uploadFile: function (filename) {
-		var self = this;
+	_uploadFile(filename: string): Promise<string> {
+		return new Promise(resolve => {
+			const content = fs.readFileSync(filename);
 
-		return new Promise(function (resolve) {
-			var content = fs.readFileSync(filename);
-
-			var zip = new JsZip();
+			let zip = new JsZip();
 			zip.file(path.basename(filename), content);
-			var data = zip.generate({ type: 'base64' });
+			const data = zip.generate({ type: 'base64' });
 			zip = null;
 
-			resolve(self._post('file', { file: data }));
+			resolve(this._post('file', { file: data }));
 		});
 	}
-};
-
+}
 
 /**
  * Gets the list of keys set in local storage for the focused window/frame.
@@ -1995,7 +2014,6 @@ Session.prototype = {
  * @returns {Promise.<number>}
  */
 storage.applyTo(Session.prototype, 'local');
-
 
 /**
  * Gets the list of keys set in session storage for the focused window/frame.
@@ -2448,22 +2466,20 @@ waitForDeleted.applyTo(Session.prototype);
  * @param {number} ms The length of the timeout, in milliseconds.
  * @returns {Promise.<void>}
  */
-(function (prototype) {
-	var timeouts = {
+(function (prototype: any) {
+	const timeouts: any = {
 		script: 'ExecuteAsync',
 		implicit: 'Find',
 		'page load': 'PageLoad'
 	};
 
-	for (var type in timeouts) {
-		prototype['get' + timeouts[type] + 'Timeout'] = lang.partial(function (type) {
+	for (let type in timeouts) {
+		prototype['get' + timeouts[type] + 'Timeout'] = lang.partial(function (this: Session, type: string) {
 			return this.getTimeout(type);
 		}, type);
 
-		prototype['set' + timeouts[type] + 'Timeout'] = lang.partial(function (type, ms) {
+		prototype['set' + timeouts[type] + 'Timeout'] = lang.partial(function (this: Session, type: string, ms: number) {
 			return this.setTimeout(type, ms);
 		}, type);
 	}
 })(Session.prototype);
-
-module.exports = Session;
