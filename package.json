@@ -13,7 +13,8 @@
 	},
 	"devDependencies": {
 		"intern": "3.2.3",
-		"typescript": "~2.0.0"
+		"typescript": "~2.0.0",
+		"@types/node": "~6.0.0"
 	},
 	"bugs": "https://github.com/theintern/leadfoot/issues",
 	"keywords": [ "javascript", "test", "functional", "selenium", "webdriver", "sauce labs", "browserstack", "testingbot" ],
