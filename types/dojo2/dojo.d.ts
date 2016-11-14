@@ -529,6 +529,7 @@ declare module 'dojo/request' {
 	        requestOptions: IRequestOptions;
 	        statusCode: number;
 	        url: string;
+			text: string;
 	    }
 	}
 	interface request extends request.IRequestProvider {
