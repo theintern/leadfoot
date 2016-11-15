@@ -1,10 +1,14 @@
 import Promise = require('dojo/Promise');
 import statusCodes from './statusCodes';
+import Element from '../Element';
+import Session from '../Session';
 
-export function applyTo(prototype: any) {
-	prototype.findDisplayed = function (this: any, strategy, value) {
-		const self = this;
-		const session = this.session || this;
+export default class FindDisplayed {
+	session?: Session;
+
+	findDisplayed(strategy: string, value: string): Promise<Element> {
+		const self = <any> this;
+		const session = <Session> (this.session || this);
 
 		return session.getTimeout('implicit').then(function (originalTimeout) {
 			const startTime = Date.now();
@@ -48,5 +52,5 @@ export function applyTo(prototype: any) {
 
 			return poll();
 		});
-	};
+	}
 }

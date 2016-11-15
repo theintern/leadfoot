@@ -66,7 +66,7 @@ function deprecate(fromMethod: string, toMethod: string): Function {
  *
  * @returns {Function}
  */
-function deprecateElementSig(fromMethod: string, toMethod: string, fn: Function): Function {
+function deprecateElementSig(fromMethod: string, toMethod?: string, fn?: Function): Function {
 	return function (this: any, element?: Element, ...args: any[]) {
 		if (element && element.elementId) {
 			warn('Command#' + fromMethod + '(element)', 'Command#find then Command#' + fromMethod + ', or ' +
@@ -94,46 +94,46 @@ function deprecateElementAndStandardSig(fromMethod, toMethod) {
 	return deprecateElementSig(fromMethod, toMethod, deprecate(fromMethod, toMethod));
 }
 
-var methods = {
+const methods = {
 	get sessionID() {
 		warn('Command#sessionID', 'the Command#session.sessionId property');
 		return this.session.sessionId;
 	},
-	status: function () {
+	status() {
 		warn('Command#status');
 		return new this.constructor(this, function () {
 			return this.session.server.getStatus();
 		});
 	},
-	init: function () {
+	init() {
 		warn('Command#init');
 		return this;
 	},
-	sessions: function () {
+	sessions() {
 		warn('Command#sessions');
 		return new this.constructor(this, function () {
 			return this.session.server.getSessions();
 		});
 	},
-	sessionCapabilities: function () {
+	sessionCapabilities() {
 		warn('Command#sessionCapabilities', 'the Command#session.capabilities property');
 		return new this.constructor(this, function () {
 			return this.session.capabilities;
 		});
 	},
-	altSessionCapabilities: function () {
+	altSessionCapabilities() {
 		warn('Command#altSessionCapabilities', 'the Command#session.capabilities property');
 		return new this.constructor(this, function () {
 			return this.session.capabilities;
 		});
 	},
-	getSessionId: function () {
+	getSessionId() {
 		warn('Command#getSessionId', 'the Command#session.sessionId property');
 		return new this.constructor(this, function () {
 			return this.session.sessionId;
 		});
 	},
-	getSessionID: function () {
+	getSessionID() {
 		warn('Command#getSessionID', 'the Command#session.sessionId property');
 		return new this.constructor(this, function () {
 			return this.session.sessionId;
@@ -148,11 +148,11 @@ var methods = {
 	forward: deprecate('forward', 'goForward'),
 	back: deprecate('back', 'goBack'),
 	safeExecute: deprecate('safeExecute', 'execute'),
-	eval: function (code) {
+	eval(code) {
 		warn('Command#eval', 'Command#execute with a return call');
 		return this.execute('return eval(arguments[0]);', [ code ]);
 	},
-	safeEval: function (code) {
+	safeEval(code) {
 		warn('Command#safeEval', 'Command#execute with a return call');
 		return this.execute('return eval(arguments[0]);', [ code ]);
 	},
@@ -161,9 +161,7 @@ var methods = {
 	window: deprecate('window', 'switchToWindow'),
 	close: deprecate('close', 'closeCurrentWindow'),
 	windowSize: deprecate('windowSize', 'setWindowSize'),
-	setWindowSize: function () {
-		var args = Array.prototype.slice.call(arguments, 0);
-
+	setWindowSize(...args: any[]) {
 		if (args.length === 3 && typeof args[0] === 'number') {
 			warn('Command#setWindowSize(width, height, handle)',
 				'Command#setWindowSize(handle, width, height)');
@@ -172,9 +170,7 @@ var methods = {
 
 		return Command.prototype.setWindowSize.apply(this, args);
 	},
-	setWindowPosition: function () {
-		var args = Array.prototype.slice.call(arguments, 0);
-
+	setWindowPosition(...args: any[]) {
 		if (args.length === 3 && typeof args[0] === 'number') {
 			warn('Command#setWindowPosition(x, y, handle)',
 				'Command#setWindowPosition(handle, x, y)');
@@ -201,7 +197,7 @@ var methods = {
 	elements: deprecate('elements', 'findAll'),
 	elementsByClassName: deprecate('elementsByClassName', 'findAllByClassName'),
 	elementsByCssSelector: deprecate('elementsByCssSelector', 'findAllByCssSelector'),
-	elementsById: function (value) {
+	elementsById(value) {
 		warn('Command#elementsById', 'Command#findById');
 		return this.findAll('id', value);
 	},
@@ -211,17 +207,17 @@ var methods = {
 	elementsByTagName: deprecate('elementsByTagName', 'findAllByTagName'),
 	elementsByXPath: deprecate('elementsByXPath', 'findAllByXpath'),
 	elementsByCss: deprecate('elementsByCss', 'findAllByCssSelector'),
-	elementOrNull: function (using, value) {
+	elementOrNull(using, value) {
 		warn('Command#elementOrNull', 'Command#find and Command#finally, or Command#findAll');
 		return this.find(using, value).catch(function () {
 			return null;
 		});
 	},
-	elementIfExists: function (using, value) {
+	elementIfExists(using, value) {
 		warn('Command#elementIfExists', 'Command#find and Command#finally, or Command#findAll');
 		return this.find(using, value).catch(function () {});
 	},
-	hasElement: function (using, value) {
+	hasElement(using, value) {
 		warn('Command#hasElement', 'Command#find and Command#then(exists, doesNotExist)');
 		return this.find(using, value).then(function () {
 			return true;
@@ -232,7 +228,7 @@ var methods = {
 	active: deprecate('active', 'getActiveElement'),
 	clickElement: deprecateElementAndStandardSig('clickElement', 'click'),
 	submit: deprecateElementSig('submit'),
-	text: function (element) {
+	text(element) {
 		return new this.constructor(this, function () {
 			if ((!element || element === 'body') && !this.context.length) {
 				if (element === 'body') {
@@ -267,7 +263,7 @@ var methods = {
 
 	// This method had a two-argument version according to the WD.js docs but they inexplicably swapped the first
 	// and second arguments so it probably never would have worked properly in Intern
-	textPresent: function (searchText, element) {
+	textPresent(searchText, element) {
 		warn('Command#textPresent', 'Command#getVisibleText and a promise helper');
 
 		function test(text) {
@@ -291,7 +287,7 @@ var methods = {
 	isEnabled: deprecateElementSig('isEnabled'),
 	enabled: deprecateElementAndStandardSig('enabled', 'isEnabled'),
 	getAttribute: deprecateElementSig('getAttribute'),
-	getValue: function (element) {
+	getValue(element) {
 		if (element && element.elementId) {
 			warn('Command#getValue(element)', 'Command#find then Command#getProperty(\'value\'), or ' +
 				'Command#find then Command#then(function (element) { ' +
@@ -305,7 +301,7 @@ var methods = {
 		warn('Command#getValue', 'Command#find then Command#getProperty(\'value\')');
 		return this.getProperty('value');
 	},
-	equalsElement: function (element, other) {
+	equalsElement(element, other) {
 		if (other && other.elementId) {
 			warn('Command#equalsElement(element, other)', 'element.equals(other)');
 			return new this.constructor(this, function () {
@@ -319,7 +315,7 @@ var methods = {
 	isDisplayed: deprecateElementSig('isDisplayed'),
 	displayed: deprecateElementAndStandardSig('displayed', 'isDisplayed'),
 	getLocation: deprecateElementAndStandardSig('getLocation', 'getPosition'),
-	getLocationInView: function () {
+	getLocationInView() {
 		warn(
 			'Command#getLocationInView',
 			'Command#getPosition',
@@ -336,7 +332,7 @@ var methods = {
 	alertText: deprecate('alertText', 'getAlertText'),
 	alertKeys: deprecate('alertKeys', 'typeInPrompt'),
 	moveTo: deprecateElementAndStandardSig('moveTo', 'moveMouseTo'),
-	click: function (button) {
+	click(button) {
 		if (typeof button === 'number') {
 			warn('Command#click(button)', 'Command#clickMouseButton(button)');
 			return this.clickMouseButton(button);
@@ -356,19 +352,19 @@ var methods = {
 	removeLocalStorageKey: deprecate('removeLocalStorageKey', 'deleteLocalStorageItem'),
 	log: deprecate('log', 'getLogsFor'),
 	logTypes: deprecate('logTypes', 'getAvailableLogTypes'),
-	newWindow: function (url, name) {
+	newWindow(url, name) {
 		warn('Command#newWindow', 'Command#execute');
 		return this.execute('window.open(arguments[0], arguments[1]);', [ url, name ]);
 	},
-	windowName: function () {
+	windowName() {
 		warn('Command#windowName', 'Command#execute');
 		return this.execute('return window.name;');
 	},
-	setHTTPInactivityTimeout: function () {
+	setHTTPInactivityTimeout() {
 		warn('Command#setHTTPInactivityTimeout');
 		return this;
 	},
-	getPageIndex: function (element) {
+	getPageIndex(element) {
 		warn('Command#getPageIndex', null, 'This command is not part of any specification.');
 		if (element && element.elementId) {
 			return new this.constructor(this, function () {
@@ -387,7 +383,7 @@ var methods = {
 			}
 		});
 	},
-	uploadFile: function () {
+	uploadFile() {
 		warn(
 			'Command#uploadFile',
 			'Command#type to type a file path into a file upload form control',
@@ -396,7 +392,7 @@ var methods = {
 
 		return this;
 	},
-	waitForCondition: function (expression, timeout, pollInterval) {
+	waitForCondition(expression, timeout, pollInterval) {
 		timeout = timeout || 1000;
 		pollInterval = pollInterval || 100;
 
@@ -404,7 +400,7 @@ var methods = {
 
 		return this.then(pollUntil('return eval(arguments[0]) ? true : null;', [ expression ], timeout, pollInterval));
 	},
-	waitForConditionInBrowser: function (expression, timeout, pollInterval) {
+	waitForConditionInBrowser(expression, timeout, pollInterval) {
 		timeout = timeout || 1000;
 		pollInterval = pollInterval || 100;
 
@@ -412,7 +408,7 @@ var methods = {
 
 		return this.then(pollUntil('return eval(arguments[0]) ? true : null;', [ expression ], timeout, pollInterval));
 	},
-	sauceJobUpdate: function () {
+	sauceJobUpdate() {
 		warn(
 			'Command#sauceJobUpdate',
 			null,
@@ -421,7 +417,7 @@ var methods = {
 
 		return this;
 	},
-	sauceJobStatus: function () {
+	sauceJobStatus() {
 		warn(
 			'Command#sauceJobStatus',
 			null,
@@ -430,7 +426,7 @@ var methods = {
 
 		return this;
 	},
-	reset: function () {
+	reset() {
 		warn(
 			'Command#reset',
 			'a previously stored Command instance'
@@ -438,7 +434,7 @@ var methods = {
 
 		return this;
 	},
-	waitForElement: function (using, value, timeout) {
+	waitForElement(this: Command, using, value, timeout) {
 		warn(
 			'Command#waitForElement',
 			'Command#setFindTimeout and Command#find',
@@ -451,7 +447,7 @@ var methods = {
 			timeout = Infinity;
 		}
 
-		var command = this;
+		const command = this;
 		return this.getFindTimeout().then(function (originalTimeout) {
 			return command.setFindTimeout(timeout)
 				.find(using, value)
@@ -466,7 +462,7 @@ var methods = {
 				});
 		});
 	},
-	waitForVisible: function (using, value, timeout) {
+	waitForVisible(this: Command, using, value, timeout) {
 		warn(
 			'Command#waitForVisible',
 			null,
@@ -480,8 +476,8 @@ var methods = {
 			timeout = Infinity;
 		}
 
-		var startTime = Date.now();
-		var command = this;
+		const startTime = Date.now();
+		const command = this;
 		return this.getFindTimeout().then(function (originalTimeout) {
 			return command.setFindTimeout(timeout)
 				.find(using, value)
@@ -502,7 +498,7 @@ var methods = {
 				});
 		});
 	},
-	isVisible: function () {
+	isVisible(...args: any[]) {
 		warn(
 			'Command#isVisible',
 			'Command#isDisplayed',
@@ -510,14 +506,14 @@ var methods = {
 		);
 
 		if (arguments.length === 2) {
-			var using = arguments[0];
-			var value = arguments[1];
+			const using = args[0];
+			const value = args[1];
 			return this.find(using, value).isDisplayed().catch(function () {
 				return false;
 			});
 		}
 		else if (arguments.length === 1) {
-			var element = arguments[0];
+			const element = args[0];
 			if (element && element.elementId) {
 				return new this.constructor(this, function () {
 					return element.isDisplayed();
@@ -564,10 +560,10 @@ strategies.suffixes.forEach(function (suffix, index) {
 		};
 	}
 
-	var wdSuffix = suffix === 'Xpath' ? 'XPath' : suffix;
-	var method = 'elementBy' + wdSuffix;
-	var toMethod = 'findBy' + suffix;
-	var using = strategies[index];
+	const wdSuffix = suffix === 'Xpath' ? 'XPath' : suffix;
+	const method = 'elementBy' + wdSuffix;
+	const toMethod = 'findBy' + suffix;
+	const using = strategies[index];
 	addStrategy(method, toMethod, suffix, wdSuffix, using);
 	if (suffix === 'CssSelector') {
 		addStrategy('elementByCss', toMethod, suffix, 'Css', using);
@@ -580,8 +576,8 @@ module.exports = {
 	 *
 	 * @param {module:leadfoot/Command} prototype A {@link module:leadfoot/Command} prototype or instance.
 	 */
-	applyTo: function (prototype) {
-		for (var key in methods) {
+	applyTo(prototype) {
+		for (let key in methods) {
 			Object.defineProperty(prototype, key, Object.getOwnPropertyDescriptor(methods, key));
 		}
 	}

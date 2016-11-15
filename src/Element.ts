@@ -4,10 +4,10 @@
  * @module leadfoot/Element
  */
 
-import findDisplayed = require('./lib/findDisplayed');
+import FindDisplayed from './lib/findDisplayed';
 import fs = require('fs');
-import strategies from './lib/strategies';
-import waitForDeleted from './lib/waitForDeleted';
+import  Strategies from './lib/strategies';
+import WaitForDeleted from './lib/waitForDeleted';
 import * as util from './lib/util';
 import Promise = require('dojo/Promise');
 import Session from './Session';
@@ -29,7 +29,8 @@ function noop() {
  * The session that the element belongs to.
  */
 export type ElementOrElementId = { ELEMENT: string; } | Element | string;
-export default class Element {
+
+export default class Element implements WaitForDeleted, FindDisplayed, Strategies {
 	private _elementId: string;
 	private _session: Session;
 	constructor(elementId: /*ElementOrElementId*/any, session: Session) {
@@ -523,345 +524,377 @@ export default class Element {
 			return value != null ? value : '';
 		});
 	}
+
+	/**
+	 * Gets the first element inside this element matching the given CSS class name.
+	 *
+	 * @method findByClassName
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} className The CSS class name to search for.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findByClassName: (selector: string) => Promise<Element>;
+
+	/**
+	 * Gets the first element inside this element matching the given CSS selector.
+	 *
+	 * @method findByCssSelector
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} selector The CSS selector to search for.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findByCssSelector: (selector: string) => Promise<Element>;
+
+	/**
+	 * Gets the first element inside this element matching the given ID.
+	 *
+	 * @method findById
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} id The ID of the element.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findById: (id: string) => Promise<Element>;
+
+	/**
+	 * Gets the first element inside this element matching the given name attribute.
+	 *
+	 * @method findByName
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} name The name of the element.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findByName: (name: string) => Promise<Element>;
+
+	/**
+	 * Gets the first element inside this element matching the given case-insensitive link text.
+	 *
+	 * @method findByLinkText
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} text The link text of the element.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findByLinkText: (text: string) => Promise<Element>;
+
+	/**
+	 * Gets the first element inside this element partially matching the given case-insensitive link text.
+	 *
+	 * @method findByPartialLinkText
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} text The partial link text of the element.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findByPartialLinkText: (text: string) => Promise<Element>;
+
+	/**
+	 * Gets the first element inside this element matching the given HTML tag name.
+	 *
+	 * @method findByTagName
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} tagName The tag name of the element.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findByTagName: (tagName: string) => Promise<Element>;
+
+	/**
+	 * Gets the first element inside this element matching the given XPath selector.
+	 *
+	 * @method findByXpath
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} path The XPath selector to search for.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findByXpath: (path: string) => Promise<Element>;
+
+	/**
+	 * Gets all elements inside this element matching the given CSS class name.
+	 *
+	 * @method findAllByClassName
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} className The CSS class name to search for.
+	 * @returns {Promise.<module:leadfoot/Element[]>}
+	 */
+	findAllByClassName: (className: string) => Promise<Element[]>;
+
+	/**
+	 * Gets all elements inside this element matching the given CSS selector.
+	 *
+	 * @method findAllByCssSelector
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} selector The CSS selector to search for.
+	 * @returns {Promise.<module:leadfoot/Element[]>}
+	 */
+	findAllByCssSelector: (selector: string) => Promise<Element[]>;
+
+	/**
+	 * Gets all elements inside this element matching the given name attribute.
+	 *
+	 * @method findAllByName
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} name The name of the element.
+	 * @returns {Promise.<module:leadfoot/Element[]>}
+	 */
+	findAllByName: (name: string) => Promise<Element[]>;
+
+	/**
+	 * Gets all elements inside this element matching the given case-insensitive link text.
+	 *
+	 * @method findAllByLinkText
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} text The link text of the element.
+	 * @returns {Promise.<module:leadfoot/Element[]>}
+	 */
+	findAllByLinkText: (text: string) => Promise<Element[]>;
+
+	/**
+	 * Gets all elements inside this element partially matching the given case-insensitive link text.
+	 *
+	 * @method findAllByPartialLinkText
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} text The partial link text of the element.
+	 * @returns {Promise.<module:leadfoot/Element[]>}
+	 */
+	findAllByPartialLinkText: (text: string) => Promise<Element[]>;
+
+	/**
+	 * Gets all elements inside this element matching the given HTML tag name.
+	 *
+	 * @method findAllByTagName
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} tagName The tag name of the element.
+	 * @returns {Promise.<module:leadfoot/Element[]>}
+	 */
+	findAllByTagName: (tagName: string) => Promise<Element[]>;
+
+	/**
+	 * Gets all elements inside this element matching the given XPath selector.
+	 *
+	 * @method findAllByXpath
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} path The XPath selector to search for.
+	 * @returns {Promise.<module:leadfoot/Element[]>}
+	 */
+	findAllByXpath: (path: string) => Promise<Element[]>;
+
+	/**
+	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
+	 * matching the given query. This is inherently slower than {@link module:leadfoot/Element#find}, so should only be
+	 * used in cases where the visibility of an element cannot be ensured in advance.
+	 *
+	 * @method findDisplayed
+	 * @memberOf module:leadfoot/Element#
+	 * @since 1.6
+	 *
+	 * @param {string} using
+	 * The element retrieval strategy to use. See {@link module:leadfoot/Session#find} for options.
+	 *
+	 * @param {string} value
+	 * The strategy-specific value to search for. See {@link module:leadfoot/Session#find} for details.
+	 *
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findDisplayed: (using: string, value: string) => Promise<Element>;
+
+	/**
+	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
+	 * matching the given CSS class name. This is inherently slower than {@link module:leadfoot/Element#find}, so should
+	 * only be used in cases where the visibility of an element cannot be ensured in advance.
+	 *
+	 * @method findDisplayedByClassName
+	 * @memberOf module:leadfoot/Element#
+	 * @since 1.6
+	 * @param {string} className The CSS class name to search for.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findDisplayedByClassName: (className: string) => Promise<Element>;
+
+	/**
+	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
+	 * matching the given CSS selector. This is inherently slower than {@link module:leadfoot/Element#find}, so should
+	 * only be used in cases where the visibility of an element cannot be ensured in advance.
+	 *
+	 * @method findDisplayedByCssSelector
+	 * @memberOf module:leadfoot/Element#
+	 * @since 1.6
+	 * @param {string} selector The CSS selector to search for.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findDisplayedByCssSelector: (selector: string) => Promise<Element>;
+
+	/**
+	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
+	 * matching the given ID. This is inherently slower than {@link module:leadfoot/Element#find}, so should
+	 * only be used in cases where the visibility of an element cannot be ensured in advance.
+	 *
+	 * @method findDisplayedById
+	 * @memberOf module:leadfoot/Element#
+	 * @since 1.6
+	 * @param {string} id The ID of the element.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findDisplayedById: (id: string) => Promise<Element>;
+
+	/**
+	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
+	 * matching the given name attribute. This is inherently slower than {@link module:leadfoot/Element#find}, so should
+	 * only be used in cases where the visibility of an element cannot be ensured in advance.
+	 *
+	 * @method findDisplayedByName
+	 * @memberOf module:leadfoot/Element#
+	 * @since 1.6
+	 * @param {string} name The name of the element.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findDisplayedByName: (name: string) => Promise<Element>;
+
+	/**
+	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
+	 * matching the given case-insensitive link text. This is inherently slower than {@link module:leadfoot/Element#find},
+	 * so should only be used in cases where the visibility of an element cannot be ensured in advance.
+	 *
+	 * @method findDisplayedByLinkText
+	 * @memberOf module:leadfoot/Element#
+	 * @since 1.6
+	 * @param {string} text The link text of the element.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findDisplayedByLinkText: (text: string) => Promise<Element>;
+
+	/**
+	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
+	 * partially matching the given case-insensitive link text. This is inherently slower than
+	 * {@link module:leadfoot/Element#find}, so should only be used in cases where the visibility of an element cannot be
+	 * ensured in advance.
+	 *
+	 * @method findDisplayedByPartialLinkText
+	 * @memberOf module:leadfoot/Element#
+	 * @since 1.6
+	 * @param {string} text The partial link text of the element.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findDisplayedByPartialLinkText: (text: string) => Promise<Element>;
+
+	/**
+	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
+	 * matching the given HTML tag name. This is inherently slower than {@link module:leadfoot/Element#find}, so should
+	 * only be used in cases where the visibility of an element cannot be ensured in advance.
+	 *
+	 * @method findDisplayedByTagName
+	 * @memberOf module:leadfoot/Element#
+	 * @since 1.6
+	 * @param {string} tagName The tag name of the element.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findDisplayedByTagName: (tagName: string) => Promise<Element>;
+
+	/**
+	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
+	 * matching the given XPath selector. This is inherently slower than {@link module:leadfoot/Element#find}, so should
+	 * only be used in cases where the visibility of an element cannot be ensured in advance.
+	 *
+	 * @method findDisplayedByXpath
+	 * @memberOf module:leadfoot/Element#
+	 * @since 1.6
+	 * @param {string} path The XPath selector to search for.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findDisplayedByXpath: (path: string) => Promise<Element>;
+
+	/**
+	 * Waits for all elements inside this element that match the given query to be destroyed.
+	 *
+	 * @method waitForDeleted
+	 * @memberOf module:leadfoot/Element#
+	 *
+	 * @param {string} using
+	 * The element retrieval strategy to use. See {@link module:leadfoot/Session#find} for options.
+	 *
+	 * @param {string} value
+	 * The strategy-specific value to search for. See {@link module:leadfoot/Session#find} for details.
+	 *
+	 * @returns {Promise.<void>}
+	 */
+	waitForDeleted: (using: string, value: string) => Promise<void>;
+
+	/**
+	 * Waits for all elements inside this element matching the given CSS class name to be destroyed.
+	 *
+	 * @method waitForDeletedByClassName
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} className The CSS class name to search for.
+	 * @returns {Promise.<void>}
+	 */
+	waitForDeletedByClassName: (className: string) => Promise<void>;
+
+	/**
+	 * Waits for all elements inside this element matching the given CSS selector to be destroyed.
+	 *
+	 * @method waitForDeletedByCssSelector
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} selector The CSS selector to search for.
+	 * @returns {Promise.<void>}
+	 */
+	waitForDeletedByCssSelector: (selector: string) => Promise<void>;
+
+	/**
+	 * Waits for all elements inside this element matching the given ID to be destroyed.
+	 *
+	 * @method waitForDeletedById
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} id The ID of the element.
+	 * @returns {Promise.<void>}
+	 */
+	waitForDeletedById: (id: string) => Promise<void>;
+
+	/**
+	 * Waits for all elements inside this element matching the given name attribute to be destroyed.
+	 *
+	 * @method waitForDeletedByName
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} name The name of the element.
+	 * @returns {Promise.<void>}
+	 */
+	waitForDeletedByName: (name: string) => Promise<void>;
+
+	/**
+	 * Waits for all elements inside this element matching the given case-insensitive link text to be destroyed.
+	 *
+	 * @method waitForDeletedByLinkText
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} text The link text of the element.
+	 * @returns {Promise.<void>}
+	 */
+	waitForDeletedByLinkText: (text: string) => Promise<void>;
+
+	/**
+	 * Waits for all elements inside this element partially matching the given case-insensitive link text to be
+	 * destroyed.
+	 *
+	 * @method waitForDeletedByPartialLinkText
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} text The partial link text of the element.
+	 * @returns {Promise.<void>}
+	 */
+	waitForDeletedByPartialLinkText: (text: string) => Promise<void>;
+
+	/**
+	 * Waits for all elements inside this element matching the given HTML tag name to be destroyed.
+	 *
+	 * @method waitForDeletedByTagName
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} tagName The tag name of the element.
+	 * @returns {Promise.<void>}
+	 */
+	waitForDeletedByTagName: (tagName: string) => Promise<void>;
+
+	/**
+	 * Waits for all elements inside this element matching the given XPath selector to be destroyed.
+	 *
+	 * @method waitForDeletedByXpath
+	 * @memberOf module:leadfoot/Element#
+	 * @param {string} path The XPath selector to search for.
+	 * @returns {Promise.<void>}
+	 */
+	waitForDeletedByXpath: (path: string) => Promise<void>;
 }
 
-/**
- * Gets the first element inside this element matching the given CSS class name.
- *
- * @method findByClassName
- * @memberOf module:leadfoot/Element#
- * @param {string} className The CSS class name to search for.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first element inside this element matching the given CSS selector.
- *
- * @method findByCssSelector
- * @memberOf module:leadfoot/Element#
- * @param {string} selector The CSS selector to search for.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first element inside this element matching the given ID.
- *
- * @method findById
- * @memberOf module:leadfoot/Element#
- * @param {string} id The ID of the element.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first element inside this element matching the given name attribute.
- *
- * @method findByName
- * @memberOf module:leadfoot/Element#
- * @param {string} name The name of the element.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first element inside this element matching the given case-insensitive link text.
- *
- * @method findByLinkText
- * @memberOf module:leadfoot/Element#
- * @param {string} text The link text of the element.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first element inside this element partially matching the given case-insensitive link text.
- *
- * @method findByPartialLinkText
- * @memberOf module:leadfoot/Element#
- * @param {string} text The partial link text of the element.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first element inside this element matching the given HTML tag name.
- *
- * @method findByTagName
- * @memberOf module:leadfoot/Element#
- * @param {string} tagName The tag name of the element.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first element inside this element matching the given XPath selector.
- *
- * @method findByXpath
- * @memberOf module:leadfoot/Element#
- * @param {string} path The XPath selector to search for.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets all elements inside this element matching the given CSS class name.
- *
- * @method findAllByClassName
- * @memberOf module:leadfoot/Element#
- * @param {string} className The CSS class name to search for.
- * @returns {Promise.<module:leadfoot/Element[]>}
- */
-
-/**
- * Gets all elements inside this element matching the given CSS selector.
- *
- * @method findAllByCssSelector
- * @memberOf module:leadfoot/Element#
- * @param {string} selector The CSS selector to search for.
- * @returns {Promise.<module:leadfoot/Element[]>}
- */
-
-/**
- * Gets all elements inside this element matching the given name attribute.
- *
- * @method findAllByName
- * @memberOf module:leadfoot/Element#
- * @param {string} name The name of the element.
- * @returns {Promise.<module:leadfoot/Element[]>}
- */
-
-/**
- * Gets all elements inside this element matching the given case-insensitive link text.
- *
- * @method findAllByLinkText
- * @memberOf module:leadfoot/Element#
- * @param {string} text The link text of the element.
- * @returns {Promise.<module:leadfoot/Element[]>}
- */
-
-/**
- * Gets all elements inside this element partially matching the given case-insensitive link text.
- *
- * @method findAllByPartialLinkText
- * @memberOf module:leadfoot/Element#
- * @param {string} text The partial link text of the element.
- * @returns {Promise.<module:leadfoot/Element[]>}
- */
-
-/**
- * Gets all elements inside this element matching the given HTML tag name.
- *
- * @method findAllByTagName
- * @memberOf module:leadfoot/Element#
- * @param {string} tagName The tag name of the element.
- * @returns {Promise.<module:leadfoot/Element[]>}
- */
-
-/**
- * Gets all elements inside this element matching the given XPath selector.
- *
- * @method findAllByXpath
- * @memberOf module:leadfoot/Element#
- * @param {string} path The XPath selector to search for.
- * @returns {Promise.<module:leadfoot/Element[]>}
- */
-strategies.applyTo(Element.prototype);
-
-/**
- * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
- * matching the given query. This is inherently slower than {@link module:leadfoot/Element#find}, so should only be
- * used in cases where the visibility of an element cannot be ensured in advance.
- *
- * @method findDisplayed
- * @memberOf module:leadfoot/Element#
- * @since 1.6
- *
- * @param {string} using
- * The element retrieval strategy to use. See {@link module:leadfoot/Session#find} for options.
- *
- * @param {string} value
- * The strategy-specific value to search for. See {@link module:leadfoot/Session#find} for details.
- *
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
- * matching the given CSS class name. This is inherently slower than {@link module:leadfoot/Element#find}, so should
- * only be used in cases where the visibility of an element cannot be ensured in advance.
- *
- * @method findDisplayedByClassName
- * @memberOf module:leadfoot/Element#
- * @since 1.6
- * @param {string} className The CSS class name to search for.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
- * matching the given CSS selector. This is inherently slower than {@link module:leadfoot/Element#find}, so should
- * only be used in cases where the visibility of an element cannot be ensured in advance.
- *
- * @method findDisplayedByCssSelector
- * @memberOf module:leadfoot/Element#
- * @since 1.6
- * @param {string} selector The CSS selector to search for.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
- * matching the given ID. This is inherently slower than {@link module:leadfoot/Element#find}, so should
- * only be used in cases where the visibility of an element cannot be ensured in advance.
- *
- * @method findDisplayedById
- * @memberOf module:leadfoot/Element#
- * @since 1.6
- * @param {string} id The ID of the element.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
- * matching the given name attribute. This is inherently slower than {@link module:leadfoot/Element#find}, so should
- * only be used in cases where the visibility of an element cannot be ensured in advance.
- *
- * @method findDisplayedByName
- * @memberOf module:leadfoot/Element#
- * @since 1.6
- * @param {string} name The name of the element.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
- * matching the given case-insensitive link text. This is inherently slower than {@link module:leadfoot/Element#find},
- * so should only be used in cases where the visibility of an element cannot be ensured in advance.
- *
- * @method findDisplayedByLinkText
- * @memberOf module:leadfoot/Element#
- * @since 1.6
- * @param {string} text The link text of the element.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
- * partially matching the given case-insensitive link text. This is inherently slower than
- * {@link module:leadfoot/Element#find}, so should only be used in cases where the visibility of an element cannot be
- * ensured in advance.
- *
- * @method findDisplayedByPartialLinkText
- * @memberOf module:leadfoot/Element#
- * @since 1.6
- * @param {string} text The partial link text of the element.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
- * matching the given HTML tag name. This is inherently slower than {@link module:leadfoot/Element#find}, so should
- * only be used in cases where the visibility of an element cannot be ensured in advance.
- *
- * @method findDisplayedByTagName
- * @memberOf module:leadfoot/Element#
- * @since 1.6
- * @param {string} tagName The tag name of the element.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
- * matching the given XPath selector. This is inherently slower than {@link module:leadfoot/Element#find}, so should
- * only be used in cases where the visibility of an element cannot be ensured in advance.
- *
- * @method findDisplayedByXpath
- * @memberOf module:leadfoot/Element#
- * @since 1.6
- * @param {string} path The XPath selector to search for.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-findDisplayed.applyTo(Element.prototype);
-
-/**
- * Waits for all elements inside this element that match the given query to be destroyed.
- *
- * @method waitForDeleted
- * @memberOf module:leadfoot/Element#
- *
- * @param {string} using
- * The element retrieval strategy to use. See {@link module:leadfoot/Session#find} for options.
- *
- * @param {string} value
- * The strategy-specific value to search for. See {@link module:leadfoot/Session#find} for details.
- *
- * @returns {Promise.<void>}
- */
-
-/**
- * Waits for all elements inside this element matching the given CSS class name to be destroyed.
- *
- * @method waitForDeletedByClassName
- * @memberOf module:leadfoot/Element#
- * @param {string} className The CSS class name to search for.
- * @returns {Promise.<void>}
- */
-
-/**
- * Waits for all elements inside this element matching the given CSS selector to be destroyed.
- *
- * @method waitForDeletedByCssSelector
- * @memberOf module:leadfoot/Element#
- * @param {string} selector The CSS selector to search for.
- * @returns {Promise.<void>}
- */
-
-/**
- * Waits for all elements inside this element matching the given ID to be destroyed.
- *
- * @method waitForDeletedById
- * @memberOf module:leadfoot/Element#
- * @param {string} id The ID of the element.
- * @returns {Promise.<void>}
- */
-
-/**
- * Waits for all elements inside this element matching the given name attribute to be destroyed.
- *
- * @method waitForDeletedByName
- * @memberOf module:leadfoot/Element#
- * @param {string} name The name of the element.
- * @returns {Promise.<void>}
- */
-
-/**
- * Waits for all elements inside this element matching the given case-insensitive link text to be destroyed.
- *
- * @method waitForDeletedByLinkText
- * @memberOf module:leadfoot/Element#
- * @param {string} text The link text of the element.
- * @returns {Promise.<void>}
- */
-
-/**
- * Waits for all elements inside this element partially matching the given case-insensitive link text to be
- * destroyed.
- *
- * @method waitForDeletedByPartialLinkText
- * @memberOf module:leadfoot/Element#
- * @param {string} text The partial link text of the element.
- * @returns {Promise.<void>}
- */
-
-/**
- * Waits for all elements inside this element matching the given HTML tag name to be destroyed.
- *
- * @method waitForDeletedByTagName
- * @memberOf module:leadfoot/Element#
- * @param {string} tagName The tag name of the element.
- * @returns {Promise.<void>}
- */
-
-/**
- * Waits for all elements inside this element matching the given XPath selector to be destroyed.
- *
- * @method waitForDeletedByXpath
- * @memberOf module:leadfoot/Element#
- * @param {string} path The XPath selector to search for.
- * @returns {Promise.<void>}
- */
-waitForDeleted.applyTo(Element.prototype);
+util.applyMixins(Element, [ Strategies, FindDisplayed, WaitForDeleted ]);

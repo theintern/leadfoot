@@ -299,7 +299,7 @@ TOP_CONTEXT.depth = 0;
  * @borrows module:leadfoot/Element#getSize as module:leadfoot/Command#getSize
  * @borrows module:leadfoot/Element#getComputedStyle as module:leadfoot/Command#getComputedStyle
  */
-export default class Command {
+export default class Command /*implements WaitForDeleted, FindDisplayed, Strategies*/ {
 	private _parent: Command;
 	private _session: Session;
 	private _context: Element|Element[];

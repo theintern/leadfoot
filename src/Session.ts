@@ -3,19 +3,19 @@
  * @module leadfoot/Session
  */
 
-import LeadfootElement, { ElementOrElementId } from './Element';
+import Element, { ElementOrElementId } from './Element';
 import Server from './Server';
-import findDisplayed = require('./lib/findDisplayed');
+import FindDisplayed from './lib/findDisplayed';
 import * as fs from 'fs';
 import JsZip = require('jszip');
 import * as lang from 'dojo/lang';
 import * as path from 'path';
 import Promise = require('dojo/Promise');
 import statusCodes from './lib/statusCodes';
-import storage from './lib/storage';
-import strategies from './lib/strategies';
+import { LocalStorage, SessionStorage } from './lib/storage';
+import Strategies from './lib/strategies';
 import * as util from './lib/util';
-import waitForDeleted from './lib/waitForDeleted';
+import WaitForDeleted from './lib/waitForDeleted';
 import { Capabilities, GeoLocation, LogEntry, WebDriverCookie } from './interfaces';
 
 /**
@@ -46,7 +46,7 @@ function convertToElements(session: Session, value: any) {
 		}
 		else if (typeof value === 'object' && value !== null) {
 			if (value.ELEMENT) {
-				value = new LeadfootElement(value, session);
+				value = new Element(value, session);
 			}
 			else {
 				for (let k in value) {
@@ -233,7 +233,7 @@ function simulateMouse(kwArgs: any) {
 		return kwArgs.target.dispatchEvent(event);
 	}
 
-	function click(target: any, button: any, detail: any) {
+	function click(target, button, detail) {
 		if (!down(target, button)) {
 			return false;
 		}
@@ -251,7 +251,7 @@ function simulateMouse(kwArgs: any) {
 		});
 	}
 
-	function down(target: any, button: any) {
+	function down(target, button) {
 		return dispatch({
 			button: button,
 			cancelable: true,
@@ -260,7 +260,7 @@ function simulateMouse(kwArgs: any) {
 		});
 	}
 
-	function up(target: any, button: any) {
+	function up(target, button) {
 		return dispatch({
 			button: button,
 			cancelable: true,
@@ -269,7 +269,7 @@ function simulateMouse(kwArgs: any) {
 		});
 	}
 
-	function move(currentElement: Element, newElement: Element, xOffset: number, yOffset: number) {
+	function move(currentElement: HTMLElement, newElement: HTMLElement, xOffset: number, yOffset: number) {
 		if (newElement) {
 			const bbox = newElement.getBoundingClientRect();
 
@@ -302,7 +302,7 @@ function simulateMouse(kwArgs: any) {
 		return position;
 	}
 
-	const target = document.elementFromPoint(position.x, position.y);
+	const target = <HTMLElement> document.elementFromPoint(position.x, position.y);
 
 	if (kwArgs.action === 'mousemove') {
 		return move(target, kwArgs.element, kwArgs.xOffset, kwArgs.yOffset);
@@ -335,14 +335,14 @@ function simulateMouse(kwArgs: any) {
 	}
 }
 
-export default class Session {
+export default class Session implements WaitForDeleted, FindDisplayed, Strategies, LocalStorage, SessionStorage {
 	private _sessionId: string;
 	private _server: Server;
 	private _capabilities: Capabilities;
 	private _closedWindows: any = null; // TODO: find correct type
 	// TODO: Timeouts are held so that we can fiddle with the implicit wait timeout to add efficient `waitFor`
 	// and `waitForDeleted` convenience methods. Technically only the implicit timeout is necessary.
-	private _timeouts: any = {}; // TODO: find correct type
+	private _timeouts: { [key: string]: Promise<number>; } = {}; // TODO: find correct type
 	private _movedToElement: boolean = false;
 	private _lastMousePosition: any = null;
 	private _lastAltitude: any = null;
@@ -1228,7 +1228,7 @@ export default class Session {
 	 *
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
-	find(using: string, value: string): Promise<LeadfootElement> {
+	find(using: string, value: string): Promise<Element> {
 		if (using.indexOf('link text') !== -1 && this.capabilities.brokenWhitespaceNormalization) {
 			return this.execute(/* istanbul ignore next */ this._manualFindByLinkText, [ using, value ])
 				.then(element => {
@@ -1237,7 +1237,7 @@ export default class Session {
 						error.name = 'NoSuchElement';
 						throw error;
 					}
-					return new LeadfootElement(element, this);
+					return new Element(element, this);
 				});
 		}
 
@@ -1245,7 +1245,7 @@ export default class Session {
 			using: using,
 			value: value
 		}).then(element => {
-			return new LeadfootElement(element, this);
+			return new Element(element, this);
 		});
 	}
 
@@ -1260,12 +1260,12 @@ export default class Session {
 	 *
 	 * @returns {Promise.<module:leadfoot/Element[]>}
 	 */
-	findAll(using: string, value: string): Promise<LeadfootElement> {
+	findAll(using: string, value: string): Promise<Element[]> {
 		if (using.indexOf('link text') !== -1 && this.capabilities.brokenWhitespaceNormalization) {
 			return this.execute(/* istanbul ignore next */ this._manualFindByLinkText, [ using, value, true ])
 				.then(elements => {
 					return elements.map((element: ElementOrElementId) => {
-						return new LeadfootElement(element, this);
+						return new Element(element, this);
 					});
 				});
 		}
@@ -1275,7 +1275,7 @@ export default class Session {
 			value: value
 		}).then(elements => {
 			return elements.map((element: ElementOrElementId) => {
-				return new LeadfootElement(element, this);
+				return new Element(element, this);
 			});
 		});
 	}
@@ -1298,7 +1298,7 @@ export default class Session {
 		else {
 			return this._post('element/active').then((element: ElementOrElementId) => {
 				if (element) {
-					return new LeadfootElement(element, this);
+					return new Element(element, this);
 				}
 				// The driver will return `null` if the active element is the body element; for consistency with how
 				// the DOM `document.activeElement` property works, we’ll diverge and always return an element
@@ -1427,7 +1427,7 @@ export default class Session {
 	 * @returns {Promise.<void>}
 	 */
 	moveMouseTo(xOffset: number, yOffset: number): Promise<void>;
-	moveMouseTo(element: LeadfootElement, xOffset: number, yOffset: number): Promise<void>;
+	moveMouseTo(element: Element, xOffset: number, yOffset: number): Promise<void>;
 	@forCommand({ usesElement: true })
 	moveMouseTo(...args: any[]): Promise<void> {
 		let [ element, xOffset, yOffset ] = args;
@@ -1583,7 +1583,7 @@ export default class Session {
 	 * @returns {Promise.<void>}
 	 */
 	@forCommand({ usesElement: true })
-	tap(element: LeadfootElement): Promise<void> {
+	tap(element: Element): Promise<void> {
 		// if (element) {
 		// 	element = element.elementId;
 		// }
@@ -1667,7 +1667,7 @@ export default class Session {
 		}
 
 		if (this.capabilities.brokenTouchScroll) {
-			return this.execute(/* istanbul ignore next */ function (element: Element, x: number, y: number) {
+			return this.execute(/* istanbul ignore next */ function (element: HTMLElement, x: number, y: number) {
 				const rect = { left: window.scrollX, top: window.scrollY };
 				if (element) {
 					const bbox = element.getBoundingClientRect();
@@ -1699,7 +1699,7 @@ export default class Session {
 	 * @returns {Promise.<void>}
 	 */
 	@forCommand({ usesElement: true })
-	doubleTap(element: LeadfootElement): Promise<void> {
+	doubleTap(element: Element): Promise<void> {
 		// if (element) {
 		// 	element = element.elementId;
 		// }
@@ -1717,7 +1717,7 @@ export default class Session {
 	 * @returns {Promise.<void>}
 	 */
 	@forCommand({ usesElement: true })
-	longTap(element: LeadfootElement): Promise<void> {
+	longTap(element: Element): Promise<void> {
 		// if (element) {
 		// 	element = element.elementId;
 		// }
@@ -1740,7 +1740,7 @@ export default class Session {
 	 * @returns {Promise.<void>}
 	 */
 	@forCommand({ usesElement: true })
-	flickFinger(element: LeadfootElement, xOffset: number, yOffset: number, speed: number): Promise<void> {
+	flickFinger(element: Element, xOffset: number, yOffset: number, speed: number): Promise<void> {
 		if (typeof speed === 'undefined' && typeof yOffset === 'undefined' && typeof xOffset !== 'undefined') {
 			return this._post('touch/flick', {
 				xspeed: element,
@@ -1886,7 +1886,7 @@ export default class Session {
 	 * @param {Element?} element A context element
 	 * @returns {Element|Element[]} The found element or elements
 	 */
-	_manualFindByLinkText(using: string, value: string, multiple: boolean, element?: Element): Element|Element[] {
+	_manualFindByLinkText(using: string, value: string, multiple: boolean, element?: HTMLElement): HTMLElement|HTMLElement[] {
 		const check = using === 'link text' ? function (linkText: string, text: string): boolean {
 			return linkText === text;
 		} : function (linkText: string, text: string): boolean {
@@ -1895,7 +1895,7 @@ export default class Session {
 
 		const links = (element || document).getElementsByTagName('a');
 		let linkText: string;
-		const found: Element[] = [];
+		const found: HTMLElement[] = [];
 		// if (multiple) {
 		// 	var found = [];
 		// }
@@ -1960,512 +1960,561 @@ export default class Session {
 			resolve(this._post('file', { file: data }));
 		});
 	}
+
+	/**
+	 * Gets the list of keys set in local storage for the focused window/frame.
+	 *
+	 * @method getLocalStorageKeys
+	 * @memberOf module:leadfoot/Session#
+	 * @returns {Promise.<string[]>}
+	 */
+	getLocalStorageKeys: () => Promise<string[]>;
+
+	/**
+	 * Sets a value in local storage for the focused window/frame.
+	 *
+	 * @method setLocalStorageItem
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} key The key to set.
+	 * @param {string} value The value to set.
+	 * @returns {Promise.<void>}
+	 */
+	setLocalStorageItem: (key: string, value: string) => Promise<void>;
+
+	/**
+	 * Clears all data in local storage for the focused window/frame.
+	 *
+	 * @method clearLocalStorage
+	 * @memberOf module:leadfoot/Session#
+	 * @returns {Promise.<void>}
+	 */
+	clearLocalStorage: () => Promise<void>;
+
+	/**
+	 * Gets a value from local storage for the focused window/frame.
+	 *
+	 * @method getLocalStorageItem
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} key The key of the data to get.
+	 * @returns {Promise.<string>}
+	 */
+	getLocalStorageItem: (key: string) => Promise<string>;
+
+	/**
+	 * Deletes a value from local storage for the focused window/frame.
+	 *
+	 * @method deleteLocalStorageItem
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} key The key of the data to delete.
+	 * @returns {Promise.<void>}
+	 */
+	deleteLocalStorageItem: (key: string) => Promise<void>;
+
+	/**
+	 * Gets the number of keys set in local storage for the focused window/frame.
+	 *
+	 * @method getLocalStorageLength
+	 * @memberOf module:leadfoot/Session#
+	 * @returns {Promise.<number>}
+	 */
+	getLocalStorageLength: () => Promise<number>;
+
+	/**
+	 * Gets the list of keys set in session storage for the focused window/frame.
+	 *
+	 * @method getSessionStorageKeys
+	 * @memberOf module:leadfoot/Session#
+	 * @returns {Promise.<string[]>}
+	 */
+	getSessionStorageKeys: () => Promise<string[]>;
+
+	/**
+	 * Sets a value in session storage for the focused window/frame.
+	 *
+	 * @method setSessionStorageItem
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} key The key to set.
+	 * @param {string} value The value to set.
+	 * @returns {Promise.<void>}
+	 */
+	setSessionStorageItem: (key: string, value: string) => Promise<void>;
+
+	/**
+	 * Clears all data in session storage for the focused window/frame.
+	 *
+	 * @method clearSessionStorage
+	 * @memberOf module:leadfoot/Session#
+	 * @returns {Promise.<void>}
+	 */
+	clearSessionStorage: () => Promise<void>;
+
+	/**
+	 * Gets a value from session storage for the focused window/frame.
+	 *
+	 * @method getSessionStorageItem
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} key The key of the data to get.
+	 * @returns {Promise.<string>}
+	 */
+	getSessionStorageItem: (key: string) => Promise<string>;
+
+	/**
+	 * Deletes a value from session storage for the focused window/frame.
+	 *
+	 * @method deleteSessionStorageItem
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} key The key of the data to delete.
+	 * @returns {Promise.<void>}
+	 */
+	deleteSessionStorageItem: (key: string) => Promise<void>;
+
+	/**
+	 * Gets the number of keys set in session storage for the focused window/frame.
+	 *
+	 * @method getSessionStorageLength
+	 * @memberOf module:leadfoot/Session#
+	 * @returns {Promise.<number>}
+	 */
+	getSessionStorageLength: () => Promise<number>;
+
+	// TODO: The rest of this file are "extra" interfaces; decide where they go more permanently
+	/**
+	 * Gets the first element in the currently active window/frame matching the given CSS class name.
+	 *
+	 * @method findByClassName
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} className The CSS class name to search for.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findByClassName: (className: string) => Promise<Element>;
+
+	/**
+	 * Gets the first element in the currently active window/frame matching the given CSS selector.
+	 *
+	 * @method findByCssSelector
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} selector The CSS selector to search for.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findByCssSelector: (selector: string) => Promise<Element>;
+
+	/**
+	 * Gets the first element in the currently active window/frame matching the given ID.
+	 *
+	 * @method findById
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} id The ID of the element.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findById: (id: string) => Promise<Element>;
+
+	/**
+	 * Gets the first element in the currently active window/frame matching the given name attribute.
+	 *
+	 * @method findByName
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} name The name of the element.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findByName: (name: string) => Promise<Element>;
+
+	/**
+	 * Gets the first element in the currently active window/frame matching the given case-insensitive link text.
+	 *
+	 * @method findByLinkText
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} text The link text of the element.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findByLinkText: (text: string) => Promise<Element>;
+
+	/**
+	 * Gets the first element in the currently active window/frame partially matching the given case-insensitive
+	 * link text.
+	 *
+	 * @method findByPartialLinkText
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} text The partial link text of the element.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findByPartialLinkText: (text: string) => Promise<Element>;
+
+	/**
+	 * Gets the first element in the currently active window/frame matching the given HTML tag name.
+	 *
+	 * @method findByTagName
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} tagName The tag name of the element.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findByTagName: (tagName: string) => Promise<Element>;
+
+	/**
+	 * Gets the first element in the currently active window/frame matching the given XPath selector.
+	 *
+	 * @method findByXpath
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} path The XPath selector to search for.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findByXpath: (path: string) => Promise<Element>;
+
+	/**
+	 * Gets all elements in the currently active window/frame matching the given CSS class name.
+	 *
+	 * @method findAllByClassName
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} className The CSS class name to search for.
+	 * @returns {Promise.<module:leadfoot/Element[]>}
+	 */
+	findAllByClassName: (className: string) => Promise<Element[]>;
+
+	/**
+	 * Gets all elements in the currently active window/frame matching the given CSS selector.
+	 *
+	 * @method findAllByCssSelector
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} selector The CSS selector to search for.
+	 * @returns {Promise.<module:leadfoot/Element[]>}
+	 */
+	findAllByCssSelector: (selector: string) => Promise<Element[]>;
+
+	/**
+	 * Gets all elements in the currently active window/frame matching the given name attribute.
+	 *
+	 * @method findAllByName
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} name The name of the element.
+	 * @returns {Promise.<module:leadfoot/Element[]>}
+	 */
+	findAllByName: (name: string) => Promise<Element[]>;
+
+	/**
+	 * Gets all elements in the currently active window/frame matching the given case-insensitive link text.
+	 *
+	 * @method findAllByLinkText
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} text The link text of the element.
+	 * @returns {Promise.<module:leadfoot/Element[]>}
+	 */
+	findAllByLinkText: (text: string) => Promise<Element[]>;
+
+	/**
+	 * Gets all elements in the currently active window/frame partially matching the given case-insensitive
+	 * link text.
+	 *
+	 * @method findAllByPartialLinkText
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} text The partial link text of the element.
+	 * @returns {Promise.<module:leadfoot/Element[]>}
+	 */
+	findAllByPartialLinkText: (text: string) => Promise<Element[]>;
+
+	/**
+	 * Gets all elements in the currently active window/frame matching the given HTML tag name.
+	 *
+	 * @method findAllByTagName
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} tagName The tag name of the element.
+	 * @returns {Promise.<module:leadfoot/Element[]>}
+	 */
+	findAllByTagName: (tagName: string) => Promise<Element[]>;
+
+	/**
+	 * Gets all elements in the currently active window/frame matching the given XPath selector.
+	 *
+	 * @method findAllByXpath
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} path The XPath selector to search for.
+	 * @returns {Promise.<module:leadfoot/Element[]>}
+	 */
+	findAllByXpath: (path: string) => Promise<Element[]>;
+
+	/**
+	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
+	 * matching the given query. This is inherently slower than {@link module:leadfoot/Session#find}, so should only be
+	 * used in cases where the visibility of an element cannot be ensured in advance.
+	 *
+	 * @method findDisplayed
+	 * @memberOf module:leadfoot/Session#
+	 * @since 1.6
+	 *
+	 * @param {string} using
+	 * The element retrieval strategy to use. See {@link module:leadfoot/Session#find} for options.
+	 *
+	 * @param {string} value
+	 * The strategy-specific value to search for. See {@link module:leadfoot/Session#find} for details.
+	 *
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findDisplayed: (using: string, value: string) => Promise<Element>;
+
+	/**
+	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
+	 * matching the given CSS class name. This is inherently slower than {@link module:leadfoot/Session#find}, so should
+	 * only be used in cases where the visibility of an element cannot be ensured in advance.
+	 *
+	 * @method findDisplayedByClassName
+	 * @memberOf module:leadfoot/Session#
+	 * @since 1.6
+	 * @param {string} className The CSS class name to search for.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findDisplayedByClassName: (className: string) => Promise<Element>;
+
+	/**
+	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
+	 * matching the given CSS selector. This is inherently slower than {@link module:leadfoot/Session#find}, so should only
+	 * be used in cases where the visibility of an element cannot be ensured in advance.
+	 *
+	 * @method findDisplayedByCssSelector
+	 * @memberOf module:leadfoot/Session#
+	 * @since 1.6
+	 * @param {string} selector The CSS selector to search for.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findDisplayedByCssSelector: (selector: string) => Promise<Element>;
+
+	/**
+	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
+	 * matching the given ID. This is inherently slower than {@link module:leadfoot/Session#find}, so should only be
+	 * used in cases where the visibility of an element cannot be ensured in advance.
+	 *
+	 * @method findDisplayedById
+	 * @memberOf module:leadfoot/Session#
+	 * @since 1.6
+	 * @param {string} id The ID of the element.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findDisplayedById: (id: string) => Promise<Element>;
+
+	/**
+	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
+	 * matching the given name attribute. This is inherently slower than {@link module:leadfoot/Session#find}, so should
+	 * only be used in cases where the visibility of an element cannot be ensured in advance.
+	 *
+	 * @method findDisplayedByName
+	 * @memberOf module:leadfoot/Session#
+	 * @since 1.6
+	 * @param {string} name The name of the element.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findDisplayedByName: (name: string) => Promise<Element>;
+
+	/**
+	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
+	 * matching the given case-insensitive link text. This is inherently slower than {@link module:leadfoot/Session#find},
+	 * so should only be used in cases where the visibility of an element cannot be ensured in advance.
+	 *
+	 * @method findDisplayedByLinkText
+	 * @memberOf module:leadfoot/Session#
+	 * @since 1.6
+	 * @param {string} text The link text of the element.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findDisplayedByLinkText: (text: string) => Promise<Element>;
+
+	/**
+	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
+	 * partially matching the given case-insensitive link text. This is inherently slower than
+	 * {@link module:leadfoot/Session#find}, so should only be used in cases where the visibility of an element cannot be
+	 * ensured in advance.
+	 *
+	 * @method findDisplayedByPartialLinkText
+	 * @memberOf module:leadfoot/Session#
+	 * @since 1.6
+	 * @param {string} text The partial link text of the element.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findDisplayedByPartialLinkText: (text: string) => Promise<Element>;
+
+	/**
+	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
+	 * matching the given HTML tag name. This is inherently slower than {@link module:leadfoot/Session#find}, so should
+	 * only be used in cases where the visibility of an element cannot be ensured in advance.
+	 *
+	 * @method findDisplayedByTagName
+	 * @memberOf module:leadfoot/Session#
+	 * @since 1.6
+	 * @param {string} tagName The tag name of the element.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findDisplayedByTagName: (tagName: string) => Promise<Element>;
+
+	/**
+	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
+	 * matching the given XPath selector. This is inherently slower than {@link module:leadfoot/Session#find}, so should
+	 * only be used in cases where the visibility of an element cannot be ensured in advance.
+	 *
+	 * @method findDisplayedByXpath
+	 * @memberOf module:leadfoot/Session#
+	 * @since 1.6
+	 * @param {string} path The XPath selector to search for.
+	 * @returns {Promise.<module:leadfoot/Element>}
+	 */
+	findDisplayedByXpath: (path: string) => Promise<Element>;
+
+	/**
+	 * Waits for all elements in the currently active window/frame to be destroyed.
+	 *
+	 * @method waitForDeleted
+	 * @memberOf module:leadfoot/Session#
+	 *
+	 * @param {string} using
+	 * The element retrieval strategy to use. See {@link module:leadfoot/Session#find} for options.
+	 *
+	 * @param {string} value
+	 * The strategy-specific value to search for. See {@link module:leadfoot/Session#find} for details.
+	 *
+	 * @returns {Promise.<void>}
+	 */
+	waitForDeleted: (using: string, value: string) => Promise<void>;
+
+	/**
+	 * Waits for all elements in the currently active window/frame matching the given CSS class name to be
+	 * destroyed.
+	 *
+	 * @method waitForDeletedByClassName
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} className The CSS class name to search for.
+	 * @returns {Promise.<void>}
+	 */
+	waitForDeletedByClassName: (className: string) => Promise<void>;
+
+	/**
+	 * Waits for all elements in the currently active window/frame matching the given CSS selector to be destroyed.
+	 *
+	 * @method waitForDeletedByCssSelector
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} selector The CSS selector to search for.
+	 * @returns {Promise.<void>}
+	 */
+	waitForDeletedByCssSelector: (selector: string) => Promise<void>;
+
+	/**
+	 * Waits for all elements in the currently active window/frame matching the given ID to be destroyed.
+	 *
+	 * @method waitForDeletedById
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} id The ID of the element.
+	 * @returns {Promise.<void>}
+	 */
+	waitForDeletedById: (id: string) => Promise<void>;
+
+	/**
+	 * Waits for all elements in the currently active window/frame matching the given name attribute to be
+	 * destroyed.
+	 *
+	 * @method waitForDeletedByName
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} name The name of the element.
+	 * @returns {Promise.<void>}
+	 */
+	waitForDeletedByName: (name: string) => Promise<void>;
+
+	/**
+	 * Waits for all elements in the currently active window/frame matching the given case-insensitive link text
+	 * to be destroyed.
+	 *
+	 * @method waitForDeletedByLinkText
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} text The link text of the element.
+	 * @returns {Promise.<void>}
+	 */
+	waitForDeletedByLinkText: (text: string) => Promise<void>;
+
+	/**
+	 * Waits for all elements in the currently active window/frame partially matching the given case-insensitive
+	 * link text to be destroyed.
+	 *
+	 * @method waitForDeletedByPartialLinkText
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} text The partial link text of the element.
+	 * @returns {Promise.<void>}
+	 */
+	waitForDeletedByPartialLinkText: (text: string) => Promise<void>;
+
+	/**
+	 * Waits for all elements in the currently active window/frame matching the given HTML tag name to be destroyed.
+	 *
+	 * @method waitForDeletedByTagName
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} tagName The tag name of the element.
+	 * @returns {Promise.<void>}
+	 */
+	waitForDeletedByTagName: (tagName: string) => Promise<void>;
+
+	/**
+	 * Waits for all elements in the currently active window/frame matching the given XPath selector to be
+	 * destroyed.
+	 *
+	 * @method waitForDeletedByXpath
+	 * @memberOf module:leadfoot/Session#
+	 * @param {string} path The XPath selector to search for.
+	 * @returns {Promise.<void>}
+	 */
+	waitForDeletedByXpath: (path: string) => Promise<void>;
+
+	/**
+	 * Gets the timeout for {@link module:leadfoot/Session#executeAsync} calls.
+	 *
+	 * @method getExecuteAsyncTimeout
+	 * @memberOf module:leadfoot/Session#
+	 * @returns {Promise.<number>}
+	 */
+	getExecuteAsyncTimeout: () => Promise<number>;
+
+	/**
+	 * Sets the timeout for {@link module:leadfoot/Session#executeAsync} calls.
+	 *
+	 * @method setExecuteAsyncTimeout
+	 * @memberOf module:leadfoot/Session#
+	 * @param {number} ms The length of the timeout, in milliseconds.
+	 * @returns {Promise.<void>}
+	 */
+	setExecuteAsyncTimeout: (ms: number) => Promise<void>;
+
+	/**
+	 * Gets the timeout for {@link module:leadfoot/Session#find} calls.
+	 *
+	 * @method getFindTimeout
+	 * @memberOf module:leadfoot/Session#
+	 * @returns {Promise.<number>}
+	 */
+	getFindTimeout: () => Promise<number>;
+
+	/**
+	 * Sets the timeout for {@link module:leadfoot/Session#find} calls.
+	 *
+	 * @method setFindTimeout
+	 * @memberOf module:leadfoot/Session#
+	 * @param {number} ms The length of the timeout, in milliseconds.
+	 * @returns {Promise.<void>}
+	 */
+	setFindTimeout: (ms: number) => Promise<void>;
+
+	/**
+	 * Gets the timeout for {@link module:leadfoot/Session#get} calls.
+	 *
+	 * @method getPageLoadTimeout
+	 * @memberOf module:leadfoot/Session#
+	 * @returns {Promise.<number>}
+	 */
+	getPageLoadTimeout: () => Promise<number>;
+
+	/**
+	 * Sets the timeout for {@link module:leadfoot/Session#get} calls.
+	 *
+	 * @method setPageLoadTimeout
+	 * @memberOf module:leadfoot/Session#
+	 * @param {number} ms The length of the timeout, in milliseconds.
+	 * @returns {Promise.<void>}
+	 */
+	setPageLoadTimeout: (ms: string) => Promise<void>;
 }
 
-/**
- * Gets the list of keys set in local storage for the focused window/frame.
- *
- * @method getLocalStorageKeys
- * @memberOf module:leadfoot/Session#
- * @returns {Promise.<string[]>}
- */
+util.applyMixins(Session, [ WaitForDeleted, FindDisplayed, Strategies, SessionStorage, LocalStorage ]);
 
-/**
- * Sets a value in local storage for the focused window/frame.
- *
- * @method setLocalStorageItem
- * @memberOf module:leadfoot/Session#
- * @param {string} key The key to set.
- * @param {string} value The value to set.
- * @returns {Promise.<void>}
- */
-
-/**
- * Clears all data in local storage for the focused window/frame.
- *
- * @method clearLocalStorage
- * @memberOf module:leadfoot/Session#
- * @returns {Promise.<void>}
- */
-
-/**
- * Gets a value from local storage for the focused window/frame.
- *
- * @method getLocalStorageItem
- * @memberOf module:leadfoot/Session#
- * @param {string} key The key of the data to get.
- * @returns {Promise.<string>}
- */
-
-/**
- * Deletes a value from local storage for the focused window/frame.
- *
- * @method deleteLocalStorageItem
- * @memberOf module:leadfoot/Session#
- * @param {string} key The key of the data to delete.
- * @returns {Promise.<void>}
- */
-
-/**
- * Gets the number of keys set in local storage for the focused window/frame.
- *
- * @method getLocalStorageLength
- * @memberOf module:leadfoot/Session#
- * @returns {Promise.<number>}
- */
-storage.applyTo(Session.prototype, 'local');
-
-/**
- * Gets the list of keys set in session storage for the focused window/frame.
- *
- * @method getSessionStorageKeys
- * @memberOf module:leadfoot/Session#
- * @returns {Promise.<string[]>}
- */
-
-/**
- * Sets a value in session storage for the focused window/frame.
- *
- * @method setSessionStorageItem
- * @memberOf module:leadfoot/Session#
- * @param {string} key The key to set.
- * @param {string} value The value to set.
- * @returns {Promise.<void>}
- */
-
-/**
- * Clears all data in session storage for the focused window/frame.
- *
- * @method clearSessionStorage
- * @memberOf module:leadfoot/Session#
- * @returns {Promise.<void>}
- */
-
-/**
- * Gets a value from session storage for the focused window/frame.
- *
- * @method getSessionStorageItem
- * @memberOf module:leadfoot/Session#
- * @param {string} key The key of the data to get.
- * @returns {Promise.<string>}
- */
-
-/**
- * Deletes a value from session storage for the focused window/frame.
- *
- * @method deleteSessionStorageItem
- * @memberOf module:leadfoot/Session#
- * @param {string} key The key of the data to delete.
- * @returns {Promise.<void>}
- */
-
-/**
- * Gets the number of keys set in session storage for the focused window/frame.
- *
- * @method getSessionStorageLength
- * @memberOf module:leadfoot/Session#
- * @returns {Promise.<number>}
- */
-storage.applyTo(Session.prototype, 'session');
-
-// TODO: The rest of this file are "extra" interfaces; decide where they go more permanently
-/**
- * Gets the first element in the currently active window/frame matching the given CSS class name.
- *
- * @method findByClassName
- * @memberOf module:leadfoot/Session#
- * @param {string} className The CSS class name to search for.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first element in the currently active window/frame matching the given CSS selector.
- *
- * @method findByCssSelector
- * @memberOf module:leadfoot/Session#
- * @param {string} selector The CSS selector to search for.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first element in the currently active window/frame matching the given ID.
- *
- * @method findById
- * @memberOf module:leadfoot/Session#
- * @param {string} id The ID of the element.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first element in the currently active window/frame matching the given name attribute.
- *
- * @method findByName
- * @memberOf module:leadfoot/Session#
- * @param {string} name The name of the element.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first element in the currently active window/frame matching the given case-insensitive link text.
- *
- * @method findByLinkText
- * @memberOf module:leadfoot/Session#
- * @param {string} text The link text of the element.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first element in the currently active window/frame partially matching the given case-insensitive
- * link text.
- *
- * @method findByPartialLinkText
- * @memberOf module:leadfoot/Session#
- * @param {string} text The partial link text of the element.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first element in the currently active window/frame matching the given HTML tag name.
- *
- * @method findByTagName
- * @memberOf module:leadfoot/Session#
- * @param {string} tagName The tag name of the element.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first element in the currently active window/frame matching the given XPath selector.
- *
- * @method findByXpath
- * @memberOf module:leadfoot/Session#
- * @param {string} path The XPath selector to search for.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets all elements in the currently active window/frame matching the given CSS class name.
- *
- * @method findAllByClassName
- * @memberOf module:leadfoot/Session#
- * @param {string} className The CSS class name to search for.
- * @returns {Promise.<module:leadfoot/Element[]>}
- */
-
-/**
- * Gets all elements in the currently active window/frame matching the given CSS selector.
- *
- * @method findAllByCssSelector
- * @memberOf module:leadfoot/Session#
- * @param {string} selector The CSS selector to search for.
- * @returns {Promise.<module:leadfoot/Element[]>}
- */
-
-/**
- * Gets all elements in the currently active window/frame matching the given name attribute.
- *
- * @method findAllByName
- * @memberOf module:leadfoot/Session#
- * @param {string} name The name of the element.
- * @returns {Promise.<module:leadfoot/Element[]>}
- */
-
-/**
- * Gets all elements in the currently active window/frame matching the given case-insensitive link text.
- *
- * @method findAllByLinkText
- * @memberOf module:leadfoot/Session#
- * @param {string} text The link text of the element.
- * @returns {Promise.<module:leadfoot/Element[]>}
- */
-
-/**
- * Gets all elements in the currently active window/frame partially matching the given case-insensitive
- * link text.
- *
- * @method findAllByPartialLinkText
- * @memberOf module:leadfoot/Session#
- * @param {string} text The partial link text of the element.
- * @returns {Promise.<module:leadfoot/Element[]>}
- */
-
-/**
- * Gets all elements in the currently active window/frame matching the given HTML tag name.
- *
- * @method findAllByTagName
- * @memberOf module:leadfoot/Session#
- * @param {string} tagName The tag name of the element.
- * @returns {Promise.<module:leadfoot/Element[]>}
- */
-
-/**
- * Gets all elements in the currently active window/frame matching the given XPath selector.
- *
- * @method findAllByXpath
- * @memberOf module:leadfoot/Session#
- * @param {string} path The XPath selector to search for.
- * @returns {Promise.<module:leadfoot/Element[]>}
- */
-strategies.applyTo(Session.prototype);
-
-/**
- * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
- * matching the given query. This is inherently slower than {@link module:leadfoot/Session#find}, so should only be
- * used in cases where the visibility of an element cannot be ensured in advance.
- *
- * @method findDisplayed
- * @memberOf module:leadfoot/Session#
- * @since 1.6
- *
- * @param {string} using
- * The element retrieval strategy to use. See {@link module:leadfoot/Session#find} for options.
- *
- * @param {string} value
- * The strategy-specific value to search for. See {@link module:leadfoot/Session#find} for details.
- *
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
- * matching the given CSS class name. This is inherently slower than {@link module:leadfoot/Session#find}, so should
- * only be used in cases where the visibility of an element cannot be ensured in advance.
- *
- * @method findDisplayedByClassName
- * @memberOf module:leadfoot/Session#
- * @since 1.6
- * @param {string} className The CSS class name to search for.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
- * matching the given CSS selector. This is inherently slower than {@link module:leadfoot/Session#find}, so should only
- * be used in cases where the visibility of an element cannot be ensured in advance.
- *
- * @method findDisplayedByCssSelector
- * @memberOf module:leadfoot/Session#
- * @since 1.6
- * @param {string} selector The CSS selector to search for.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
- * matching the given ID. This is inherently slower than {@link module:leadfoot/Session#find}, so should only be
- * used in cases where the visibility of an element cannot be ensured in advance.
- *
- * @method findDisplayedById
- * @memberOf module:leadfoot/Session#
- * @since 1.6
- * @param {string} id The ID of the element.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
- * matching the given name attribute. This is inherently slower than {@link module:leadfoot/Session#find}, so should
- * only be used in cases where the visibility of an element cannot be ensured in advance.
- *
- * @method findDisplayedByName
- * @memberOf module:leadfoot/Session#
- * @since 1.6
- * @param {string} name The name of the element.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
- * matching the given case-insensitive link text. This is inherently slower than {@link module:leadfoot/Session#find},
- * so should only be used in cases where the visibility of an element cannot be ensured in advance.
- *
- * @method findDisplayedByLinkText
- * @memberOf module:leadfoot/Session#
- * @since 1.6
- * @param {string} text The link text of the element.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
- * partially matching the given case-insensitive link text. This is inherently slower than
- * {@link module:leadfoot/Session#find}, so should only be used in cases where the visibility of an element cannot be
- * ensured in advance.
- *
- * @method findDisplayedByPartialLinkText
- * @memberOf module:leadfoot/Session#
- * @since 1.6
- * @param {string} text The partial link text of the element.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
- * matching the given HTML tag name. This is inherently slower than {@link module:leadfoot/Session#find}, so should
- * only be used in cases where the visibility of an element cannot be ensured in advance.
- *
- * @method findDisplayedByTagName
- * @memberOf module:leadfoot/Session#
- * @since 1.6
- * @param {string} tagName The tag name of the element.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-
-/**
- * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
- * matching the given XPath selector. This is inherently slower than {@link module:leadfoot/Session#find}, so should
- * only be used in cases where the visibility of an element cannot be ensured in advance.
- *
- * @method findDisplayedByXpath
- * @memberOf module:leadfoot/Session#
- * @since 1.6
- * @param {string} path The XPath selector to search for.
- * @returns {Promise.<module:leadfoot/Element>}
- */
-findDisplayed.applyTo(Session.prototype);
-
-/**
- * Waits for all elements in the currently active window/frame to be destroyed.
- *
- * @method waitForDeleted
- * @memberOf module:leadfoot/Session#
- *
- * @param {string} using
- * The element retrieval strategy to use. See {@link module:leadfoot/Session#find} for options.
- *
- * @param {string} value
- * The strategy-specific value to search for. See {@link module:leadfoot/Session#find} for details.
- *
- * @returns {Promise.<void>}
- */
-
-/**
- * Waits for all elements in the currently active window/frame matching the given CSS class name to be
- * destroyed.
- *
- * @method waitForDeletedByClassName
- * @memberOf module:leadfoot/Session#
- * @param {string} className The CSS class name to search for.
- * @returns {Promise.<void>}
- */
-
-/**
- * Waits for all elements in the currently active window/frame matching the given CSS selector to be destroyed.
- *
- * @method waitForDeletedByCssSelector
- * @memberOf module:leadfoot/Session#
- * @param {string} selector The CSS selector to search for.
- * @returns {Promise.<void>}
- */
-
-/**
- * Waits for all elements in the currently active window/frame matching the given ID to be destroyed.
- *
- * @method waitForDeletedById
- * @memberOf module:leadfoot/Session#
- * @param {string} id The ID of the element.
- * @returns {Promise.<void>}
- */
-
-/**
- * Waits for all elements in the currently active window/frame matching the given name attribute to be
- * destroyed.
- *
- * @method waitForDeletedByName
- * @memberOf module:leadfoot/Session#
- * @param {string} name The name of the element.
- * @returns {Promise.<void>}
- */
-
-/**
- * Waits for all elements in the currently active window/frame matching the given case-insensitive link text
- * to be destroyed.
- *
- * @method waitForDeletedByLinkText
- * @memberOf module:leadfoot/Session#
- * @param {string} text The link text of the element.
- * @returns {Promise.<void>}
- */
-
-/**
- * Waits for all elements in the currently active window/frame partially matching the given case-insensitive
- * link text to be destroyed.
- *
- * @method waitForDeletedByPartialLinkText
- * @memberOf module:leadfoot/Session#
- * @param {string} text The partial link text of the element.
- * @returns {Promise.<void>}
- */
-
-/**
- * Waits for all elements in the currently active window/frame matching the given HTML tag name to be destroyed.
- *
- * @method waitForDeletedByTagName
- * @memberOf module:leadfoot/Session#
- * @param {string} tagName The tag name of the element.
- * @returns {Promise.<void>}
- */
-
-/**
- * Waits for all elements in the currently active window/frame matching the given XPath selector to be
- * destroyed.
- *
- * @method waitForDeletedByXpath
- * @memberOf module:leadfoot/Session#
- * @param {string} path The XPath selector to search for.
- * @returns {Promise.<void>}
- */
-waitForDeleted.applyTo(Session.prototype);
-
-/**
- * Gets the timeout for {@link module:leadfoot/Session#executeAsync} calls.
- *
- * @method getExecuteAsyncTimeout
- * @memberOf module:leadfoot/Session#
- * @returns {Promise.<number>}
- */
-
-/**
- * Sets the timeout for {@link module:leadfoot/Session#executeAsync} calls.
- *
- * @method setExecuteAsyncTimeout
- * @memberOf module:leadfoot/Session#
- * @param {number} ms The length of the timeout, in milliseconds.
- * @returns {Promise.<void>}
- */
-
-/**
- * Gets the timeout for {@link module:leadfoot/Session#find} calls.
- *
- * @method getFindTimeout
- * @memberOf module:leadfoot/Session#
- * @returns {Promise.<number>}
- */
-
-/**
- * Sets the timeout for {@link module:leadfoot/Session#find} calls.
- *
- * @method setFindTimeout
- * @memberOf module:leadfoot/Session#
- * @param {number} ms The length of the timeout, in milliseconds.
- * @returns {Promise.<void>}
- */
-
-/**
- * Gets the timeout for {@link module:leadfoot/Session#get} calls.
- *
- * @method getPageLoadTimeout
- * @memberOf module:leadfoot/Session#
- * @returns {Promise.<number>}
- */
-
-/**
- * Sets the timeout for {@link module:leadfoot/Session#get} calls.
- *
- * @method setPageLoadTimeout
- * @memberOf module:leadfoot/Session#
- * @param {number} ms The length of the timeout, in milliseconds.
- * @returns {Promise.<void>}
- */
 (function (prototype: any) {
 	const timeouts: any = {
 		script: 'ExecuteAsync',
