@@ -24,6 +24,23 @@ function isMacGeckoDriver(capabilities: Capabilities): boolean {
 	return isGeckoDriver(capabilities) && capabilities.platform === 'MAC';
 }
 
+function isMsEdge(capabilities: Capabilities, minVersion?: number, maxVersion?: number): boolean {
+	if (capabilities.browserName !== 'MicrosoftEdge') {
+		return false;
+	}
+	if (minVersion != null || maxVersion != null) {
+		const version = parseFloat(capabilities.browserVersion);
+		if (minVersion != null && version < minVersion) {
+			return false;
+		}
+		if (maxVersion != null && version > maxVersion) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 /**
  * A function that performs an HTTP request to a JsonWireProtocol endpoint and normalises response status and
  * data.
@@ -403,7 +420,7 @@ export default class Server {
 			// innerHTML, though it is unfortunately a quirks-mode file so testing is limited
 			if (
 				(capabilities.browserName === 'internet explorer' && parseFloat(capabilities.version) < 10) ||
-				capabilities.browserName === 'MicrosoftEdge'
+				isMsEdge(capabilities)
 			) {
 				// Edge driver doesn't provide an initialBrowserUrl
 				const initialUrl = capabilities.browserName === 'internet explorer' ? capabilities.initialBrowserUrl :
@@ -425,7 +442,7 @@ export default class Server {
 		}
 
 		function discoverFeatures(): any {
-			// jshint maxcomplexity:13
+			// jshint maxcomplexity:15
 
 			const testedCapabilities: any = {};
 
@@ -449,11 +466,7 @@ export default class Server {
 			}
 
 			// At least MS Edge 14316 supports alerts but does not specify the capability
-			if (
-				capabilities.browserName === 'MicrosoftEdge' &&
-				parseFloat(capabilities.browserVersion) >= 37.14316 &&
-				!('handlesAlerts' in capabilities)
-			) {
+			if (isMsEdge(capabilities, 37.14316) && !('handlesAlerts' in capabilities)) {
 				testedCapabilities.handlesAlerts = true;
 			}
 
@@ -513,10 +526,18 @@ export default class Server {
 					};
 				}
 			}
+			else if (isMsEdge(capabilities)) {
+				testedCapabilities.brokenDeleteCookie = true;
+			}
 
 			// At least firefox 49 + geckodriver can't POST empty data
 			if (isGeckoDriver(capabilities)) {
 				testedCapabilities.brokenEmptyPost = true;
+			}
+
+			// At least MS Edge may return an 'element is obscured' error when trying to click on visible elements.
+			if (isMsEdge(capabilities)) {
+				testedCapabilities.brokenClick = true;
 			}
 
 			// Don't check for touch support if the environment reports that no touchscreen is available
@@ -623,10 +644,10 @@ export default class Server {
 				return error.name === 'UnknownCommand';
 			});
 
-			// At least Selendroid 0.9.0 has broken cookie deletion; nobody else has broken cookie deletion but
-			// this test is very hard to get working properly in other environments so only test when Selendroid
-			// is the browser
+			// At least Selendroid 0.9.0 and MS Edge have broken cookie deletion
 			if (capabilities.browserName === 'selendroid') {
+				// This test is very hard to get working properly in other environments so only test when Selendroid is
+				// the browser
 				testedCapabilities.brokenDeleteCookie = function () {
 					return session.get('about:blank').then(function () {
 						return session.clearCookies();
@@ -729,10 +750,7 @@ export default class Server {
 			// https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/7194303/
 			//
 			// The existing feature test for this caused some browsers to hang, so just flag it for Edge for now.
-			if (
-				capabilities.browserName === 'MicrosoftEdge' &&
-				parseFloat(capabilities.browserVersion) <= 38.14366
-			) {
+			if (isMsEdge(capabilities, null, 38.14366)) {
 				testedCapabilities.brokenFileSendKeys = true;
 			}
 			// testedCapabilities.brokenFileSendKeys = function () {
@@ -834,10 +852,7 @@ export default class Server {
 			// At least MS Edge 10586 becomes unresponsive after calling DELETE window, and window.close() requires user
 			// interaction. This capability is distinct from brokenDeleteWindow as this capability indicates that there
 			// is no way to close a Window.
-			if (
-				capabilities.browserName === 'MicrosoftEdge' &&
-				parseFloat(capabilities.browserVersion) <= 25.10586
-			) {
+			if (isMsEdge(capabilities, null, 25.10586)) {
 				testedCapabilities.brokenWindowClose = true;
 			}
 
@@ -935,7 +950,7 @@ export default class Server {
 				testedCapabilities.brokenMouseEvents = function () {
 					return get(
 						'<!DOCTYPE html><div id="foo">foo</div>' +
-						'<script>counter = 0; var d = document; d.onmousemove = function () { counter++; };</script>'
+						'<script>window.counter = 0; var d = document; d.onmousemove = function () { window.counter++; };</script>'
 					).then(function () {
 						return session.findById('foo');
 					}).then(function (element) {
@@ -974,7 +989,7 @@ export default class Server {
 						return Promise.resolve(false);
 					}
 
-					return get('<!DOCTYPE html><script>counter = 0; var d = document; d.onclick = d.onmousedown = d.onmouseup = function () { counter++; };</script>').then(function () {
+					return get('<!DOCTYPE html><script>window.counter = 0; var d = document; d.onclick = d.onmousedown = d.onmouseup = function () { window.counter++; };</script>').then(function () {
 						return session.findByTagName('html');
 					}).then(function (element) {
 						return session.moveMouseTo(element);
@@ -983,7 +998,7 @@ export default class Server {
 					}).then(function () {
 						return session.doubleClick();
 					}).then(function () {
-						return session.execute('return counter;');
+						return session.execute('return window.counter;');
 					}).then(function (counter) {
 						// InternetExplorerDriver 2.41.0 has a race condition that makes this test sometimes fail
 						/* istanbul ignore if: inconsistent race condition */
@@ -1083,35 +1098,40 @@ export default class Server {
 			if (!isMacSafari(capabilities)) {
 				// At least MS Edge 14316 returns immediately from a click request immediately rather than waiting for
 				// default action to occur.
-				testedCapabilities.returnsFromClickImmediately = function () {
-					function assertSelected(expected: any) {
-						return function (actual: any) {
-							if (expected !== actual) {
-								throw new Error('unexpected selection state');
-							}
-						};
-					}
+				if (isMsEdge(capabilities)) {
+					testedCapabilities.returnsFromClickImmediately = true;
+				}
+				else {
+					testedCapabilities.returnsFromClickImmediately = function () {
+						function assertSelected(expected: any) {
+							return function (actual: any) {
+								if (expected !== actual) {
+									throw new Error('unexpected selection state');
+								}
+							};
+						}
 
-					return get(
-						'<!DOCTYPE html><input type="checkbox" id="c">'
-					).then(function () {
-						return session.findById('c');
-					}).then(function (element) {
-						return element.click().then(function () {
-							return element.isSelected();
-						}).then(assertSelected(true))
-						.then(function () {
+						return get(
+							'<!DOCTYPE html><input type="checkbox" id="c">'
+						).then(function () {
+							return session.findById('c');
+						}).then(function (element) {
 							return element.click().then(function () {
 								return element.isSelected();
-							});
-						}).then(assertSelected(false))
-						.then(function () {
-							return element.click().then(function () {
-								return element.isSelected();
-							});
-						}).then(assertSelected(true));
-					}).then(works, broken);
-				};
+							}).then(assertSelected(true))
+							.then(function () {
+								return element.click().then(function () {
+									return element.isSelected();
+								});
+							}).then(assertSelected(false))
+							.then(function () {
+								return element.click().then(function () {
+									return element.isSelected();
+								});
+							}).then(assertSelected(true));
+						}).then(works, broken);
+					};
+				}
 			}
 
 			// The W3C WebDriver standard does not support the session-level /keys command, but JsonWireProtocol does.

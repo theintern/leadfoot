@@ -1087,6 +1087,26 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	 * Clears all cookies for the current page.
 	 */
 	clearCookies(): Promise<void> {
+		if (this.capabilities.brokenDeleteCookie) {
+			return this.getCookies().then(cookies => {
+				return cookies.reduce((promise, cookie) => {
+					const expiredCookie = [
+						`${cookie.name}=`,
+						'expires=Thu, 01 Jan 1970 00:00:00 GMT'
+					];
+					pushCookieProperties(expiredCookie, cookie);
+
+					return promise.then(() => {
+						return this.execute(/* istanbul ignore next */ function (expiredCookie: string) {
+							// Assume the cookie was created by Selenium, so it's path is '/'; at least MS Edge
+							// requires a path to delete a cookie
+							document.cookie = `${expiredCookie}; domain=${encodeURIComponent(document.domain)}; path=/`;
+						}, [ expiredCookie.join(';') ]);
+					});
+				}, Promise.resolve());
+			}).then(noop);
+		}
+
 		return this._delete('cookie').then(noop);
 	}
 
@@ -1106,14 +1126,16 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 					}
 				})) {
 					const expiredCookie = [
-						cookie.name + '=',
+						`${cookie.name}=`,
 						'expires=Thu, 01 Jan 1970 00:00:00 GMT'
 					];
 
 					pushCookieProperties(expiredCookie, cookie);
 
 					return this.execute(/* istanbul ignore next */ function (expiredCookie: any) {
-						document.cookie = expiredCookie + ';domain=' + encodeURIComponent(document.domain);
+						// Assume the cookie was created by Selenium, so it's path is '/'; at least MS Edge requires
+						// a path to delete a cookie
+						document.cookie = `${expiredCookie}; domain=${encodeURIComponent(document.domain)}; path=/`;
 					}, [ expiredCookie.join(';') ]);
 				}
 			});
