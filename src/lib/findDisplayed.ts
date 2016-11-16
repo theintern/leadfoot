@@ -2,11 +2,12 @@ import Promise = require('dojo/Promise');
 import statusCodes from './statusCodes';
 import Element from '../Element';
 import Session from '../Session';
+import { Thenable } from '../interfaces';
 
 export default class FindDisplayed {
 	session?: Session;
 
-	findDisplayed(strategy: string, value: string): Promise<Element> {
+	findDisplayed(strategy: string, value: string): Thenable<Element> {
 		const self = <any> this;
 		const session = <Session> (this.session || this);
 

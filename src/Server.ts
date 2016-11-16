@@ -331,7 +331,7 @@ export default class Server {
 		}).then(response => {
 			const session = new this.sessionConstructor(response.sessionId, this, response.value);
 			if (fixSessionCapabilities) {
-				return this._fillCapabilities(session).catch(function (error: Error) {
+				return this._fillCapabilities(session).catch(function (error) {
 					// The session was started on the server, but we did not resolve the Promise yet. If a failure
 					// occurs during capabilities filling, we should quit the session on the server too since the
 					// caller will not be aware that it ever got that far and will have no access to the session to
@@ -347,7 +347,7 @@ export default class Server {
 		});
 	}
 
-	_fillCapabilities(session: Session) {
+	private _fillCapabilities(session: Session): Promise<Session> {
 		/*jshint maxlen:140 */
 		const capabilities = session.capabilities;
 
@@ -572,7 +572,7 @@ export default class Server {
 			// At least SafariDriver 2.41.0 fails to allow stand-alone feature testing because it does not inject user
 			// scripts for URLs that are not http/https
 			if (isMacSafari(capabilities)) {
-				return {
+				return <Capabilities> {
 					brokenDeleteCookie: false,
 					brokenExecuteElementReturn: false,
 					brokenExecuteUndefinedReturn: false,
@@ -626,9 +626,9 @@ export default class Server {
 						return cookies.length > 0;
 					}).catch(function () {
 						return true;
-					}).then(function (isBroken: Function) {
+					}).then(function (isBroken) {
 						return session.clearCookies().finally(function () {
-							return isBroken();
+							return isBroken;
 						});
 					});
 				};
@@ -834,12 +834,12 @@ export default class Server {
 			// they have tried to hardcode the available log types in this version so we can just return the
 			// same hardcoded list ourselves;
 			// At least InternetExplorerDriver 2.41.0 also fails to provide log types
-			testedCapabilities.fixedLogTypes = session.getAvailableLogTypes().then(unsupported, function (error: Error) {
+			testedCapabilities.fixedLogTypes = session.getAvailableLogTypes().then(unsupported, function (error?: any) {
 				if (capabilities.browserName === 'selendroid' && !error.response.text.length) {
 					return [ 'logcat' ];
 				}
 
-				return [];
+				return <string[]> [];
 			});
 
 			// At least Microsoft Edge 10240 doesn't support timeout values of 0.
@@ -1126,8 +1126,8 @@ export default class Server {
 	 *
 	 * @returns {Promise.<Object[]>}
 	 */
-	getSessions() {
-		return this._get('sessions').then(function (sessions) {
+	getSessions(): Promise<any[]> {
+		return this._get('sessions').then(function (sessions: any[]) {
 			// At least BrowserStack is now returning an array for the sessions response
 			if (sessions && !Array.isArray(sessions)) {
 				sessions = returnValue(sessions);
@@ -1135,7 +1135,7 @@ export default class Server {
 
 			// At least ChromeDriver 2.19 uses the wrong keys
 			// https://code.google.com/p/chromedriver/issues/detail?id=1229
-			sessions.forEach(function (session: Session) {
+			sessions.forEach(function (session: any) {
 				if (session.sessionId && !session.id) {
 					session.id = session.sessionId;
 				}

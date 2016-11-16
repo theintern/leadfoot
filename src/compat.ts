@@ -9,7 +9,7 @@ import Command from './Command';
 import Element from './Element';
 import Promise = require('dojo/Promise');
 import pollUntil = require('./helpers/pollUntil');
-import strategies from './lib/strategies';
+import strategies, { suffixes } from './lib/strategies';
 import * as topic from 'dojo/topic';
 
 /**
@@ -537,7 +537,7 @@ const methods = {
 	wait: deprecate('wait', 'sleep')
 };
 
-strategies.suffixes.forEach(function (suffix, index) {
+suffixes.forEach(function (suffix, index) {
 	function addStrategy(method, toMethod, suffix, wdSuffix, using) {
 		methods[method + 'OrNull'] = function (value) {
 			return this.elementOrNull(using, value);

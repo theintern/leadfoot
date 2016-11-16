@@ -6,14 +6,14 @@ import * as util from './lib/util';
 import Element from './Element';
 import Promise = require('dojo/Promise');
 import Session from './Session';
-import chaiAsPromised = require('chai-as-promised');
-import strategies from './lib/strategies';
+import Strategies from './lib/strategies';
+import { LogEntry, GeoLocation, WebDriverCookie } from './interfaces';
 
 export interface SetContextMethod {
 	(context: Element|Element[]): void;
 }
 
-export interface Context extends Array<Command> {
+export interface Context extends Array<Element> {
 	isSingle?: boolean;
 	depth?: number;
 }
@@ -299,27 +299,27 @@ TOP_CONTEXT.depth = 0;
  * @borrows module:leadfoot/Element#getSize as module:leadfoot/Command#getSize
  * @borrows module:leadfoot/Element#getComputedStyle as module:leadfoot/Command#getComputedStyle
  */
-export default class Command /*implements WaitForDeleted, FindDisplayed, Strategies*/ {
-	private _parent: Command;
+export default class Command implements Strategies {
+	private _parent: Command|Session;
 	private _session: Session;
-	private _context: Element|Element[];
+	private _context: Context;
 	private _promise: Promise<any>;
 
-	constructor(parent, initialiser?: any, errback?: any) {
+	constructor(parent?: Session|Command, initialiser?: (setContext: Function, value: any) => Promise<any>|any, errback?: (setContext: Function, error: Error) => Promise<any>|any) {
 		const self = this;
 		let session;
 		const trace: any = {};
 
-		function setContext(context) {
+		function setContext(context: Context) {
 			if (!Array.isArray(context)) {
-				context = [ context ];
+				context = <Context> [ context ];
 				context.isSingle = true;
 			}
 
 			// If the context being set has depth, then it is coming from `Command#end`,
 			// or someone smart knows what they are doing; do not change the depth
 			if (!('depth' in context)) {
-				context.depth = parent ? parent.context.depth + 1 : 0;
+				context.depth = parent ? (<Command> parent).context.depth + 1 : 0;
 			}
 
 			self._context = context;
@@ -331,11 +331,11 @@ export default class Command /*implements WaitForDeleted, FindDisplayed, Strateg
 			throw error;
 		}
 
-		if (parent && parent.session) {
+		if (parent instanceof Command) {
 			this._parent = parent;
 			session = this._session = parent.session;
 		}
-		else if (parent && parent.sessionId) {
+		else if (parent instanceof Session) {
 			session = this._session = parent;
 			parent = null;
 		}
@@ -354,11 +354,11 @@ export default class Command /*implements WaitForDeleted, FindDisplayed, Strateg
 
 		Error.captureStackTrace(trace, Command);
 
-		this._promise = (parent ? parent.promise : Promise.resolve(undefined)).then(function (returnValue) {
-			self._context = parent ? parent.context : TOP_CONTEXT;
+		this._promise = (parent ? (<Command> parent).promise : Promise.resolve(undefined)).then(function (returnValue) {
+			self._context = parent ? (<Command> parent).context : TOP_CONTEXT;
 			return returnValue;
 		}, function (error) {
-			self._context = parent ? parent.context : TOP_CONTEXT;
+			self._context = parent ? (<Command> parent).context : TOP_CONTEXT;
 			throw error;
 		}).then(
 			initialiser && function (returnValue) {
@@ -455,9 +455,7 @@ export default class Command /*implements WaitForDeleted, FindDisplayed, Strateg
 	 * @param {number=} numCommandsToPop The number of element contexts to pop. Defaults to 1.
 	 * @returns {module:leadfoot/Command.<void>}
 	 */
-	end(numCommandsToPop) {
-		numCommandsToPop = numCommandsToPop || 1;
-
+	end(numCommandsToPop: number = 1) {
 		return new Command(this, function (setContext) {
 			let command = this;
 			let depth = this.context.depth;
@@ -490,7 +488,7 @@ export default class Command /*implements WaitForDeleted, FindDisplayed, Strateg
 	 * @param {Function=} errback
 	 * @returns {module:leadfoot/Command.<any>}
 	 */
-	then(callback, errback) {
+	then(callback: Function, errback?: Function) {
 		function runCallback(command, callback, value, setContext) {
 			const returnValue = callback.call(command, value, setContext);
 
@@ -554,7 +552,7 @@ export default class Command /*implements WaitForDeleted, FindDisplayed, Strateg
 	 * @param {string} method
 	 * @returns {Command}
 	 */
-	private _createElementMethod(method: string, ...args: any[]): Command {
+	private _createElementMethod(method: string, ...args: string[]): Command {
 		return new Command(this, function (setContext: SetContextMethod) {
 			const parentContext = this._context;
 			let promise: Promise<any>;
@@ -584,16 +582,16 @@ export default class Command /*implements WaitForDeleted, FindDisplayed, Strateg
 		});
 	}
 
-	find(...args: any[]) {
-		return this._createElementMethod('find', args);
+	find(strategy: string, value: string): Command {
+		return this._createElementMethod('find', strategy, value);
 	}
 
-	findAll(...args: any[]) {
-		return this._createElementMethod('findAll', args);
+	findAll(strategy: string, value: string): Command {
+		return this._createElementMethod('findAll', strategy, value);
 	}
 
-	findDisplayed(...args: any[]) {
-		return this._createElementMethod('findDisplayed', args);
+	findDisplayed(strategy: string, value: string): Command {
+		return this._createElementMethod('findDisplayed', strategy, value);
 	}
 
 	/**
@@ -707,12 +705,141 @@ export default class Command /*implements WaitForDeleted, FindDisplayed, Strateg
 			};
 		}
 	}
+
+	// from Strategies mixin
+	findByClassName: (className: string) => Command;
+	findByCssSelector: (selector: string) => Command;
+	findById: (id: string) => Command;
+	findByName: (name: string) => Command;
+	findByLinkText: (text: string) => Command;
+	findByPartialLinkText: (text: string) => Command;
+	findByTagName: (tagName: string) => Command;
+	findByXpath: (path: string) => Command;
+	findAllByClassName: (className: string) => Command;
+	findAllByCssSelector: (selector: string) => Command;
+	findAllByName: (name: string) => Command;
+	findAllByLinkText: (text: string) => Command;
+	findAllByPartialLinkText: (text: string) => Command;
+	findAllByTagName: (tagName: string) => Command;
+	findAllByXpath: (path: string) => Command;
+	findDisplayedByClassName: (className: string) => Command;
+	findDisplayedByCssSelector: (selector: string) => Command;
+	findDisplayedById: (id: string) => Command;
+	findDisplayedByName: (name: string) => Command;
+	findDisplayedByLinkText: (text: string) => Command;
+	findDisplayedByPartialLinkText: (text: string) => Command;
+	findDisplayedByTagName: (tagName: string) => Command;
+	findDisplayedByXpath: (path: string) => Command;
+	waitForDeletedByClassName: (className: string) => Command;
+	waitForDeletedByCssSelector: (selector: string) => Command;
+	waitForDeletedById: (id: string) => Command;
+	waitForDeletedByName: (name: string) => Command;
+	waitForDeletedByLinkText: (text: string) => Command;
+	waitForDeletedByPartialLinkText: (text: string) => Command;
+	waitForDeletedByTagName: (tagName: string) => Command;
+	waitForDeletedByXpath: (path: string) => Command;
+
+	// from Session
+	getTimeout: (type: string) => Promise<number>;
+	setTimeout: (type: string, ms: number) => Promise<void>;
+	getCurrentWindowHandle: () => Promise<string>;
+	getAllWindowHandles: () => Promise<string[]>;
+	getCurrentUrl: () => Promise<string>;
+	get: (url: string) => Promise<void>;
+	goForward: () => Promise<void>;
+	goBack: () => Promise<void>;
+	refresh: () => Promise<void>;
+	execute: (script: Function|string, args?: any[]) => Promise<any>;
+	executeAsync: (script: Function|string, args?: any[]) => Promise<any>;
+	takeScreenshot: () => Promise<Buffer>;
+	getAvailableImeEngines: () => Promise<string[]>;
+	getActiveImeEngine: () => Promise<string>;
+	isImeActivated: () => Promise<boolean>;
+	deactivateIme: () => Promise<void>;
+	activateIme: (engine: string) => Promise<void>;
+	switchToFrame: (id: string|number|Element) => Promise<void>;
+	switchToWindow: (handle: string) => Promise<void>;
+	switchToParentFrame: () => Promise<void>;
+	closeCurrentWindow: () => Promise<void>;
+	// setWindowSize(width: number, height: number): Promise<void>;
+	// setWindowSize(windowHandle: string, width: number, height: number): Promise<void>;
+	setWindowSize: (...args: any[]) => Promise<void>;
+	getWindowSize: (windowHandle?: string) => Promise<{ width: number, height: number }>;
+	// setWindowPosition(x: number, y: number): Promise<void>;
+	// setWindowPosition(windowHandle: string, x: number, y: number): Promise<void>;
+	setWindowPosition: (...args: any[]) => Promise<void>;
+	getWindowPosition: (windowHandle?: string) => Promise<{ x: number, y: number }>;
+	maximizeWindow: (windowHandle?: string) => Promise<void>;
+	getCookies: () => Promise<WebDriverCookie[]>;
+	setCookie: (cookie: WebDriverCookie) => Promise<void>;
+	clearCookies: () => Promise<void>;
+	deleteCookie: (name: string) => Promise<void>;
+	getPageSource: () => Promise<string>;
+	getPageTitle: () => Promise<string>;
+	getActiveElement: () => Promise<Element>;
+	pressKeys: (keys: string|string[]) => Promise<void>;
+	getOrientation: () => Promise<'portrait'|'landscape'>;
+	setOrientation: (orientation: string) => Promise<void>;
+	getAlertText: () => Promise<string>;
+	typeInPrompt: (text: string|string[]) => Promise<void>;
+	acceptAlert: () => Promise<void>;
+	dismissAlert: () => Promise<void>;
+	// moveMouseTo(xOffset?: number, yOffset?: number): Promise<void>;
+	// moveMouseTo(element?: Element, xOffset?: number, yOffset?: number): Promise<void>;
+	moveMouseTo: (...args: any[]) => Promise<void>;
+	clickMouseButton: (button?: number) => Promise<void>;
+	pressMouseButton: (button?: number) => Promise<void>;
+	releaseMouseButton: (button?: number) => Promise<void>;
+	doubleClick: () => Promise<void>;
+	tap: (element: Element) => Promise<void>;
+	pressFinger: (x: number, y: number) => Promise<void>;
+	releaseFinger: (x: number, y: number) => Promise<void>;
+	moveFinger: (x: number, y: number) => Promise<void>;
+	// touchScroll(xOffset: number, yOffset: number): Promise<void>;
+	// touchScroll(element?: Element, xOffset?: number, yOffset?: number): Promise<void>;
+	touchScroll: (...args: any[]) => Promise<void>;
+	doubleTap: (element?: Element) => Promise<void>;
+	longTap: (element?: Element) => Promise<void>;
+	// flickFinger(element: Element, xOffset: number, yOffset: number, speed?: number): Promise<void>;
+	// flickFinger(xOffset: number, yOffset: number, speed?: number): Promise<void>;
+	flickFinger: (...args: any[]) => Promise<void>;
+	getGeolocation: () => Promise<GeoLocation>;
+	setGeolocation: (location: GeoLocation) => Promise<void>;
+	getLogsFor: (type: string) => Promise<LogEntry[]>;
+	getAvailableLogTypes: () => Promise<string[]>;
+	getApplicationCacheStatus: () => Promise<number>;
+	quit: () => Promise<void>;
+	waitForDeleted: (using: string, value: string) => Promise<void>;
+	getExecuteAsyncTimeout: () => Command;
+	setExecuteAsyncTimeout: (ms: number) => Command;
+	getFindTimeout: () => Command;
+	setFindTimeout: (ms: number) => Command;
+	getPageLoadTimeout: () => Command;
+	setPageLoadTimeout: (ms: string) => Command;
+
+	// Element
+	click: () => Promise<void>;
+	submit: () => Promise<void>;
+	getVisibleText: () => Promise<string>;
+	type: (value: string|string[]) => Promise<void>;
+	getTagName: () => Promise<string>;
+	clearValue: () => Promise<void>;
+	isSelected: () => Promise<boolean>;
+	isEnabled: () => Promise<boolean>;
+	getSpecAttribute: (name: string) => Promise<string>;
+	getAttribute: (name: string) => Promise<string>;
+	getProperty: (name: string) => Promise<any>;
+	equals: (other: Element) => Promise<boolean>;
+	isDisplayed: () => Promise<boolean>;
+	getPosition: () => Promise<{ x: number, y: number }>;
+	getSize: () => Promise<{ width: number, height: number }>;
+	getComputedStyle: (propertyName: string) => Promise<string>;
 }
 
 // Element retrieval strategies must be applied directly to Command because it has its own custom
 // find/findAll methods that operate based on the Command’s context, so can’t simply be delegated to the
 // underlying session
-strategies.applyTo(Command.prototype);
+util.applyMixins(Command, [ Strategies ]);
 
 (function () {
 	for (let key in Session.prototype) {
@@ -723,6 +850,11 @@ strategies.applyTo(Command.prototype);
 		Command.addElementMethod(Command.prototype, key);
 	}
 })();
+
+let chaiAsPromised: any = null;
+try {
+	chaiAsPromised = require('chai-as-promised');
+} catch (error) {}
 
 // TODO: Add unit test
 if (chaiAsPromised) {

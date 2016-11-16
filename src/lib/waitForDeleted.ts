@@ -2,12 +2,13 @@ import Promise = require('dojo/Promise');
 import statusCodes from './statusCodes';
 import Session from '../Session';
 import Element from '../Element';
+import { Thenable } from '../interfaces';
 
 export default class WaitForDeleted {
 	session?: Session;
-	find: (strategy: string, value: string) => Promise<Element>;
+	find: (strategy: string, value: string) => Thenable<Element>;
 
-	waitForDeleted(strategy: string, value: string): Promise<void> {
+	waitForDeleted(strategy: string, value: string): Thenable<void> {
 		const self = this;
 		const session = <Session> (this.session || this);
 		let originalTimeout: number;

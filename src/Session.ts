@@ -466,15 +466,15 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 		});
 	}
 
-	private _get(path: string, requestData?: any, pathParts?: string[]): Promise<any> {
+	/* private */ _get(path: string, requestData?: any, pathParts?: string[]): Promise<any> {
 		return this._delegateToServer('_get', path, requestData, pathParts);
 	}
 
-	private _post(path: string, requestData?: any, pathParts?: string[]): Promise<any> {
+	/* private */ _post(path: string, requestData?: any, pathParts?: string[]): Promise<any> {
 		return this._delegateToServer('_post', path, requestData, pathParts);
 	}
 
-	private _delete(path: string, requestData?: any, pathParts?: string[]): Promise<any> {
+	/* private */ _delete(path: string, requestData?: any, pathParts?: string[]): Promise<any> {
 		return this._delegateToServer('_delete', path, requestData, pathParts);
 	}
 
@@ -1055,7 +1055,7 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	maximizeWindow(windowHandle?: string) {
+	maximizeWindow(windowHandle?: string): Promise<void> {
 		if (typeof windowHandle === 'undefined') {
 			windowHandle = 'current';
 		}
@@ -1287,7 +1287,7 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
 	@forCommand({ createsContext: true })
-	getActiveElement() {
+	getActiveElement(): Promise<Element> {
 		const getDocumentActiveElement = () => {
 			return this.execute('return document.activeElement;');
 		};
@@ -1426,8 +1426,8 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	moveMouseTo(xOffset: number, yOffset: number): Promise<void>;
-	moveMouseTo(element: Element, xOffset: number, yOffset: number): Promise<void>;
+	moveMouseTo(xOffset?: number, yOffset?: number): Promise<void>;
+	moveMouseTo(element?: Element, xOffset?: number, yOffset?: number): Promise<void>;
 	@forCommand({ usesElement: true })
 	moveMouseTo(...args: any[]): Promise<void> {
 		let [ element, xOffset, yOffset ] = args;
@@ -1699,13 +1699,11 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @returns {Promise.<void>}
 	 */
 	@forCommand({ usesElement: true })
-	doubleTap(element: Element): Promise<void> {
-		// if (element) {
-		// 	element = element.elementId;
-		// }
+	doubleTap(element?: Element): Promise<void> {
+		const elementId = element && element.elementId;
 
 		return this._post('touch/doubleclick', {
-			element: element.elementId
+			element: elementId
 		}).then(noop);
 	}
 
@@ -1717,13 +1715,10 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @returns {Promise.<void>}
 	 */
 	@forCommand({ usesElement: true })
-	longTap(element: Element): Promise<void> {
-		// if (element) {
-		// 	element = element.elementId;
-		// }
-
+	longTap(element?: Element): Promise<void> {
+		const elementId = element && element.elementId;
 		return this._post('touch/longclick', {
-			element: element.elementId
+			element: elementId
 		}).then(noop);
 	}
 
@@ -1739,8 +1734,11 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * this value will be higher than expected.
 	 * @returns {Promise.<void>}
 	 */
+	flickFinger(element: Element, xOffset: number, yOffset: number, speed?: number): Promise<void>;
+	flickFinger(xOffset: number, yOffset: number, speed?: number): Promise<void>;
 	@forCommand({ usesElement: true })
-	flickFinger(element: Element, xOffset: number, yOffset: number, speed: number): Promise<void> {
+	flickFinger(...args: any[]): Promise<void> {
+		let [ element, xOffset, yOffset, speed ] = args;
 		if (typeof speed === 'undefined' && typeof yOffset === 'undefined' && typeof xOffset !== 'undefined') {
 			return this._post('touch/flick', {
 				xspeed: element,

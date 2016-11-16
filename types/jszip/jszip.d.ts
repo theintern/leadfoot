@@ -3,6 +3,7 @@
 // Definitions by: mzeiher <https://github.com/mzeiher>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
+import Promise = require('dojo/Promise');
 interface JSZip {
 	files: {[key: string]: JSZipObject};
 
@@ -103,8 +104,8 @@ interface JSZip {
 	loadAsync(data: any, options?: JSZipLoadOptions): Promise<JSZip>;
 }
 
-type Serialization = ("string" | "text" | "base64" | "binarystring" | "uint8array" |
-					  "arraybuffer" | "blob" | "nodebuffer");
+type Serialization = ('string' | 'text' | 'base64' | 'binarystring' | 'uint8array' |
+						'arraybuffer' | 'blob' | 'nodebuffer');
 
 interface JSZipObject {
 	name: string;
@@ -137,7 +138,7 @@ interface JSZipObject {
 	 * @deprecated since version 3.0
 	 */
 	asUint8Array(): void;
-	//asNodeBuffer(): void;
+	// asNodeBuffer(): void;
 }
 
 interface JSZipFileOptions {
@@ -215,8 +216,8 @@ declare var JSZip: {
 
 	prototype: JSZip;
 	support: JSZipSupport;
-}
+};
 
-declare module "jszip" {
+declare module 'jszip' {
 	export = JSZip;
 }

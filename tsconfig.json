@@ -13,11 +13,9 @@
 	},
 	"files": [
 		"./types/dojo2/dojo.d.ts",
-		"./types/jszip/jszip.d.ts",
-		"./types/chai-as-promised/chai-as-promised.d.ts"
+		"./types/jszip/jszip.d.ts"
 	],
 	"include": [
-		"./src/**/*.ts",
-		"./tests/**/*.ts"
+		"./src/**/*.ts"
 	]
 }

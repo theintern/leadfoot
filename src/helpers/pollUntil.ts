@@ -3,7 +3,7 @@
  */
 
 import * as util from '../lib/util';
-import { Command } from '../lib/Command';
+import Command from '../Command';
 import Promise = require('dojo/Promise');
 
 /**
@@ -71,7 +71,7 @@ function pollUntil(...allArgs: any[]): () => Promise<any> {
 	args = args || [];
 	pollInterval = pollInterval || 67;
 
-	return function (this: Commmand) {
+	return function (this: Command) {
 		const session = this.session;
 		let originalTimeout: number;
 

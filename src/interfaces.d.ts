@@ -1,3 +1,5 @@
+import Promise = require('dojo/Promise');
+
 export interface Capabilities {
 	brokenActiveElement?: boolean;
 	brokenComputedStyles?: boolean;
@@ -22,7 +24,7 @@ export interface Capabilities {
 	brokenZeroTimeout?: boolean;
 	browserName?: string;
 	fixSessionCapabilities?: string|boolean;
-	fixedLogTypes?: string[];
+	fixedLogTypes?: false|string[]|Promise<string[]>;
 	implicitWindowHandles?: boolean;
 	platform?: string;
 	platformName?: string;
@@ -39,6 +41,11 @@ export interface Capabilities {
 	locationContextEnabled?: boolean;
 	webStorageEnabled?: boolean;
 	applicationCacheEnabled?: boolean;
+	hasTouchScreen?: boolean;
+	deviceName?: string;
+	mouseEnabled?: boolean;
+	supportsCssTransforms?: boolean;
+	_filled?: boolean;
 }
 
 export interface GeoLocation {
@@ -49,6 +56,10 @@ export interface LogEntry {
 	timestamp: number;
 	level: string;
 	message: string;
+}
+
+export interface Thenable<T> {
+	then<U>(onFulfilled?: (value?: T) => Thenable<U> | U, onRejected?: (error?: Error) => Thenable<U> | U): Thenable<U>;
 }
 
 interface WebDriverCookie {
