@@ -115,6 +115,10 @@ function delegateToServer(method) {
 		var self = this;
 		path = 'session/' + this._sessionId + (path ? ('/' + path) : '');
 
+		if (method === '_post' &amp;&amp; !requestData &amp;&amp; this.capabilities.brokenEmptyPost) {
+			requestData = {};
+		}
+
 		return new Promise(function (resolve, reject, progress, setCanceller) {
 			var cancelled = false;
 			setCanceller(function (reason) {
@@ -250,25 +254,43 @@ function simulateKeys(keys) {
 	var target = document.activeElement;
 
 	function dispatch(kwArgs) {
-		var event = document.createEvent('KeyboardEvent');
-		event.initKeyboardEvent(
-			kwArgs.type,
-			kwArgs.bubbles || true,
-			kwArgs.cancelable || false,
-			window,
-			kwArgs.key || '',
-			kwArgs.location || 3,
-			kwArgs.modifiers || '',
-			kwArgs.repeat || 0,
-			kwArgs.locale || ''
-		);
+		var event;
+		if (typeof KeyboardEvent === 'function') {
+			event = new KeyboardEvent(kwArgs.type, {
+				bubbles: true,
+				cancelable: kwArgs.cancelable || false,
+				view: window,
+				key: kwArgs.key || '',
+				location: 3
+			});
+		}
+		else {
+			event = document.createEvent('KeyboardEvent');
+			event.initKeyboardEvent(
+				kwArgs.type,
+				true,
+				kwArgs.cancelable || false,
+				window,
+				kwArgs.key || '',
+				3,
+				'',
+				0,
+				''
+			);
+		}
 
 		return target.dispatchEvent(event);
 	}
 
 	function dispatchInput() {
-		var event = document.createEvent('Event');
-		event.initEvent('input', true, false);
+		var event;
+		if (typeof Event === 'function') {
+			event = new Event('input', { bubbles: true, cancelable: false });
+		}
+		else {
+			event = document.createEvent('Event');
+			event.initEvent('input', true, false);
+		}
 		return target.dispatchEvent(event);
 	}
 
@@ -317,24 +339,45 @@ function simulateMouse(kwArgs) {
 	var position = kwArgs.position;
 
 	function dispatch(kwArgs) {
-		var event = document.createEvent('MouseEvents');
-		event.initMouseEvent(
-			kwArgs.type,
-			kwArgs.bubbles || true,
-			kwArgs.cancelable || false,
-			window,
-			kwArgs.detail || 0,
-			window.screenX + position.x,
-			window.screenY + position.y,
-			position.x,
-			position.y,
-			kwArgs.ctrlKey || false,
-			kwArgs.altKey || false,
-			kwArgs.shiftKey || false,
-			kwArgs.metaKey || false,
-			kwArgs.button || 0,
-			kwArgs.relatedTarget || null
-		);
+		var event;
+		if (typeof MouseEvent === 'function') {
+			event = new MouseEvent(kwArgs.type, {
+				bubbles: 'bubbles' in kwArgs ? kwArgs.bubbles : true,
+				cancelable: kwArgs.cancelable || false,
+				view: window,
+				detail: kwArgs.detail || 0,
+				screenX: window.screenX + position.x,
+				screenY: window.screenY + position.y,
+				clientX: position.x,
+				clientY: position.y,
+				ctrlKey: kwArgs.ctrlKey || false,
+				shiftKey: kwArgs.shiftKey || false,
+				altKey: kwArgs.altKey || false,
+				metaKey: kwArgs.metaKey || false,
+				button: kwArgs.button || 0,
+				relatedTarget: kwArgs.relatedTarget
+			});
+		}
+		else {
+			event = document.createEvent('MouseEvents');
+			event.initMouseEvent(
+				kwArgs.type,
+				kwArgs.bubbles || true,
+				kwArgs.cancelable || false,
+				window,
+				kwArgs.detail || 0,
+				window.screenX + position.x,
+				window.screenY + position.y,
+				position.x,
+				position.y,
+				kwArgs.ctrlKey || false,
+				kwArgs.altKey || false,
+				kwArgs.shiftKey || false,
+				kwArgs.metaKey || false,
+				kwArgs.button || 0,
+				kwArgs.relatedTarget || null
+			);
+		}
 
 		return kwArgs.target.dispatchEvent(event);
 	}
@@ -1184,6 +1227,29 @@ Session.prototype = {
 	 * @returns {Promise.&lt;void>}
 	 */
 	clearCookies: function () {
+		if (this.capabilities.brokenDeleteCookie) {
+			var self = this;
+			return this.getCookies().then(function (cookies) {
+				return cookies.reduce(function (promise, cookie) {
+					var expiredCookie = [
+						cookie.name + '=',
+						'expires=Thu, 01 Jan 1970 00:00:00 GMT'
+					];
+
+					pushCookieProperties(expiredCookie, cookie);
+
+					return promise.then(function () {
+						return self.execute(/* istanbul ignore next */ function (expiredCookie) {
+							document.cookie = expiredCookie + '; domain=' + encodeURIComponent(document.domain) +
+								// Assume the cookie was created by Selenium, so it's path is '/'; at least MS Edge
+								// requires a path to delete a cookie
+								'; path=/';
+						}, [ expiredCookie.join(';') ]);
+					});
+				}, Promise.resolve());
+			});
+		}
+
 		return this._delete('cookie').then(noop);
 	},
 
@@ -1212,7 +1278,10 @@ Session.prototype = {
 					pushCookieProperties(expiredCookie, cookie);
 
 					return self.execute(/* istanbul ignore next */ function (expiredCookie) {
-						document.cookie = expiredCookie + ';domain=' + encodeURIComponent(document.domain);
+						document.cookie = expiredCookie + '; domain=' + encodeURIComponent(document.domain) +
+							// Assume the cookie was created by Selenium, so it's path is '/'; at least MS Edge requires
+							// a path to delete a cookie
+							'; path=/';
 					}, [ expiredCookie.join(';') ]);
 				}
 			});
@@ -1267,6 +1336,12 @@ Session.prototype = {
 	find: function (using, value) {
 		var self = this;
 
+		if (this.capabilities.isWebDriver) {
+			var locator = strategies.toW3cLocator(using, value);
+			using = locator.using;
+			value = locator.value;
+		}
+
 		if (using.indexOf('link text') !== -1 &amp;&amp; this.capabilities.brokenWhitespaceNormalization) {
 			return this.execute(/* istanbul ignore next */ this._manualFindByLinkText, [ using, value ])
 				.then(function (element) {
@@ -1300,6 +1375,12 @@ Session.prototype = {
 	 */
 	findAll: function (using, value) {
 		var self = this;
+
+		if (this.capabilities.isWebDriver) {
+			var locator = strategies.toW3cLocator(using, value);
+			using = locator.using;
+			value = locator.value;
+		}
 
 		if (using.indexOf('link text') !== -1 &amp;&amp; this.capabilities.brokenWhitespaceNormalization) {
 			return this.execute(/* istanbul ignore next */ this._manualFindByLinkText, [ using, value, true ])

@@ -67,6 +67,37 @@ var statusCodes = require('./lib/statusCodes');
 var urlUtil = require('url');
 var util = require('./lib/util');
 
+function isMsEdge(capabilities, minVersion, maxVersion) {
+	if (capabilities.browserName !== 'MicrosoftEdge') {
+		return false;
+	}
+	if (minVersion != null || maxVersion != null) {
+		var version = parseFloat(capabilities.browserVersion);
+		if (minVersion != null &amp;&amp; version &lt; minVersion) {
+			return false;
+		}
+		if (maxVersion != null &amp;&amp; version > maxVersion) {
+			return false;
+		}
+	}
+	return true;
+}
+
+function isMacSafari(capabilities) {
+	return capabilities.browserName === 'safari' &amp;&amp;
+		capabilities.platform === 'MAC' &amp;&amp;
+		capabilities.platformName !== 'ios';
+}
+
+function isGeckodriver(capabilities) {
+	return capabilities.browserName === 'firefox' &amp;&amp;
+		parseFloat(capabilities.version) >= 49;
+}
+
+function isMacGeckodriver(capabilities) {
+	return isGeckodriver(capabilities) &amp;&amp; capabilities.platform === 'MAC';
+}
+
 /**
  * Creates a function that performs an HTTP request to a JsonWireProtocol endpoint.
  *
@@ -453,7 +484,7 @@ Server.prototype = {
 			// innerHTML, though it is unfortunately a quirks-mode file so testing is limited
 			if (
 				(capabilities.browserName === 'internet explorer' &amp;&amp; parseFloat(capabilities.version) &lt; 10) ||
-				capabilities.browserName === 'MicrosoftEdge'
+				isMsEdge(capabilities) 
 			) {
 				// Edge driver doesn't provide an initialBrowserUrl
 				var initialUrl = capabilities.browserName === 'internet explorer' ? capabilities.initialBrowserUrl :
@@ -475,17 +506,13 @@ Server.prototype = {
 		}
 
 		function discoverFeatures() {
-			// jshint maxcomplexity:13
+			// jshint maxcomplexity:15
 
 			var testedCapabilities = {};
 
 			// At least SafariDriver 2.41.0 fails to allow stand-alone feature testing because it does not inject user
 			// scripts for URLs that are not http/https
-			if (
-				capabilities.browserName === 'safari' &amp;&amp;
-				capabilities.platform === 'MAC' &amp;&amp;
-				capabilities.platformName !== 'ios'
-			) {
+			if (isMacSafari(capabilities)) {
 				return {
 					nativeEvents: false,
 					rotatable: false,
@@ -502,13 +529,13 @@ Server.prototype = {
 				};
 			}
 
+			// Firefox 49+ (via geckodriver) only supports W3C locator strategies
+			if (isGeckodriver(capabilities)) {
+				testedCapabilities.isWebDriver = true;
+			}
 
 			// At least MS Edge 14316 supports alerts but does not specify the capability
-			if (
-				capabilities.browserName === 'MicrosoftEdge' &amp;&amp;
-				parseFloat(capabilities.browserVersion) >= 37.14316 &amp;&amp;
-				!('handlesAlerts' in capabilities)
-			) {
+			if (isMsEdge(capabilities, 37.14316) &amp;&amp; !('handlesAlerts' in capabilities)) {
 				testedCapabilities.handlesAlerts = true;
 			}
 
@@ -557,8 +584,16 @@ Server.prototype = {
 			// Some additional, currently-non-standard capabilities are needed in order to know about supported
 			// features of a given platform
 			if (!('mouseEnabled' in capabilities)) {
-				testedCapabilities.mouseEnabled = session.doubleClick()
-					.then(supported, maybeSupported);
+				// Using mouse services such as doubleclick will hang Firefox 49+ session on the Mac.
+				if (isMacGeckodriver(capabilities)) {
+					testedCapabilities.mouseEnabled = true;
+				}
+				else {
+					testedCapabilities.mouseEnabled = function () {
+						return session.doubleClick()
+							.then(supported, maybeSupported);
+					};
+				}
 			}
 
 			// Don't check for touch support if the environment reports that no touchscreen is available
@@ -627,11 +662,7 @@ Server.prototype = {
 
 			// At least SafariDriver 2.41.0 fails to allow stand-alone feature testing because it does not inject user
 			// scripts for URLs that are not http/https
-			if (
-				capabilities.browserName === 'safari' &amp;&amp;
-				capabilities.platform === 'MAC' &amp;&amp;
-				capabilities.platformName !== 'ios'
-			) {
+			if (isMacSafari(capabilities)) {
 				return {
 					brokenDeleteCookie: false,
 					brokenExecuteElementReturn: false,
@@ -669,10 +700,10 @@ Server.prototype = {
 				return error.name === 'UnknownCommand';
 			});
 
-			// At least Selendroid 0.9.0 has broken cookie deletion; nobody else has broken cookie deletion but
-			// this test is very hard to get working properly in other environments so only test when Selendroid
-			// is the browser
+			// At least Selendroid 0.9.0 and MS Edge have broken cookie deletion.
 			if (capabilities.browserName === 'selendroid') {
+				// This test is very hard to get working properly in other environments so only test when Selendroid is
+				// the browser
 				testedCapabilities.brokenDeleteCookie = function () {
 					return session.get('about:blank').then(function () {
 						return session.clearCookies();
@@ -692,6 +723,19 @@ Server.prototype = {
 						});
 					});
 				};
+			}
+			else if (isMsEdge(capabilities)) {
+				testedCapabilities.brokenDeleteCookie = true;
+			}
+
+			// At least Firefox 49 + geckodriver can't POST empty data
+			if (isGeckodriver(capabilities)) {
+				testedCapabilities.brokenEmptyPost = true;
+			}
+
+			// At least MS Edge may return an 'element is obscured' error when trying to click on visible elements.
+			if (isMsEdge(capabilities)) {
+				testedCapabilities.brokenClick = true;
 			}
 
 			// At least Selendroid 0.9.0 incorrectly returns HTML tag names in uppercase, which is a violation
@@ -775,10 +819,7 @@ Server.prototype = {
 			// https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/7194303/
 			//
 			// The existing feature test for this caused some browsers to hang, so just flag it for Edge for now.
-			if (
-				capabilities.browserName === 'MicrosoftEdge' &amp;&amp;
-				parseFloat(capabilities.browserVersion) &lt;= 38.14366
-			) {
+			if (isMsEdge(capabilities, null, 38.14366)) {
 				testedCapabilities.brokenFileSendKeys = true;
 			}
 			// testedCapabilities.brokenFileSendKeys = function () {
@@ -821,7 +862,7 @@ Server.prototype = {
 				return get(pageText).then(function () {
 					return session.findById('a1');
 				}).then(function (element) {
-					return element.getComputedStyle('backgroundColor');
+					return element.getComputedStyle('background-color');
 				}).then(function (value) {
 					if (!value) {
 						throw new Error('empty style');
@@ -880,10 +921,7 @@ Server.prototype = {
 			// At least MS Edge 10586 becomes unresponsive after calling DELETE window, and window.close() requires user
 			// interaction. This capability is distinct from brokenDeleteWindow as this capability indicates that there
 			// is no way to close a Window.
-			if (
-				capabilities.browserName === 'MicrosoftEdge' &amp;&amp;
-				parseFloat(capabilities.browserVersion) &lt;= 25.10586
-			) {
+			if (isMsEdge(capabilities, null, 25.10586)) {
 				testedCapabilities.brokenWindowClose = true;
 			}
 
@@ -892,15 +930,21 @@ Server.prototype = {
 
 			// At least Selendroid 0.9.0 has a bug where it catastrophically fails to retrieve available types;
 			// they have tried to hardcode the available log types in this version so we can just return the
-			// same hardcoded list ourselves;
-			// At least InternetExplorerDriver 2.41.0 also fails to provide log types
-			testedCapabilities.fixedLogTypes = session.getAvailableLogTypes().then(unsupported, function (error) {
-				if (capabilities.browserName === 'selendroid' &amp;&amp; !error.response.text.length) {
-					return [ 'logcat' ];
-				}
+			// same hardcoded list ourselves.
+			// At least InternetExplorerDriver 2.41.0 also fails to provide log types.
+			// Firefox 49+ (via geckodriver) doesn't support retrieving logs or log types, and may hang the session.
+			if (isMacGeckodriver(capabilities)) {
+				testedCapabilities.fixedLogTypes = [];
+			}
+			else {
+				testedCapabilities.fixedLogTypes = session.getAvailableLogTypes().then(unsupported, function (error) {
+					if (capabilities.browserName === 'selendroid' &amp;&amp; !error.response.text.length) {
+						return [ 'logcat' ];
+					}
 
-				return [];
-			});
+					return [];
+				});
+			}
 
 			// At least Microsoft Edge 10240 doesn't support timeout values of 0.
 			testedCapabilities.brokenZeroTimeout = session.setTimeout('implicit', 0).then(works, broken);
@@ -964,13 +1008,18 @@ Server.prototype = {
 				}).catch(broken);
 			};
 
-			if (capabilities.mouseEnabled) {
+			if (isGeckodriver(capabilities)) {
+				// At least geckodriver 0.11 and Firefox 49 don't implement mouse control, so everything will need to be
+				// simulated.
+				testedCapabilities.brokenMouseEvents = true;
+			}
+			else if (capabilities.mouseEnabled) {
 				// At least IE 10 and 11 on SauceLabs don't fire native mouse events consistently even though they
 				// support moveMouseTo
 				testedCapabilities.brokenMouseEvents = function () {
 					return get(
 						'&lt;!DOCTYPE html>&lt;div id="foo">foo&lt;/div>' +
-						'&lt;script>counter = 0; var d = document; d.onmousemove = function () { counter++; };&lt;/script>'
+						'&lt;script>window.counter = 0; var d = document; d.onmousemove = function () { window.counter++; };&lt;/script>'
 					).then(function () {
 						return session.findById('foo');
 					}).then(function (element) {
@@ -978,7 +1027,7 @@ Server.prototype = {
 					}).then(function () {
 						return util.sleep(100);
 					}).then(function () {
-						return session.execute('return counter;');
+						return session.execute('return window.counter;');
 					}).then(
 						function (counter) {
 							return counter > 0 ? works() : broken();
@@ -1009,7 +1058,7 @@ Server.prototype = {
 						return Promise.resolve(false);
 					}
 
-					return get('&lt;!DOCTYPE html>&lt;script>counter = 0; var d = document; d.onclick = d.onmousedown = d.onmouseup = function () { counter++; };&lt;/script>').then(function () {
+					return get('&lt;!DOCTYPE html>&lt;script>window.counter = 0; var d = document; d.onclick = d.onmousedown = d.onmouseup = function () { window.counter++; };&lt;/script>').then(function () {
 						return session.findByTagName('html');
 					}).then(function (element) {
 						return session.moveMouseTo(element);
@@ -1018,7 +1067,7 @@ Server.prototype = {
 					}).then(function () {
 						return session.doubleClick();
 					}).then(function () {
-						return session.execute('return counter;');
+						return session.execute('return window.counter;');
 					}).then(function (counter) {
 						// InternetExplorerDriver 2.41.0 has a race condition that makes this test sometimes fail
 						/* istanbul ignore if: inconsistent race condition */
@@ -1113,41 +1162,55 @@ Server.prototype = {
 				return error.name === 'UnknownCommand';
 			});
 
-			// At least MS Edge 14316 returns immediately from a click request immediately rather than waiting for
-			// default action to occur.
-			testedCapabilities.returnsFromClickImmediately = function () {
-				function assertSelected(expected) {
-					return function (actual) {
-						if (expected !== actual) {
-							throw new Error('unexpected selection state');
+			// At least SafariDriver 2.41.0 fails to allow stand-alone feature testing because it does not inject user
+			// scripts for URLs that are not http/https
+			if (!isMacSafari(capabilities)) {
+				// At least MS Edge 14316 returns immediately from a click request immediately rather than waiting for
+				// default action to occur.
+				if (isMsEdge(capabilities)) {
+					testedCapabilities.returnsFromClickImmediately = true;
+				}
+				else {
+					testedCapabilities.returnsFromClickImmediately = function () {
+						function assertSelected(expected) {
+							return function (actual) {
+								if (expected !== actual) {
+									throw new Error('unexpected selection state');
+								}
+							};
 						}
+
+						return get(
+							'&lt;!DOCTYPE html>&lt;input type="checkbox" id="c">'
+						).then(function () {
+							return session.findById('c');
+						}).then(function (element) {
+							return element.click().then(function () {
+								return element.isSelected();
+							}).then(assertSelected(true))
+							.then(function () {
+								return element.click().then(function () {
+									return element.isSelected();
+								});
+							}).then(assertSelected(false))
+							.then(function () {
+								return element.click().then(function () {
+									return element.isSelected();
+								});
+							}).then(assertSelected(true));
+						}).then(works, broken);
 					};
 				}
-
-				return get(
-					'&lt;!DOCTYPE html>&lt;input type="checkbox" id="c">'
-				).then(function () {
-					return session.findById('c');
-				}).then(function (element) {
-					return element.click().then(function () {
-						return element.isSelected();
-					}).then(assertSelected(true))
-					.then(function () {
-						return element.click().then(function () {
-							return element.isSelected();
-						});
-					}).then(assertSelected(false))
-					.then(function () {
-						return element.click().then(function () {
-							return element.isSelected();
-						});
-					}).then(assertSelected(true));
-				}).then(works, broken);
-			};
+			}
 
 			// The W3C WebDriver standard does not support the session-level /keys command, but JsonWireProtocol does.
-			testedCapabilities.supportsKeysCommand = session._post('keys', { value: [ 'a' ] }).then(supported,
-				unsupported);
+			if (isGeckodriver(capabilities)) {
+				testedCapabilities.supportsKeysCommand = false;
+			}
+			else {
+				testedCapabilities.supportsKeysCommand = session._post('keys', { value: [ 'a' ] }).then(supported,
+					unsupported);
+			}
 
 			return Promise.all(testedCapabilities);
 		}
@@ -1156,7 +1219,10 @@ Server.prototype = {
 			return Promise.resolve(session);
 		}
 
-		return session.get('about:blank')
+		// At least geckodriver 0.11 and Firefox 49+ may hang when getting 'about:blank' in the first request
+		var promise = isGeckodriver(capabilities) ? Promise.resolve(session) : session.get('about:blank');
+
+		return promise
 			.then(discoverServerFeatures)
 			.then(addCapabilities)
 			.then(discoverFeatures)
