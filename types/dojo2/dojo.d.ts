@@ -414,7 +414,8 @@ declare module 'dojo/Promise' {
 	    /**
 	     * Adds a callback to the promise to be invoked when the asynchronous operation throws an error.
 	     */
-	    catch<U>(onRejected: (error?: Error) => Promise.Thenable<U> | U): Promise<U>;
+	    catch(onRejected: (error?: Error) => T | Promise.Thenable<T> | void): Promise<T>;
+	    catch<U>(onRejected: (error?: Error) => Promise.Thenable<U>): Promise<U>;
 	    /**
 	     * Adds a callback to the promise to be invoked regardless of whether or not the asynchronous operation completed
 	     * successfully.

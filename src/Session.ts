@@ -393,6 +393,10 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	private _delegateToServer(method: string, path: string, requestData: any, pathParts?: string[]): Promise<any> {
 		path = 'session/' + this._sessionId + (path ? ('/' + path) : '');
 
+		if (method === '_post' && !requestData && this.capabilities.brokenEmptyPost) {
+			requestData = {};
+		}
+
 		return new Promise((resolve, reject, progress, setCanceller) => {
 			let cancelled = false;
 			const self = this;

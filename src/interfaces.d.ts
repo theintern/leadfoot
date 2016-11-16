@@ -4,7 +4,9 @@ import { Url } from 'url';
 export interface Capabilities {
 	_filled?: boolean;
 	applicationCacheEnabled?: boolean;
+	brokenEmptyPost?: boolean;
 	brokenActiveElement?: boolean;
+	brokenClick?: boolean;
 	brokenComputedStyles?: boolean;
 	brokenCookies?: boolean;
 	brokenCssTransformedSize?: boolean;

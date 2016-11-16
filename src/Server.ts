@@ -15,6 +15,15 @@ function isMacSafari(capabilities: Capabilities): boolean {
 		capabilities.platformName !== 'ios';
 }
 
+function isGeckoDriver(capabilities: Capabilities): boolean {
+	return capabilities.browserName === 'firefox' &&
+		parseFloat(capabilities.version) >= 49;
+}
+
+function isMacGeckoDriver(capabilities: Capabilities): boolean {
+	return isGeckoDriver(capabilities) && capabilities.platform === 'MAC';
+}
+
 /**
  * A function that performs an HTTP request to a JsonWireProtocol endpoint and normalises response status and
  * data.
@@ -493,8 +502,21 @@ export default class Server {
 			// Some additional, currently-non-standard capabilities are needed in order to know about supported
 			// features of a given platform
 			if (!('mouseEnabled' in capabilities)) {
-				testedCapabilities.mouseEnabled = session.doubleClick()
-					.then(supported, maybeSupported);
+				// Using mouse services such as doubleclick will hang Firefox 49+ session on the Mac.
+				if (isMacGeckoDriver(capabilities)) {
+					testedCapabilities.mouseEnabled = true;
+				}
+				else {
+					testedCapabilities.mouseEnabled = function () {
+						return session.doubleClick()
+							.then(supported, maybeSupported);
+					};
+				}
+			}
+
+			// At least firefox 49 + geckodriver can't POST empty data
+			if (isGeckoDriver(capabilities)) {
+				testedCapabilities.brokenEmptyPost = true;
 			}
 
 			// Don't check for touch support if the environment reports that no touchscreen is available
@@ -826,13 +848,19 @@ export default class Server {
 			// they have tried to hardcode the available log types in this version so we can just return the
 			// same hardcoded list ourselves;
 			// At least InternetExplorerDriver 2.41.0 also fails to provide log types
-			(<any> testedCapabilities).fixedLogTypes = session.getAvailableLogTypes().then(<any> unsupported, function (error?: any) {
-				if (capabilities.browserName === 'selendroid' && !error.response.text.length) {
-					return [ 'logcat' ];
-				}
+			// Firefox 49+ (via geckodriver) doesn't support retrieving logs or log types, and may hang the session.
+			if (isMacGeckoDriver(capabilities)) {
+				testedCapabilities.fixedLogTypes = [];
+			}
+			else {
+				(<any> testedCapabilities).fixedLogTypes = session.getAvailableLogTypes().then(<any> unsupported, function (error?: any) {
+					if (capabilities.browserName === 'selendroid' && !error.response.text.length) {
+						return [ 'logcat' ];
+					}
 
-				return <string[]> [];
-			});
+					return <string[]> [];
+				});
+			}
 
 			// At least Microsoft Edge 10240 doesn't support timeout values of 0.
 			testedCapabilities.brokenZeroTimeout = session.setTimeout('implicit', 0).then(works, broken);
@@ -896,7 +924,12 @@ export default class Server {
 				}).catch(broken);
 			};
 
-			if (capabilities.mouseEnabled) {
+			if (isGeckoDriver(capabilities)) {
+				// At least geckodriver 0.11 and Firefox 49 don't implement mouse control, so everything will need to be
+				// simulated.
+				testedCapabilities.brokenMouseEvents = true;
+			}
+			else if (capabilities.mouseEnabled) {
 				// At least IE 10 and 11 on SauceLabs don't fire native mouse events consistently even though they
 				// support moveMouseTo
 				testedCapabilities.brokenMouseEvents = function () {
@@ -1082,8 +1115,13 @@ export default class Server {
 			}
 
 			// The W3C WebDriver standard does not support the session-level /keys command, but JsonWireProtocol does.
-			testedCapabilities.supportsKeysCommand = session['_post']('keys', { value: [ 'a' ] }).then(supported,
-				unsupported);
+			if (isGeckoDriver(capabilities)) {
+				testedCapabilities.supportsKeysCommand = false;
+			}
+			else {
+				testedCapabilities.supportsKeysCommand = session['_post']('keys', { value: [ 'a' ] }).then(supported,
+					unsupported);
+			}
 
 			return Promise.all(testedCapabilities);
 		}
@@ -1092,7 +1130,10 @@ export default class Server {
 			return Promise.resolve(session);
 		}
 
-		return session.get('about:blank')
+		// At least geckodriver 0.11 and Firefox 49+ may hang when getting 'about:blank' in the first request
+		const promise: Promise<Session|void> = isGeckoDriver(capabilities) ? Promise.resolve(session) : session.get('about:blank');
+
+		return promise
 			.then(discoverServerFeatures)
 			.then(addCapabilities)
 			.then(discoverFeatures)

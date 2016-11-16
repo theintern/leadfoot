@@ -152,10 +152,18 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 		}
 
 		return this._post('element', {
-			using: using,
-			value: value
+			using,
+			value
 		}).then(function (element) {
 			return new Element(element, session);
+		}).catch(function (error) {
+			// At least Firefox 49 + geckodriver returns an UnknownCommand error when unable to find elements.
+			if (error.name === 'UnknownCommand' && error.message.indexOf('Unable to locate element:') !== -1) {
+				const newError = new Error();
+				newError.name = 'NoSuchElement';
+				newError.message = error.message;
+				throw newError;
+			}
 		});
 	}
 
@@ -201,6 +209,12 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	 * Clicks the element. This method works on both mouse and touch platforms.
 	 */
 	click(): Promise<void> {
+		if (this.session.capabilities.brokenClick) {
+			return this.session.execute(function (element: HTMLElement) {
+				element.click();
+			}, [ this ]);
+		}
+
 		return this._post('click').then(() => {
 			// ios-driver 0.6.6-SNAPSHOT April 2014 and MS Edge Driver 14316 do not wait until the default action for
 			// a click event occurs before returning
