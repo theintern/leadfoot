@@ -42,7 +42,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	constructor(elementId: /*ElementOrElementId*/any, session?: Session) {
 		super();
 
-		this._elementId = elementId.ELEMENT || elementId.elementId || elementId;
+		this._elementId = elementId.ELEMENT || elementId.elementId || elementId['element-6066-11e4-a52e-4f735466cecf'] || elementId;
 		this._session = session;
 	}
 
@@ -132,6 +132,12 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	find(using: string, value: string): Promise<Element> {
 		const session = this._session;
 
+		if (session.capabilities.isWebDriver) {
+			const locator = util.toW3Locator(using, value);
+			using = locator.using;
+			value = locator.value;
+		}
+
 		if (using.indexOf('link text') !== -1 && this.session.capabilities.brokenWhitespaceNormalization) {
 			return this.session.execute(/* istanbul ignore next */ this.session['_manualFindByLinkText'], [
 				using, value, false, this
@@ -164,6 +170,12 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	 */
 	findAll(using: string, value: string): Promise<Element[]> {
 		const session = this._session;
+
+		if (session.capabilities.isWebDriver) {
+			const locator = util.toW3Locator(using, value);
+			using = locator.using;
+			value = locator.value;
+		}
 
 		if (using.indexOf('link text') !== -1 && this.session.capabilities.brokenWhitespaceNormalization) {
 			return this.session.execute(/* istanbul ignore next */ this.session['_manualFindByLinkText'], [
@@ -243,6 +255,13 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	 * The text to type in the remote environment. See [[Session.pressKeys]] for more information.
 	 */
 	type(value: string|string[]): Promise<void> {
+		const getPostData = (value: string[]): { value: string[] } => {
+			if (this.session.capabilities.isWebDriver) {
+				return { value: value.join('').split('') };
+			}
+			return { value };
+		};
+
 		if (!Array.isArray(value)) {
 			value = [ value ];
 		}
@@ -255,9 +274,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 			try {
 				if (fs.statSync(filename).isFile()) {
 					return this._uploadFile(filename).then((uploadedFilename: string) => {
-						return this._post('value', {
-							value: [ uploadedFilename ]
-						}).then(noop);
+						return this._post('value', getPostData([ uploadedFilename ])).then(noop);
 					});
 				}
 			}
@@ -267,9 +284,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 		}
 
 		// If the input isn't a filename, just post the value directly
-		return this._post('value', {
-			value: value
-		}).then(noop);
+		return this._post('value', getPostData(value)).then(noop);
 	}
 
 	/**

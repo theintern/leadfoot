@@ -1156,6 +1156,12 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	 * element to retrieve.
 	 */
 	find(using: string, value: string): Promise<Element> {
+		if (this.capabilities.isWebDriver) {
+			const locator = util.toW3Locator(using, value);
+			using = locator.using;
+			value = locator.value;
+		}
+
 		if (using.indexOf('link text') !== -1 && this.capabilities.brokenWhitespaceNormalization) {
 			return this.execute(/* istanbul ignore next */ this._manualFindByLinkText, [ using, value ])
 				.then(element => {
@@ -1186,6 +1192,12 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	 * The strategy-specific value to search for. See [[Session.find]] for details.
 	 */
 	findAll(using: string, value: string): Promise<Element[]> {
+		if (this.capabilities.isWebDriver) {
+			const locator = util.toW3Locator(using, value);
+			using = locator.using;
+			value = locator.value;
+		}
+
 		if (using.indexOf('link text') !== -1 && this.capabilities.brokenWhitespaceNormalization) {
 			return this.execute(/* istanbul ignore next */ this._manualFindByLinkText, [ using, value, true ])
 				.then(elements => {

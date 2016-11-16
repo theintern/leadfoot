@@ -73,3 +73,25 @@ export function applyMixins(derivedCtor: any, baseCtors: any[], includePrivates:
 		});
 	});
 }
+
+export function toW3Locator(using: string, value: string): { using: string, value: string } {
+	switch (using) {
+	case 'id':
+		using = 'css selector';
+		value = `#${value}`;
+		break;
+	case 'class name':
+		using = 'css selector';
+		value = `.${value}`;
+		break;
+	case 'name':
+		using = 'css selector';
+		value = `[name="${value}"]`;
+		break;
+	case 'tag name':
+		using = 'css selector';
+		break;
+	}
+
+	return { using, value };
+}
