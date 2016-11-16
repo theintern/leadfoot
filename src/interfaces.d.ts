@@ -50,6 +50,7 @@ export interface Capabilities {
 	hasTouchScreen?: boolean;
 	implicitWindowHandles?: boolean;
 	initialBrowserUrl?: string;
+	isWebDriver?: boolean;
 	locationContextEnabled?: boolean;
 	mouseEnabled?: boolean;
 	platform?: string;

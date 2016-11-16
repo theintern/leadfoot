@@ -648,7 +648,12 @@ registerSuite(function () {
 				}).then(function () {
 					return element.getSpecAttribute('value');
 				}).then(function (value) {
-					assert.strictEqual(value, 'defaultfoo', 'Current value of input should be returned');
+					if (session.capabilities.isWebDriver) {
+						assert.strictEqual(value, 'default', 'Initial value of input should be returned');
+					}
+					else {
+						assert.strictEqual(value, 'defaultfoo', 'Current value of input should be returned');
+					}
 					return element.getSpecAttribute('defaultValue');
 				}).then(function (defaultValue) {
 					assert.strictEqual(defaultValue, 'default', 'Default value should be returned');
@@ -671,10 +676,15 @@ registerSuite(function () {
 			}).then(function (element) {
 				return element.getSpecAttribute('href');
 			}).then(function (href) {
-				return session.getCurrentUrl().then(function (baseUrl) {
-					const expected = baseUrl.slice(0, baseUrl.lastIndexOf('/') + 1) + 'default.html';
-					assert.strictEqual(href, expected, 'Link href value should be absolute');
-				});
+				if (session.capabilities.isWebDriver) {
+					assert.strictEqual(href, 'default.html', 'Unexpected link href value');
+				}
+				else {
+					return session.getCurrentUrl().then(function (baseUrl) {
+						const expected = baseUrl.slice(0, baseUrl.lastIndexOf('/') + 1) + 'default.html';
+						assert.strictEqual(href, expected, 'Link href value should be absolute');
+					});
+				}
 			});
 		},
 
