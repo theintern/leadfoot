@@ -315,7 +315,7 @@ export default class Server {
 	 *
 	 * @returns {Promise.<module:leadfoot/Session>}
 	 */
-	createSession(desiredCapabilities: Capabilities, requiredCapabilities: Capabilities): Promise<Session> {
+	createSession(desiredCapabilities: Capabilities, requiredCapabilities: Capabilities): Promise<Session|void> {
 		const fixSessionCapabilities = desiredCapabilities.fixSessionCapabilities !== false &&
 			this.fixSessionCapabilities;
 
@@ -329,9 +329,9 @@ export default class Server {
 			desiredCapabilities: desiredCapabilities,
 			requiredCapabilities: requiredCapabilities
 		}).then(response => {
-			const session = new this.sessionConstructor(response.sessionId, this, response.value);
+			const session = new (<typeof Session> this.sessionConstructor)(response.sessionId, this, response.value);
 			if (fixSessionCapabilities) {
-				return this._fillCapabilities(session).catch(function (error) {
+				return <any> this._fillCapabilities(session).catch(error => {
 					// The session was started on the server, but we did not resolve the Promise yet. If a failure
 					// occurs during capabilities filling, we should quit the session on the server too since the
 					// caller will not be aware that it ever got that far and will have no access to the session to
@@ -351,8 +351,8 @@ export default class Server {
 		/*jshint maxlen:140 */
 		const capabilities = session.capabilities;
 
-		function supported() { return true; }
-		function unsupported() { return false; }
+		function supported(): boolean { return true; }
+		function unsupported(): boolean { return false; }
 		function maybeSupported(error: Error) { return error.name !== 'UnknownCommand'; }
 		const broken = supported;
 		const works = unsupported;
@@ -834,7 +834,7 @@ export default class Server {
 			// they have tried to hardcode the available log types in this version so we can just return the
 			// same hardcoded list ourselves;
 			// At least InternetExplorerDriver 2.41.0 also fails to provide log types
-			testedCapabilities.fixedLogTypes = session.getAvailableLogTypes().then(unsupported, function (error?: any) {
+			(<any> testedCapabilities).fixedLogTypes = session.getAvailableLogTypes().then(<any> unsupported, function (error?: any) {
 				if (capabilities.browserName === 'selendroid' && !error.response.text.length) {
 					return [ 'logcat' ];
 				}
