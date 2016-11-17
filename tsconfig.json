@@ -3,8 +3,8 @@
 		"experimentalDecorators": true,
 		"module": "umd",
 		"moduleResolution": "node",
-		"noImplicitAny": true,
-		"noImplicitThis": true,
+		"noImplicitAny": false,
+		"noImplicitThis": false,
 		"declaration": true,
 		"removeComments": true,
 		"preserveConstEnums": true,
@@ -15,9 +15,14 @@
 	},
 	"files": [
 		"./types/dojo2/dojo.d.ts",
-		"./types/jszip/jszip.d.ts"
+		"./types/jszip/jszip.d.ts",
+		"./types/intern/intern.d.ts",
+		"./types/leadfoot/leadfoot.d.ts",
+		"./types/istanbul/istanbul.d.ts",
+		"./node_modules/intern/typings/chai/chai.d.ts"
 	],
 	"include": [
-		"./src/**/*.ts"
+		"./src/**/*.ts",
+		"./tests/**/*.ts"
 	]
 }

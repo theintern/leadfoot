@@ -23,8 +23,6 @@ export const suffixes = STRATEGIES.map(function (strategy) {
 	});
 });
 
-module.exports = STRATEGIES;
-
 export default class Strategies {
 	find: (strategy: string, value: string) => Thenable<Element>;
 	findAll: (strategy: string, value: string) => Thenable<Element[]>;

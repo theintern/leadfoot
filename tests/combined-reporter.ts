@@ -1,5 +1,6 @@
 import * as intern from 'intern';
-import * as util from 'intern/lib/util';
+// TODO: logError does not exist in intern/lib/util
+// import * as util from 'intern/lib/util';
 import * as fs from 'dojo/node!fs';
 import Collector = require('dojo/node!istanbul/lib/collector');
 import JsonReporter = require('dojo/node!istanbul/lib/report/json');
@@ -7,7 +8,7 @@ import LcovHtmlReporter = require('dojo/node!istanbul/lib/report/html');
 import TextReporter = require('dojo/node!istanbul/lib/report/text');
 
 const collector = new Collector();
-const reporters: any = [];
+let reporters: any = [];
 
 if (intern.mode === 'client') {
 	reporters = [ new JsonReporter() ];
@@ -30,7 +31,7 @@ const reporter = {
 	},
 
 	'/error'(error) {
-		util.logError(error);
+		// util.logError(error);
 	},
 
 	'/launcher/start'() {
@@ -47,12 +48,12 @@ const reporter = {
 
 	'/test/fail'(test) {
 		console.error('FAIL: ' + test.id);
-		util.logError(test.error);
+		// util.logError(test.error);
 	},
 
 	stop() {
 		if (intern.mode === 'runner' && fs.existsSync('coverage-final.json')) {
-			collector.add(JSON.parse(fs.readFileSync('coverage-final.json')));
+			collector.add(JSON.parse(fs.readFileSync('coverage-final.json').toString()));
 		}
 
 		reporters.forEach(function (reporter) {

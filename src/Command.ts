@@ -674,14 +674,14 @@ export default class Command<T> implements Strategies {
 	 * @param {module:leadfoot/Command} target
 	 * @param {string} key
 	 */
-	static addElementMethod<U>(target: Command<U>, key: string): void {
+	static addElementMethod<T>(target: Command<T>, key: string): void {
 		const anyTarget = <any> target;
 		if (key.charAt(0) !== '_') {
 			// some methods, like `click`, exist on both Session and Element; deduplicate these methods by appending the
 			// element ones with 'Element'
 			const targetKey = key + (anyTarget[key] ? 'Element' : '');
-			anyTarget[targetKey] = function (this: Command<U>, ...args: any[]): Command<U> {
-				return new Command(this, function (this: Command<U>, setContext: Function) {
+			anyTarget[targetKey] = function (this: Command<T>, ...args: any[]): Command<T> {
+				return new Command(this, function (this: Command<T>, setContext: Function) {
 					const parentContext = this._context;
 					let promise: Promise<any>;
 					let fn = (<any> parentContext)[0] && (<any> parentContext)[0][key];
@@ -702,7 +702,7 @@ export default class Command<T> implements Strategies {
 						});
 					}
 
-					return <Promise<U>> promise;
+					return <Promise<T>> promise;
 				});
 			};
 		}
@@ -844,12 +844,19 @@ export default class Command<T> implements Strategies {
 util.applyMixins(Command, [ Strategies ]);
 
 (function () {
+	const sessionPrototype = <any> Session.prototype;
+	const elementPrototype = <any> Session.prototype;
+
 	for (let key in Session.prototype) {
-		Command.addSessionMethod(Command.prototype, key, (<any> Session.prototype)[key]);
+		if (typeof sessionPrototype[key] === 'function') {
+			Command.addSessionMethod(Command.prototype, key, sessionPrototype[key]);
+		}
 	}
 
 	for (let key in Element.prototype) {
-		Command.addElementMethod(Command.prototype, key);
+		if (typeof elementPrototype[key] === 'function') {
+			Command.addElementMethod(Command.prototype, key);
+		}
 	}
 })();
 

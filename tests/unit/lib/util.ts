@@ -2,6 +2,9 @@ import registerSuite = require('intern!object');
 import * as assert from 'intern/chai!assert';
 import * as util from '../../../src/lib/util';
 
+declare let __cov_abcdef: number;
+declare let a: any;
+
 registerSuite({
 	name: 'lib/leadfoot/util',
 
@@ -25,7 +28,7 @@ registerSuite({
 	},
 
 	'.forCommand'() {
-		const commandFn = util.forCommand(function () {}, {
+		const commandFn: any = util.forCommand(function () {}, {
 			createsContext: false,
 			usesElement: true
 		});
