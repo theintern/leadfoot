@@ -71,7 +71,7 @@ function pollUntil(...allArgs: any[]): () => Promise<any> {
 	args = args || [];
 	pollInterval = pollInterval || 67;
 
-	return function (this: Command) {
+	return function (this: Command<any>) {
 		const session = this.session;
 		let originalTimeout: number;
 

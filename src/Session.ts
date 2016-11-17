@@ -7,7 +7,7 @@ import Element, { ElementOrElementId } from './Element';
 import Server from './Server';
 import FindDisplayed from './lib/findDisplayed';
 import * as fs from 'fs';
-import JsZip = require('jszip');
+import JSZip = require('jszip');
 import * as lang from 'dojo/lang';
 import * as path from 'path';
 import Promise = require('dojo/Promise');
@@ -1950,7 +1950,7 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 		return new Promise(resolve => {
 			const content = fs.readFileSync(filename);
 
-			let zip = new JsZip();
+			let zip = new JSZip();
 			zip.file(path.basename(filename), content);
 			const data = zip.generate({ type: 'base64' });
 			zip = null;
