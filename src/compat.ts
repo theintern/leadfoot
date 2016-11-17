@@ -434,7 +434,7 @@ const methods = {
 
 		return this;
 	},
-	waitForElement(this: Command, using, value, timeout) {
+	waitForElement(this: Command<any>, using, value, timeout) {
 		warn(
 			'Command#waitForElement',
 			'Command#setFindTimeout and Command#find',
@@ -462,7 +462,7 @@ const methods = {
 				});
 		});
 	},
-	waitForVisible(this: Command, using, value, timeout) {
+	waitForVisible(this: Command<any>, using, value, timeout) {
 		warn(
 			'Command#waitForVisible',
 			null,

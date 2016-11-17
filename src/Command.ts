@@ -9,8 +9,8 @@ import Session from './Session';
 import Strategies from './lib/strategies';
 import { LogEntry, GeoLocation, WebDriverCookie } from './interfaces';
 
-export interface SetContextMethod {
-	(context: Element|Element[]): void;
+export interface SetContextMethod<T> {
+	(context: T|T[]): void;
 }
 
 export interface Context extends Array<Element> {
@@ -299,13 +299,13 @@ TOP_CONTEXT.depth = 0;
  * @borrows module:leadfoot/Element#getSize as module:leadfoot/Command#getSize
  * @borrows module:leadfoot/Element#getComputedStyle as module:leadfoot/Command#getComputedStyle
  */
-export default class Command implements Strategies {
-	private _parent: Command|Session;
+export default class Command<T> implements Strategies {
+	private _parent: Command<T>|Session;
 	private _session: Session;
 	private _context: Context;
-	private _promise: Promise<any>;
+	private _promise: Promise<T|void>;
 
-	constructor(parent?: Session|Command, initialiser?: (setContext: Function, value: any) => Promise<any>|any, errback?: (setContext: Function, error: Error) => Promise<any>|any) {
+	constructor(parent?: Session|Command<any>, initialiser?: (setContext: Function, value: any) => Promise<any>|any, errback?: (setContext: Function, error: Error) => Promise<any>|any) {
 		const self = this;
 		let session;
 		const trace: any = {};
@@ -319,7 +319,7 @@ export default class Command implements Strategies {
 			// If the context being set has depth, then it is coming from `Command#end`,
 			// or someone smart knows what they are doing; do not change the depth
 			if (!('depth' in context)) {
-				context.depth = parent ? (<Command> parent).context.depth + 1 : 0;
+				context.depth = parent ? (<Command<T>> parent).context.depth + 1 : 0;
 			}
 
 			self._context = context;
@@ -354,11 +354,12 @@ export default class Command implements Strategies {
 
 		Error.captureStackTrace(trace, Command);
 
-		this._promise = (parent ? (<Command> parent).promise : Promise.resolve(undefined)).then(function (returnValue) {
-			self._context = parent ? (<Command> parent).context : TOP_CONTEXT;
+		let parentCommand = <Command<T>> parent;
+		this._promise = (parentCommand ? parentCommand.promise : Promise.resolve(undefined)).then(function (returnValue) {
+			self._context = parentCommand ? parentCommand.context : TOP_CONTEXT;
 			return returnValue;
 		}, function (error) {
-			self._context = parent ? (<Command> parent).context : TOP_CONTEXT;
+			self._context = parentCommand ? parentCommand.context : TOP_CONTEXT;
 			throw error;
 		}).then(
 			initialiser && function (returnValue) {
@@ -552,10 +553,10 @@ export default class Command implements Strategies {
 	 * @param {string} method
 	 * @returns {Command}
 	 */
-	private _createElementMethod(method: string, ...args: string[]): Command {
-		return new Command(this, function (setContext: SetContextMethod) {
+	private _createElementMethod<U>(method: string, ...args: string[]): Command<U> {
+		return new Command<U>(this, function (setContext: SetContextMethod<U>) {
 			const parentContext = this._context;
-			let promise: Promise<any>;
+			let promise: Promise<U>;
 
 			if (parentContext.length && parentContext.isSingle) {
 				promise = parentContext[0][method].apply(parentContext[0], args);
@@ -582,15 +583,15 @@ export default class Command implements Strategies {
 		});
 	}
 
-	find(strategy: string, value: string): Command {
-		return this._createElementMethod('find', strategy, value);
+	find(strategy: string, value: string): Command<Element> {
+		return this._createElementMethod<Element>('find', strategy, value);
 	}
 
-	findAll(strategy: string, value: string): Command {
+	findAll(strategy: string, value: string): Command<Element[]> {
 		return this._createElementMethod('findAll', strategy, value);
 	}
 
-	findDisplayed(strategy: string, value: string): Command {
+	findDisplayed(strategy: string, value: string): Command<Element> {
 		return this._createElementMethod('findDisplayed', strategy, value);
 	}
 
@@ -612,11 +613,11 @@ export default class Command implements Strategies {
 	 * @param {string} key
 	 * @param {Function} originalFn
 	 */
-	static addSessionMethod(target: Command, key: string, originalFn: Function): void {
+	static addSessionMethod<U>(target: Command<U>, key: string, originalFn: Function): void {
 		// Checking for private/non-functions here deduplicates this logic; otherwise it would need to exist in both
 		// the Command constructor (for copying functions from sessions) as well as the Command factory below
 		if (key.charAt(0) !== '_' && !target[key] && typeof originalFn === 'function') {
-			target[key] = function (...args: any[]): Command {
+			target[key] = function (...args: any[]): Command<U> {
 				return new Command(this, function (setContext) {
 					const parentContext = this._context;
 					const session = this._session;
@@ -673,12 +674,12 @@ export default class Command implements Strategies {
 	 * @param {module:leadfoot/Command} target
 	 * @param {string} key
 	 */
-	static addElementMethod(target: Command, key: string): void {
+	static addElementMethod<U>(target: Command<U>, key: string): void {
 		if (key.charAt(0) !== '_') {
 			// some methods, like `click`, exist on both Session and Element; deduplicate these methods by appending the
 			// element ones with 'Element'
 			const targetKey = key + (target[key] ? 'Element' : '');
-			target[targetKey] = function (...args: any[]): Command {
+			target[targetKey] = function (...args: any[]): Command<U> {
 				return new Command(this, function (setContext) {
 					const parentContext = this._context;
 					let promise;
@@ -707,133 +708,133 @@ export default class Command implements Strategies {
 	}
 
 	// from Strategies mixin
-	findByClassName: (className: string) => Command;
-	findByCssSelector: (selector: string) => Command;
-	findById: (id: string) => Command;
-	findByName: (name: string) => Command;
-	findByLinkText: (text: string) => Command;
-	findByPartialLinkText: (text: string) => Command;
-	findByTagName: (tagName: string) => Command;
-	findByXpath: (path: string) => Command;
-	findAllByClassName: (className: string) => Command;
-	findAllByCssSelector: (selector: string) => Command;
-	findAllByName: (name: string) => Command;
-	findAllByLinkText: (text: string) => Command;
-	findAllByPartialLinkText: (text: string) => Command;
-	findAllByTagName: (tagName: string) => Command;
-	findAllByXpath: (path: string) => Command;
-	findDisplayedByClassName: (className: string) => Command;
-	findDisplayedByCssSelector: (selector: string) => Command;
-	findDisplayedById: (id: string) => Command;
-	findDisplayedByName: (name: string) => Command;
-	findDisplayedByLinkText: (text: string) => Command;
-	findDisplayedByPartialLinkText: (text: string) => Command;
-	findDisplayedByTagName: (tagName: string) => Command;
-	findDisplayedByXpath: (path: string) => Command;
-	waitForDeletedByClassName: (className: string) => Command;
-	waitForDeletedByCssSelector: (selector: string) => Command;
-	waitForDeletedById: (id: string) => Command;
-	waitForDeletedByName: (name: string) => Command;
-	waitForDeletedByLinkText: (text: string) => Command;
-	waitForDeletedByPartialLinkText: (text: string) => Command;
-	waitForDeletedByTagName: (tagName: string) => Command;
-	waitForDeletedByXpath: (path: string) => Command;
+	findByClassName: (className: string) => Command<Element>;
+	findByCssSelector: (selector: string) => Command<Element>;
+	findById: (id: string) => Command<Element>;
+	findByName: (name: string) => Command<Element>;
+	findByLinkText: (text: string) => Command<Element>;
+	findByPartialLinkText: (text: string) => Command<Element>;
+	findByTagName: (tagName: string) => Command<Element>;
+	findByXpath: (path: string) => Command<Element>;
+	findAllByClassName: (className: string) => Command<Element[]>;
+	findAllByCssSelector: (selector: string) => Command<Element[]>;
+	findAllByName: (name: string) => Command<Element[]>;
+	findAllByLinkText: (text: string) => Command<Element[]>;
+	findAllByPartialLinkText: (text: string) => Command<Element[]>;
+	findAllByTagName: (tagName: string) => Command<Element[]>;
+	findAllByXpath: (path: string) => Command<Element[]>;
+	findDisplayedByClassName: (className: string) => Command<Element>;
+	findDisplayedByCssSelector: (selector: string) => Command<Element>;
+	findDisplayedById: (id: string) => Command<Element>;
+	findDisplayedByName: (name: string) => Command<Element>;
+	findDisplayedByLinkText: (text: string) => Command<Element>;
+	findDisplayedByPartialLinkText: (text: string) => Command<Element>;
+	findDisplayedByTagName: (tagName: string) => Command<Element>;
+	findDisplayedByXpath: (path: string) => Command<Element>;
+	waitForDeletedByClassName: (className: string) => Command<void>;
+	waitForDeletedByCssSelector: (selector: string) => Command<void>;
+	waitForDeletedById: (id: string) => Command<void>;
+	waitForDeletedByName: (name: string) => Command<void>;
+	waitForDeletedByLinkText: (text: string) => Command<void>;
+	waitForDeletedByPartialLinkText: (text: string) => Command<void>;
+	waitForDeletedByTagName: (tagName: string) => Command<void>;
+	waitForDeletedByXpath: (path: string) => Command<void>;
 
 	// from Session
-	getTimeout: (type: string) => Promise<number>;
-	setTimeout: (type: string, ms: number) => Promise<void>;
-	getCurrentWindowHandle: () => Promise<string>;
-	getAllWindowHandles: () => Promise<string[]>;
-	getCurrentUrl: () => Promise<string>;
-	get: (url: string) => Promise<void>;
-	goForward: () => Promise<void>;
-	goBack: () => Promise<void>;
-	refresh: () => Promise<void>;
-	execute: (script: Function|string, args?: any[]) => Promise<any>;
-	executeAsync: (script: Function|string, args?: any[]) => Promise<any>;
-	takeScreenshot: () => Promise<Buffer>;
-	getAvailableImeEngines: () => Promise<string[]>;
-	getActiveImeEngine: () => Promise<string>;
-	isImeActivated: () => Promise<boolean>;
-	deactivateIme: () => Promise<void>;
-	activateIme: (engine: string) => Promise<void>;
-	switchToFrame: (id: string|number|Element) => Promise<void>;
-	switchToWindow: (handle: string) => Promise<void>;
-	switchToParentFrame: () => Promise<void>;
-	closeCurrentWindow: () => Promise<void>;
-	// setWindowSize(width: number, height: number): Promise<void>;
-	// setWindowSize(windowHandle: string, width: number, height: number): Promise<void>;
-	setWindowSize: (...args: any[]) => Promise<void>;
-	getWindowSize: (windowHandle?: string) => Promise<{ width: number, height: number }>;
-	// setWindowPosition(x: number, y: number): Promise<void>;
-	// setWindowPosition(windowHandle: string, x: number, y: number): Promise<void>;
-	setWindowPosition: (...args: any[]) => Promise<void>;
-	getWindowPosition: (windowHandle?: string) => Promise<{ x: number, y: number }>;
-	maximizeWindow: (windowHandle?: string) => Promise<void>;
-	getCookies: () => Promise<WebDriverCookie[]>;
-	setCookie: (cookie: WebDriverCookie) => Promise<void>;
-	clearCookies: () => Promise<void>;
-	deleteCookie: (name: string) => Promise<void>;
-	getPageSource: () => Promise<string>;
-	getPageTitle: () => Promise<string>;
-	getActiveElement: () => Promise<Element>;
-	pressKeys: (keys: string|string[]) => Promise<void>;
-	getOrientation: () => Promise<'portrait'|'landscape'>;
-	setOrientation: (orientation: string) => Promise<void>;
-	getAlertText: () => Promise<string>;
-	typeInPrompt: (text: string|string[]) => Promise<void>;
-	acceptAlert: () => Promise<void>;
-	dismissAlert: () => Promise<void>;
-	// moveMouseTo(xOffset?: number, yOffset?: number): Promise<void>;
-	// moveMouseTo(element?: Element, xOffset?: number, yOffset?: number): Promise<void>;
-	moveMouseTo: (...args: any[]) => Promise<void>;
-	clickMouseButton: (button?: number) => Promise<void>;
-	pressMouseButton: (button?: number) => Promise<void>;
-	releaseMouseButton: (button?: number) => Promise<void>;
-	doubleClick: () => Promise<void>;
-	tap: (element: Element) => Promise<void>;
-	pressFinger: (x: number, y: number) => Promise<void>;
-	releaseFinger: (x: number, y: number) => Promise<void>;
-	moveFinger: (x: number, y: number) => Promise<void>;
-	// touchScroll(xOffset: number, yOffset: number): Promise<void>;
-	// touchScroll(element?: Element, xOffset?: number, yOffset?: number): Promise<void>;
-	touchScroll: (...args: any[]) => Promise<void>;
-	doubleTap: (element?: Element) => Promise<void>;
-	longTap: (element?: Element) => Promise<void>;
-	// flickFinger(element: Element, xOffset: number, yOffset: number, speed?: number): Promise<void>;
-	// flickFinger(xOffset: number, yOffset: number, speed?: number): Promise<void>;
-	flickFinger: (...args: any[]) => Promise<void>;
-	getGeolocation: () => Promise<GeoLocation>;
-	setGeolocation: (location: GeoLocation) => Promise<void>;
-	getLogsFor: (type: string) => Promise<LogEntry[]>;
-	getAvailableLogTypes: () => Promise<string[]>;
-	getApplicationCacheStatus: () => Promise<number>;
-	quit: () => Promise<void>;
-	waitForDeleted: (using: string, value: string) => Promise<void>;
-	getExecuteAsyncTimeout: () => Command;
-	setExecuteAsyncTimeout: (ms: number) => Command;
-	getFindTimeout: () => Command;
-	setFindTimeout: (ms: number) => Command;
-	getPageLoadTimeout: () => Command;
-	setPageLoadTimeout: (ms: string) => Command;
+	getTimeout: (type: string) => Command<number>;
+	setTimeout: (type: string, ms: number) => Command<void>;
+	getCurrentWindowHandle: () => Command<string>;
+	getAllWindowHandles: () => Command<string[]>;
+	getCurrentUrl: () => Command<string>;
+	get: (url: string) => Command<void>;
+	goForward: () => Command<void>;
+	goBack: () => Command<void>;
+	refresh: () => Command<void>;
+	execute: (script: Function|string, args?: any[]) => Command<any>;
+	executeAsync: (script: Function|string, args?: any[]) => Command<any>;
+	takeScreenshot: () => Command<Buffer>;
+	getAvailableImeEngines: () => Command<string[]>;
+	getActiveImeEngine: () => Command<string>;
+	isImeActivated: () => Command<boolean>;
+	deactivateIme: () => Command<void>;
+	activateIme: (engine: string) => Command<void>;
+	switchToFrame: (id: string|number|Element) => Command<void>;
+	switchToWindow: (handle: string) => Command<void>;
+	switchToParentFrame: () => Command<void>;
+	closeCurrentWindow: () => Command<void>;
+	// setWindowSize(width: number, height: number): Command<void>;
+	// setWindowSize(windowHandle: string, width: number, height: number): Command<void>;
+	setWindowSize: (...args: any[]) => Command<void>;
+	getWindowSize: (windowHandle?: string) => Command<{ width: number, height: number }>;
+	// setWindowPosition(x: number, y: number): Command<void>;
+	// setWindowPosition(windowHandle: string, x: number, y: number): Command<void>;
+	setWindowPosition: (...args: any[]) => Command<void>;
+	getWindowPosition: (windowHandle?: string) => Command<{ x: number, y: number }>;
+	maximizeWindow: (windowHandle?: string) => Command<void>;
+	getCookies: () => Command<WebDriverCookie[]>;
+	setCookie: (cookie: WebDriverCookie) => Command<void>;
+	clearCookies: () => Command<void>;
+	deleteCookie: (name: string) => Command<void>;
+	getPageSource: () => Command<string>;
+	getPageTitle: () => Command<string>;
+	getActiveElement: () => Command<Element>;
+	pressKeys: (keys: string|string[]) => Command<void>;
+	getOrientation: () => Command<'portrait'|'landscape'>;
+	setOrientation: (orientation: string) => Command<void>;
+	getAlertText: () => Command<string>;
+	typeInPrompt: (text: string|string[]) => Command<void>;
+	acceptAlert: () => Command<void>;
+	dismissAlert: () => Command<void>;
+	// moveMouseTo(xOffset?: number, yOffset?: number): Command<void>;
+	// moveMouseTo(element?: Element, xOffset?: number, yOffset?: number): Command<void>;
+	moveMouseTo: (...args: any[]) => Command<void>;
+	clickMouseButton: (button?: number) => Command<void>;
+	pressMouseButton: (button?: number) => Command<void>;
+	releaseMouseButton: (button?: number) => Command<void>;
+	doubleClick: () => Command<void>;
+	tap: (element: Element) => Command<void>;
+	pressFinger: (x: number, y: number) => Command<void>;
+	releaseFinger: (x: number, y: number) => Command<void>;
+	moveFinger: (x: number, y: number) => Command<void>;
+	// touchScroll(xOffset: number, yOffset: number): Command<void>;
+	// touchScroll(element?: Element, xOffset?: number, yOffset?: number): Command<void>;
+	touchScroll: (...args: any[]) => Command<void>;
+	doubleTap: (element?: Element) => Command<void>;
+	longTap: (element?: Element) => Command<void>;
+	// flickFinger(element: Element, xOffset: number, yOffset: number, speed?: number): Command<void>;
+	// flickFinger(xOffset: number, yOffset: number, speed?: number): Command<void>;
+	flickFinger: (...args: any[]) => Command<void>;
+	getGeolocation: () => Command<GeoLocation>;
+	setGeolocation: (location: GeoLocation) => Command<void>;
+	getLogsFor: (type: string) => Command<LogEntry[]>;
+	getAvailableLogTypes: () => Command<string[]>;
+	getApplicationCacheStatus: () => Command<number>;
+	quit: () => Command<void>;
+	waitForDeleted: (using: string, value: string) => Command<void>;
+	getExecuteAsyncTimeout: () => Command<number>;
+	setExecuteAsyncTimeout: (ms: number) => Command<void>;
+	getFindTimeout: () => Command<number>;
+	setFindTimeout: (ms: number) => Command<void>;
+	getPageLoadTimeout: () => Command<number>;
+	setPageLoadTimeout: (ms: string) => Command<void>;
 
 	// Element
-	click: () => Promise<void>;
-	submit: () => Promise<void>;
-	getVisibleText: () => Promise<string>;
-	type: (value: string|string[]) => Promise<void>;
-	getTagName: () => Promise<string>;
-	clearValue: () => Promise<void>;
-	isSelected: () => Promise<boolean>;
-	isEnabled: () => Promise<boolean>;
-	getSpecAttribute: (name: string) => Promise<string>;
-	getAttribute: (name: string) => Promise<string>;
-	getProperty: (name: string) => Promise<any>;
-	equals: (other: Element) => Promise<boolean>;
-	isDisplayed: () => Promise<boolean>;
-	getPosition: () => Promise<{ x: number, y: number }>;
-	getSize: () => Promise<{ width: number, height: number }>;
-	getComputedStyle: (propertyName: string) => Promise<string>;
+	click: () => Command<void>;
+	submit: () => Command<void>;
+	getVisibleText: () => Command<string>;
+	type: (value: string|string[]) => Command<void>;
+	getTagName: () => Command<string>;
+	clearValue: () => Command<void>;
+	isSelected: () => Command<boolean>;
+	isEnabled: () => Command<boolean>;
+	getSpecAttribute: (name: string) => Command<string>;
+	getAttribute: (name: string) => Command<string>;
+	getProperty: (name: string) => Command<any>;
+	equals: (other: Element) => Command<boolean>;
+	isDisplayed: () => Command<boolean>;
+	getPosition: () => Command<{ x: number, y: number }>;
+	getSize: () => Command<{ width: number, height: number }>;
+	getComputedStyle: (propertyName: string) => Command<string>;
 }
 
 // Element retrieval strategies must be applied directly to Command because it has its own custom
