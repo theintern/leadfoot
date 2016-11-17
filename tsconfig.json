@@ -3,6 +3,8 @@
 		"experimentalDecorators": true,
 		"module": "umd",
 		"moduleResolution": "node",
+		"noImplicitAny": true,
+		"noImplicitThis": true,
 		"declaration": true,
 		"removeComments": true,
 		"preserveConstEnums": true,

@@ -15,11 +15,11 @@ export default class FindDisplayed {
 			const startTime = Date.now();
 
 			function poll() {
-				return self.findAll(strategy, value).then(function (elements) {
+				return self.findAll(strategy, value).then(function (elements: Element[]) {
 					// Due to concurrency issues with at least ChromeDriver 2.16, each element must be tested one
 					// at a time instead of using `Promise.all`
 					let i = -1;
-					function checkElement() {
+					function checkElement(): Thenable<Element|Element[]> {
 						const element = elements[++i];
 						if (element) {
 							return element.isDisplayed().then(function (isDisplayed) {
@@ -40,8 +40,8 @@ export default class FindDisplayed {
 						else if (Date.now() - startTime > originalTimeout) {
 							const error: any = new Error();
 							error.status = elements.length ? 11 : 7;
-							error.name = statusCodes[error.status][0];
-							error.message = statusCodes[error.status][1];
+							error.name = (<any> statusCodes)[error.status][0];
+							error.message = (<any> statusCodes)[error.status][1];
 							throw error;
 						}
 						else {

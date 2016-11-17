@@ -9,7 +9,7 @@ import Command from './Command';
 import Element from './Element';
 import Promise = require('dojo/Promise');
 import pollUntil = require('./helpers/pollUntil');
-import strategies, { suffixes } from './lib/strategies';
+import Strategies, { suffixes } from './lib/strategies';
 import * as topic from 'dojo/topic';
 
 /**
@@ -78,7 +78,7 @@ function deprecateElementSig(fromMethod: string, toMethod?: string, fn?: Functio
 			});
 		}
 
-		return fn ? fn.apply(this, arguments) : Command.prototype[fromMethod].apply(this, arguments);
+		return fn ? fn.apply(this, arguments) : (<any> Command.prototype)[fromMethod].apply(this, arguments);
 	};
 }
 
@@ -90,52 +90,52 @@ function deprecateElementSig(fromMethod: string, toMethod?: string, fn?: Functio
  * @param {string} toMethod
  * @returns {Function}
  */
-function deprecateElementAndStandardSig(fromMethod, toMethod) {
+function deprecateElementAndStandardSig(fromMethod: string, toMethod: string): Function {
 	return deprecateElementSig(fromMethod, toMethod, deprecate(fromMethod, toMethod));
 }
 
 const methods = {
-	get sessionID() {
+	get sessionID(this: Command<any>) {
 		warn('Command#sessionID', 'the Command#session.sessionId property');
 		return this.session.sessionId;
 	},
-	status() {
+	status(this: Command<any>) {
 		warn('Command#status');
-		return new this.constructor(this, function () {
+		return new (<typeof Command> this.constructor)<any>(this, function (this: Command<any>) {
 			return this.session.server.getStatus();
 		});
 	},
-	init() {
+	init(this: Command<any>) {
 		warn('Command#init');
 		return this;
 	},
-	sessions() {
+	sessions(this: Command<any>) {
 		warn('Command#sessions');
-		return new this.constructor(this, function () {
+		return new (<typeof Command> this.constructor)<any>(this, function (this: Command<any>) {
 			return this.session.server.getSessions();
 		});
 	},
-	sessionCapabilities() {
+	sessionCapabilities(this: Command<any>) {
 		warn('Command#sessionCapabilities', 'the Command#session.capabilities property');
-		return new this.constructor(this, function () {
+		return new (<typeof Command> this.constructor)<any>(this, function (this: Command<any>) {
 			return this.session.capabilities;
 		});
 	},
-	altSessionCapabilities() {
+	altSessionCapabilities(this: Command<any>) {
 		warn('Command#altSessionCapabilities', 'the Command#session.capabilities property');
-		return new this.constructor(this, function () {
+		return new (<typeof Command> this.constructor)<any>(this, function (this: Command<any>) {
 			return this.session.capabilities;
 		});
 	},
-	getSessionId() {
+	getSessionId(this: Command<any>) {
 		warn('Command#getSessionId', 'the Command#session.sessionId property');
-		return new this.constructor(this, function () {
+		return new (<typeof Command> this.constructor)<any>(this, function (this: Command<any>) {
 			return this.session.sessionId;
 		});
 	},
-	getSessionID() {
+	getSessionID(this: Command<any>) {
 		warn('Command#getSessionID', 'the Command#session.sessionId property');
-		return new this.constructor(this, function () {
+		return new (<typeof Command> this.constructor)<any>(this, function (this: Command<any>) {
 			return this.session.sessionId;
 		});
 	},
@@ -148,11 +148,11 @@ const methods = {
 	forward: deprecate('forward', 'goForward'),
 	back: deprecate('back', 'goBack'),
 	safeExecute: deprecate('safeExecute', 'execute'),
-	eval(code) {
+	eval(this: Command<any>, code: any) {
 		warn('Command#eval', 'Command#execute with a return call');
 		return this.execute('return eval(arguments[0]);', [ code ]);
 	},
-	safeEval(code) {
+	safeEval(this: Command<any>, code: Function|string) {
 		warn('Command#safeEval', 'Command#execute with a return call');
 		return this.execute('return eval(arguments[0]);', [ code ]);
 	},
@@ -161,7 +161,7 @@ const methods = {
 	window: deprecate('window', 'switchToWindow'),
 	close: deprecate('close', 'closeCurrentWindow'),
 	windowSize: deprecate('windowSize', 'setWindowSize'),
-	setWindowSize(...args: any[]) {
+	setWindowSize(this: Command<any>, ...args: any[]) {
 		if (args.length === 3 && typeof args[0] === 'number') {
 			warn('Command#setWindowSize(width, height, handle)',
 				'Command#setWindowSize(handle, width, height)');
@@ -170,7 +170,7 @@ const methods = {
 
 		return Command.prototype.setWindowSize.apply(this, args);
 	},
-	setWindowPosition(...args: any[]) {
+	setWindowPosition(this: Command<any>, ...args: any[]) {
 		if (args.length === 3 && typeof args[0] === 'number') {
 			warn('Command#setWindowPosition(x, y, handle)',
 				'Command#setWindowPosition(handle, x, y)');
@@ -197,7 +197,7 @@ const methods = {
 	elements: deprecate('elements', 'findAll'),
 	elementsByClassName: deprecate('elementsByClassName', 'findAllByClassName'),
 	elementsByCssSelector: deprecate('elementsByCssSelector', 'findAllByCssSelector'),
-	elementsById(value) {
+	elementsById(this: Command<any>, value: string) {
 		warn('Command#elementsById', 'Command#findById');
 		return this.findAll('id', value);
 	},
@@ -207,17 +207,17 @@ const methods = {
 	elementsByTagName: deprecate('elementsByTagName', 'findAllByTagName'),
 	elementsByXPath: deprecate('elementsByXPath', 'findAllByXpath'),
 	elementsByCss: deprecate('elementsByCss', 'findAllByCssSelector'),
-	elementOrNull(using, value) {
+	elementOrNull(this: Command<any>, using: string, value: string) {
 		warn('Command#elementOrNull', 'Command#find and Command#finally, or Command#findAll');
-		return this.find(using, value).catch(function () {
+		return this.find(using, value).catch(function (): any {
 			return null;
 		});
 	},
-	elementIfExists(using, value) {
+	elementIfExists(this: Command<any>, using: any, value: any) {
 		warn('Command#elementIfExists', 'Command#find and Command#finally, or Command#findAll');
 		return this.find(using, value).catch(function () {});
 	},
-	hasElement(using, value) {
+	hasElement(this: Command<any>, using: any, value: any) {
 		warn('Command#hasElement', 'Command#find and Command#then(exists, doesNotExist)');
 		return this.find(using, value).then(function () {
 			return true;
@@ -228,8 +228,8 @@ const methods = {
 	active: deprecate('active', 'getActiveElement'),
 	clickElement: deprecateElementAndStandardSig('clickElement', 'click'),
 	submit: deprecateElementSig('submit'),
-	text(element) {
-		return new this.constructor(this, function () {
+	text(this: Command<any>, element: any) {
+		return new (<typeof Command> this.constructor)<any>(this, function (this: Command<any>) {
 			if ((!element || element === 'body') && !this.context.length) {
 				if (element === 'body') {
 					warn('Command#text(\'body\')', 'Command#findByTagName(\'body\') then Command#getVisibleText');
@@ -263,15 +263,15 @@ const methods = {
 
 	// This method had a two-argument version according to the WD.js docs but they inexplicably swapped the first
 	// and second arguments so it probably never would have worked properly in Intern
-	textPresent(searchText, element) {
+	textPresent(this: Command<any>, searchText: string, element: Element) {
 		warn('Command#textPresent', 'Command#getVisibleText and a promise helper');
 
-		function test(text) {
+		function test(text: string) {
 			return text.indexOf(searchText) > -1;
 		}
 
 		if (element) {
-			return new this.constructor(this, function () {
+			return new (<typeof Command> this.constructor)<any>(this, function () {
 				return element.getVisibleText().then(test);
 			});
 		}
@@ -287,13 +287,13 @@ const methods = {
 	isEnabled: deprecateElementSig('isEnabled'),
 	enabled: deprecateElementAndStandardSig('enabled', 'isEnabled'),
 	getAttribute: deprecateElementSig('getAttribute'),
-	getValue(element) {
+	getValue(this: Command<any>, element: Element) {
 		if (element && element.elementId) {
 			warn('Command#getValue(element)', 'Command#find then Command#getProperty(\'value\'), or ' +
 				'Command#find then Command#then(function (element) { ' +
 				'return element.getProperty(\'value\'); }');
 
-			return new this.constructor(this, function () {
+			return new (<typeof Command> this.constructor)<any>(this, function () {
 				return element.getProperty('value');
 			});
 		}
@@ -301,10 +301,10 @@ const methods = {
 		warn('Command#getValue', 'Command#find then Command#getProperty(\'value\')');
 		return this.getProperty('value');
 	},
-	equalsElement(element, other) {
+	equalsElement(this: Command<any>, element: any, other: any) {
 		if (other && other.elementId) {
 			warn('Command#equalsElement(element, other)', 'element.equals(other)');
-			return new this.constructor(this, function () {
+			return new (<typeof Command> this.constructor)<any>(this, function () {
 				return element.equals(other);
 			});
 		}
@@ -315,7 +315,7 @@ const methods = {
 	isDisplayed: deprecateElementSig('isDisplayed'),
 	displayed: deprecateElementAndStandardSig('displayed', 'isDisplayed'),
 	getLocation: deprecateElementAndStandardSig('getLocation', 'getPosition'),
-	getLocationInView() {
+	getLocationInView(this: Command<any>) {
 		warn(
 			'Command#getLocationInView',
 			'Command#getPosition',
@@ -332,7 +332,7 @@ const methods = {
 	alertText: deprecate('alertText', 'getAlertText'),
 	alertKeys: deprecate('alertKeys', 'typeInPrompt'),
 	moveTo: deprecateElementAndStandardSig('moveTo', 'moveMouseTo'),
-	click(button) {
+	click(this: Command<any>, button: any) {
 		if (typeof button === 'number') {
 			warn('Command#click(button)', 'Command#clickMouseButton(button)');
 			return this.clickMouseButton(button);
@@ -352,38 +352,38 @@ const methods = {
 	removeLocalStorageKey: deprecate('removeLocalStorageKey', 'deleteLocalStorageItem'),
 	log: deprecate('log', 'getLogsFor'),
 	logTypes: deprecate('logTypes', 'getAvailableLogTypes'),
-	newWindow(url, name) {
+	newWindow(this: Command<any>, url: string, name: string) {
 		warn('Command#newWindow', 'Command#execute');
 		return this.execute('window.open(arguments[0], arguments[1]);', [ url, name ]);
 	},
-	windowName() {
+	windowName(this: Command<any>) {
 		warn('Command#windowName', 'Command#execute');
 		return this.execute('return window.name;');
 	},
-	setHTTPInactivityTimeout() {
+	setHTTPInactivityTimeout(this: Command<any>) {
 		warn('Command#setHTTPInactivityTimeout');
 		return this;
 	},
-	getPageIndex(element) {
+	getPageIndex(this: Command<any>, element: Element) {
 		warn('Command#getPageIndex', null, 'This command is not part of any specification.');
 		if (element && element.elementId) {
-			return new this.constructor(this, function () {
-				return element._get('pageIndex');
+			return new (<typeof Command> this.constructor)<any>(this, function () {
+				return (<any> element)._get('pageIndex');
 			});
 		}
 
-		return new this.constructor(this, function () {
+		return new (<typeof Command> this.constructor)<any>(this, function (this: Command<any>) {
 			if (this.context.isSingle) {
-				return this.context[0]._get('pageIndex');
+				return (<any> this.context)[0]._get('pageIndex');
 			}
 			else {
-				return Promise.all(this.context.map(function (element) {
+				return Promise.all(this.context.map(function (element: any) {
 					return element._get('pageIndex');
 				}));
 			}
 		});
 	},
-	uploadFile() {
+	uploadFile(this: Command<any>) {
 		warn(
 			'Command#uploadFile',
 			'Command#type to type a file path into a file upload form control',
@@ -392,7 +392,7 @@ const methods = {
 
 		return this;
 	},
-	waitForCondition(expression, timeout, pollInterval) {
+	waitForCondition(this: Command<any>, expression: any, timeout: number, pollInterval: number) {
 		timeout = timeout || 1000;
 		pollInterval = pollInterval || 100;
 
@@ -400,7 +400,7 @@ const methods = {
 
 		return this.then(pollUntil('return eval(arguments[0]) ? true : null;', [ expression ], timeout, pollInterval));
 	},
-	waitForConditionInBrowser(expression, timeout, pollInterval) {
+	waitForConditionInBrowser(this: Command<any>, expression: any, timeout: number, pollInterval: number) {
 		timeout = timeout || 1000;
 		pollInterval = pollInterval || 100;
 
@@ -408,7 +408,7 @@ const methods = {
 
 		return this.then(pollUntil('return eval(arguments[0]) ? true : null;', [ expression ], timeout, pollInterval));
 	},
-	sauceJobUpdate() {
+	sauceJobUpdate(this: Command<any>) {
 		warn(
 			'Command#sauceJobUpdate',
 			null,
@@ -417,7 +417,7 @@ const methods = {
 
 		return this;
 	},
-	sauceJobStatus() {
+	sauceJobStatus(this: Command<any>) {
 		warn(
 			'Command#sauceJobStatus',
 			null,
@@ -426,7 +426,7 @@ const methods = {
 
 		return this;
 	},
-	reset() {
+	reset(this: Command<any>) {
 		warn(
 			'Command#reset',
 			'a previously stored Command instance'
@@ -434,7 +434,7 @@ const methods = {
 
 		return this;
 	},
-	waitForElement(this: Command<any>, using, value, timeout) {
+	waitForElement(this: Command<any>, using: any, value: any, timeout: number) {
 		warn(
 			'Command#waitForElement',
 			'Command#setFindTimeout and Command#find',
@@ -448,21 +448,21 @@ const methods = {
 		}
 
 		const command = this;
-		return this.getFindTimeout().then(function (originalTimeout) {
+		return this.getFindTimeout().then(function (originalTimeout: number) {
 			return command.setFindTimeout(timeout)
 				.find(using, value)
 				.then(function () {
-					return command.setFindTimeout(originalTimeout).then(function () {
+					return command.setFindTimeout(originalTimeout).then(function (): any {
 						return null;
 					});
-				}, function (error) {
+				}, function (error: Error) {
 					return command.setFindTimeout(originalTimeout).then(function () {
 						throw error;
 					});
 				});
 		});
 	},
-	waitForVisible(this: Command<any>, using, value, timeout) {
+	waitForVisible(this: any, using: any, value: any, timeout: any) {
 		warn(
 			'Command#waitForVisible',
 			null,
@@ -478,27 +478,27 @@ const methods = {
 
 		const startTime = Date.now();
 		const command = this;
-		return this.getFindTimeout().then(function (originalTimeout) {
+		return this.getFindTimeout().then(function (this: any, originalTimeout: number) {
 			return command.setFindTimeout(timeout)
 				.find(using, value)
-				.then(function (element) {
-					return pollUntil(/* istanbul ignore next */ function (element) {
+				.then(function (this: any, element: Element) {
+					return pollUntil(/* istanbul ignore next */ function (element: HTMLElement) {
 						return element.offsetWidth && element.offsetHeight ? true : null;
 					}, [ element ], timeout - (startTime - Date.now())).call(this);
-				}).then(function (isVisible) {
+				}).then(function (isVisible: boolean) {
 					return command.setFindTimeout(originalTimeout).then(function () {
 						if (!isVisible) {
 							throw new Error('Element didn\'t become visible');
 						}
 					});
-				}, function (error) {
+				}, function (error: Error) {
 					return command.setFindTimeout(originalTimeout).then(function () {
 						throw error;
 					});
 				});
 		});
 	},
-	isVisible(...args: any[]) {
+	isVisible(this: any, ...args: any[]) {
 		warn(
 			'Command#isVisible',
 			'Command#isDisplayed',
@@ -521,7 +521,7 @@ const methods = {
 			}
 		}
 
-		return new this.constructor(this, function () {
+		return new (<typeof Command> this.constructor)<any>(this, function (this: Command<any>) {
 			if (this.context.isSingle) {
 				return this.context[0].isDisplayed();
 			}
@@ -538,24 +538,25 @@ const methods = {
 };
 
 suffixes.forEach(function (suffix, index) {
-	function addStrategy(method, toMethod, suffix, wdSuffix, using) {
-		methods[method + 'OrNull'] = function (value) {
+	function addStrategy(method: string, toMethod: string, suffix: string, wdSuffix: string, using: any) {
+		const anyMethods = <any> methods;
+		anyMethods[method + 'OrNull'] = function (this: any, value: string) {
 			return this.elementOrNull(using, value);
 		};
 
-		methods[method + 'IfExists'] = function (value) {
+		anyMethods[method + 'IfExists'] = function (this: any, value: string) {
 			return this.elementIfExists(using, value);
 		};
 
-		methods['hasElementBy' + wdSuffix] = function (value) {
+		anyMethods['hasElementBy' + wdSuffix] = function (this: any, value: string) {
 			return this.hasElement(using, value);
 		};
 
-		methods['waitForElementBy' + wdSuffix] = function (value, timeout) {
+		anyMethods['waitForElementBy' + wdSuffix] = function (this: any, value: string, timeout: number) {
 			return this.waitForElement(using, value, timeout);
 		};
 
-		methods['waitForVisibleBy' + wdSuffix] = function (value, timeout) {
+		anyMethods['waitForVisibleBy' + wdSuffix] = function (this: any, value: string, timeout: number) {
 			return this.waitForVisible(using, value, timeout);
 		};
 	}
@@ -563,22 +564,20 @@ suffixes.forEach(function (suffix, index) {
 	const wdSuffix = suffix === 'Xpath' ? 'XPath' : suffix;
 	const method = 'elementBy' + wdSuffix;
 	const toMethod = 'findBy' + suffix;
-	const using = strategies[index];
+	const using = (<any> Strategies.prototype)[index];
 	addStrategy(method, toMethod, suffix, wdSuffix, using);
 	if (suffix === 'CssSelector') {
 		addStrategy('elementByCss', toMethod, suffix, 'Css', using);
 	}
 });
 
-module.exports = {
-	/**
-	 * Applies the methods from compat to a {@link module:leadfoot/Command} prototype or instance.
-	 *
-	 * @param {module:leadfoot/Command} prototype A {@link module:leadfoot/Command} prototype or instance.
-	 */
-	applyTo(prototype) {
-		for (let key in methods) {
-			Object.defineProperty(prototype, key, Object.getOwnPropertyDescriptor(methods, key));
-		}
+/**
+ * Applies the methods from compat to a {@link module:leadfoot/Command} prototype or instance.
+ *
+ * @param {module:leadfoot/Command} prototype A {@link module:leadfoot/Command} prototype or instance.
+ */
+export function applyTo(prototype: Command<any>) {
+	for (let key in methods) {
+		Object.defineProperty(prototype, key, Object.getOwnPropertyDescriptor(methods, key));
 	}
-};
+}

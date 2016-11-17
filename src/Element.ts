@@ -169,7 +169,7 @@ export default class Element implements WaitForDeleted, FindDisplayed, Strategie
 	 */
 	submit(): Promise<void> {
 		if (this.session.capabilities.brokenSubmitElement) {
-			return this.session.execute(/* istanbul ignore next */ function (element: any|HTMLFormElement) {
+			return this.session.execute(/* istanbul ignore next */ function (element: any) {
 				if (element.submit) {
 					element.submit();
 				}
@@ -399,7 +399,7 @@ export default class Element implements WaitForDeleted, FindDisplayed, Strategie
 				this.session.capabilities.brokenElementDisplayedOpacity ||
 				this.session.capabilities.brokenElementDisplayedOffscreen
 			)) {
-				return this.session.execute(/* istanbul ignore next */ function (element: any) {
+				return this.session.execute(/* istanbul ignore next */ function (element: HTMLElement) {
 					const scrollX = document.documentElement.scrollLeft || document.body.scrollLeft;
 					const scrollY = document.documentElement.scrollTop || document.body.scrollTop;
 					do {
@@ -412,7 +412,7 @@ export default class Element implements WaitForDeleted, FindDisplayed, Strategie
 							return false;
 						}
 					}
-					while ((element = element.parentNode) && element.nodeType === 1);
+					while ((element = <HTMLElement> element.parentNode) && element.nodeType === 1);
 					return true;
 				}, [ this ]);
 			}
@@ -430,7 +430,7 @@ export default class Element implements WaitForDeleted, FindDisplayed, Strategie
 	getPosition(): Promise<{ x: number, y: number }> {
 		if (this.session.capabilities.brokenElementPosition) {
 			/* jshint browser:true */
-			return this.session.execute(/* istanbul ignore next */ function (element: any) {
+			return this.session.execute(/* istanbul ignore next */ function (element: HTMLElement) {
 				const bbox = element.getBoundingClientRect();
 				const scrollX = document.documentElement.scrollLeft || document.body.scrollLeft;
 				const scrollY = document.documentElement.scrollTop || document.body.scrollTop;
@@ -453,7 +453,7 @@ export default class Element implements WaitForDeleted, FindDisplayed, Strategie
 	 */
 	getSize(): Promise<{ width: number, height: number }> {
 		const getUsingExecute = () => {
-			return this.session.execute(/* istanbul ignore next */ function (element: any) {
+			return this.session.execute(/* istanbul ignore next */ function (element: HTMLElement) {
 				const bbox = element.getBoundingClientRect();
 				return { width: bbox.right - bbox.left, height: bbox.bottom - bbox.top };
 			}, [ this ]);

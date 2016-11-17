@@ -1,21 +1,21 @@
-import Promise = require('dojo/Promise');
+import { Thenable } from '../interfaces';
 
 export class LocalStorage {
-	getLocalStorageKeys: () => Promise<string[]>;
-	setLocalStorageItem: (key: string, value: string) => Promise<void>;
-	clearLocalStorage: () => Promise<void>;
-	getLocalStorageItem: (key: string) => Promise<string>;
-	deleteLocalStorageItem: (key: string) => Promise<void>;
-	getLocalStorageLength: ()  => Promise<number>;
+	getLocalStorageKeys: () => Thenable<string[]>;
+	setLocalStorageItem: (key: string, value: string) => Thenable<void>;
+	clearLocalStorage: () => Thenable<void>;
+	getLocalStorageItem: (key: string) => Thenable<string>;
+	deleteLocalStorageItem: (key: string) => Thenable<void>;
+	getLocalStorageLength: ()  => Thenable<number>;
 }
 
 export class SessionStorage {
-	getSessionStorageKeys: () => Promise<string[]>;
-	setSessionStorageItem: (key: string, value: string) => Promise<void>;
-	clearSessionStorage: () => Promise<void>;
-	getSessionStorageItem: (key: string) => Promise<string>;
-	deleteSessionStorageItem: (key: string) => Promise<void>;
-	getSessionStorageLength: ()  => Promise<number>;
+	getSessionStorageKeys: () => Thenable<string[]>;
+	setSessionStorageItem: (key: string, value: string) => Thenable<void>;
+	clearSessionStorage: () => Thenable<void>;
+	getSessionStorageItem: (key: string) => Thenable<string>;
+	deleteSessionStorageItem: (key: string) => Thenable<void>;
+	getSessionStorageLength: ()  => Thenable<number>;
 }
 
 const METHODS = {
@@ -47,7 +47,7 @@ const METHODS = {
 	},
 
 	delete_StorageItem: function (type: string) {
-		return function (this: any, key) {
+		return function (this: any, key: string) {
 			return this._delete(type + '_storage/key/$0', null, [ key ]);
 		};
 	},
@@ -62,7 +62,7 @@ const METHODS = {
 function applyTo(prototype: any, type: string): void {
 	const methodType = type.charAt(0).toUpperCase() + type.slice(1);
 	for (let method in METHODS) {
-		prototype[method.replace('_', methodType)] = METHODS[method](type);
+		prototype[method.replace('_', methodType)] = (<any> METHODS)[method](type);
 	}
 }
 

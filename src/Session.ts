@@ -233,7 +233,7 @@ function simulateMouse(kwArgs: any) {
 		return kwArgs.target.dispatchEvent(event);
 	}
 
-	function click(target, button, detail) {
+	function click(target: any, button: any, detail: any) {
 		if (!down(target, button)) {
 			return false;
 		}
@@ -251,7 +251,7 @@ function simulateMouse(kwArgs: any) {
 		});
 	}
 
-	function down(target, button) {
+	function down(target: any, button: any) {
 		return dispatch({
 			button: button,
 			cancelable: true,
@@ -260,7 +260,7 @@ function simulateMouse(kwArgs: any) {
 		});
 	}
 
-	function up(target, button) {
+	function up(target: any, button: any) {
 		return dispatch({
 			button: button,
 			cancelable: true,
@@ -339,10 +339,10 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	private _sessionId: string;
 	private _server: Server;
 	private _capabilities: Capabilities;
-	private _closedWindows: any = null; // TODO: find correct type
+	private _closedWindows: any = null;
 	// TODO: Timeouts are held so that we can fiddle with the implicit wait timeout to add efficient `waitFor`
 	// and `waitForDeleted` convenience methods. Technically only the implicit timeout is necessary.
-	private _timeouts: { [key: string]: Promise<number>; } = {}; // TODO: find correct type
+	private _timeouts: { [key: string]: Promise<number>; } = {};
 	private _movedToElement: boolean = false;
 	private _lastMousePosition: any = null;
 	private _lastAltitude: any = null;

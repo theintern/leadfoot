@@ -379,12 +379,12 @@ export default class Server {
 
 					if (typeof value === 'function') {
 						value().then(function (value: any) {
-							capabilities[key] = value;
+							(<any> capabilities)[key] = value;
 							next();
 						}, reject);
 					}
 					else {
-						capabilities[key] = value;
+						(<any> capabilities)[key] = value;
 						next();
 					}
 				})();

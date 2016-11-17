@@ -307,7 +307,7 @@ export default class Command<T> implements Strategies {
 
 	constructor(parent?: Session|Command<any>, initialiser?: (setContext: Function, value: any) => Promise<any>|any, errback?: (setContext: Function, error: Error) => Promise<any>|any) {
 		const self = this;
-		let session;
+		let session: Session;
 		const trace: any = {};
 
 		function setContext(context: Context) {
@@ -347,8 +347,8 @@ export default class Command<T> implements Strategies {
 		// using the fluid interfaces
 		// TODO: Test
 		for (let key in session) {
-			if (session[key] !== Session.prototype[key]) {
-				Command.addSessionMethod(this, key, session[key]);
+			if ((<any> session)[key] !== (<any> Session.prototype)[key]) {
+				Command.addSessionMethod(this, key, (<any> session)[key]);
 			}
 		}
 
@@ -456,12 +456,12 @@ export default class Command<T> implements Strategies {
 	 * @param {number=} numCommandsToPop The number of element contexts to pop. Defaults to 1.
 	 * @returns {module:leadfoot/Command.<void>}
 	 */
-	end(numCommandsToPop: number = 1) {
-		return new Command(this, function (setContext) {
+	end(numCommandsToPop: number = 1): Command<T> {
+		return new Command<void>(this, function (this: Command<T>, setContext: Function) {
 			let command = this;
-			let depth = this.context.depth;
+			let depth: number = this.context.depth;
 
-			while (depth && numCommandsToPop && (command = command.parent)) {
+			while (depth && numCommandsToPop && (command = <Command<any>> command.parent)) {
 				if (command.context.depth < depth) {
 					--numCommandsToPop;
 					depth = command.context.depth;
@@ -489,27 +489,27 @@ export default class Command<T> implements Strategies {
 	 * @param {Function=} errback
 	 * @returns {module:leadfoot/Command.<any>}
 	 */
-	then(callback: Function, errback?: Function) {
-		function runCallback(command, callback, value, setContext) {
+	then(callback: Function, errback?: Function): Command<T> {
+		function runCallback(command: Command<T>, callback: Function, value: T, setContext: SetContextMethod<T>): T {
 			const returnValue = callback.call(command, value, setContext);
 
 			// If someone returns `this` (or a chain starting from `this`) from the callback, it will cause a deadlock
 			// where the child command is waiting for the child command to resolve
-			if (returnValue instanceof command.constructor) {
+			if (returnValue instanceof Command) {
 				let maybeCommand = returnValue;
 				do {
 					if (maybeCommand === command) {
 						throw new Error('Deadlock: do not use `return this` from a Command callback');
 					}
-				} while ((maybeCommand = maybeCommand.parent));
+				} while ((maybeCommand = <Command<any>> maybeCommand.parent));
 			}
 
 			return returnValue;
 		}
 
-		return new Command(this, callback && function (setContext, value) {
+		return new Command(this, callback && function (this: Command<T>, setContext: SetContextMethod<T>, value: T) {
 			return runCallback(this, callback, value, setContext);
-		}, errback && function (setContext, value) {
+		}, errback && function (this: Command<T>, setContext: SetContextMethod<T>, value: any) {
 			return runCallback(this, errback, value, setContext);
 		});
 	}
@@ -520,7 +520,7 @@ export default class Command<T> implements Strategies {
 	 * @param {Function} errback
 	 * @returns {module:leadfoot/Command.<any>}
 	 */
-	catch(errback) {
+	catch(errback: Function): Command<T> {
 		return this.then(null, errback);
 	}
 
@@ -530,7 +530,7 @@ export default class Command<T> implements Strategies {
 	 * @param {Function} callback
 	 * @returns {module:leadfoot/Command.<any>}
 	 */
-	finally(callback) {
+	finally(callback: Function): Command<T> {
 		return this.then(callback, callback);
 	}
 
@@ -554,16 +554,16 @@ export default class Command<T> implements Strategies {
 	 * @returns {Command}
 	 */
 	private _createElementMethod<U>(method: string, ...args: string[]): Command<U> {
-		return new Command<U>(this, function (setContext: SetContextMethod<U>) {
+		return new Command<U>(this, function (this: Command<U>, setContext: SetContextMethod<U>) {
 			const parentContext = this._context;
 			let promise: Promise<U>;
 
 			if (parentContext.length && parentContext.isSingle) {
-				promise = parentContext[0][method].apply(parentContext[0], args);
+				promise = (<any> parentContext)[0][method].apply(parentContext[0], args);
 			}
 			else if (parentContext.length) {
-				promise = Promise.all(parentContext.map(function (element) {
-					return element[method].apply(element, args);
+				promise = Promise.all(parentContext.map(function (element: Element) {
+					return (<any> element)[method].apply(element, args);
 				})).then(function (elements) {
 					// findAll against an array context will result in arrays of arrays; flatten into a single
 					// array of elements. It would also be possible to resort in document order but other parallel
@@ -573,7 +573,7 @@ export default class Command<T> implements Strategies {
 				});
 			}
 			else {
-				promise = this.session[method].apply(this.session, args);
+				promise = (<any> this.session)[method].apply(this.session, args);
 			}
 
 			return promise.then(function (newContext) {
@@ -616,18 +616,18 @@ export default class Command<T> implements Strategies {
 	static addSessionMethod<U>(target: Command<U>, key: string, originalFn: Function): void {
 		// Checking for private/non-functions here deduplicates this logic; otherwise it would need to exist in both
 		// the Command constructor (for copying functions from sessions) as well as the Command factory below
-		if (key.charAt(0) !== '_' && !target[key] && typeof originalFn === 'function') {
-			target[key] = function (...args: any[]): Command<U> {
-				return new Command(this, function (setContext) {
+		if (key.charAt(0) !== '_' && !(<any> target)[key] && typeof originalFn === 'function') {
+			(<any> target)[key] = function (this: Command<U>, ...args: any[]): Command<U> {
+				return new Command<U>(this, function (this: Command<U>, setContext: Function) {
 					const parentContext = this._context;
 					const session = this._session;
-					let promise;
+					let promise: Promise<any>;
 					// The function may have come from a session object prototype but have been overridden on the actual
 					// session instance; in such a case, the overridden function should be used instead of the one from
 					// the original source object. The original source object may still be used, however, if the
 					// function is being added like a mixin and does not exist on the actual session object for this
 					// session
-					const fn = session[key] || originalFn;
+					const fn = (<any> session)[key] || originalFn;
 
 					if (fn.usesElement && parentContext.length && (!args[0] || !args[0].elementId)) {
 						// Defer converting arguments into an array until it is necessary to avoid overhead
@@ -637,7 +637,7 @@ export default class Command<T> implements Strategies {
 							promise = fn.apply(session, [ parentContext[0] ].concat(args));
 						}
 						else {
-							promise = Promise.all(parentContext.map(function (element) {
+							promise = Promise.all(parentContext.map(function (element: Element) {
 								return fn.apply(session, [ element ].concat(args));
 							}));
 						}
@@ -653,7 +653,7 @@ export default class Command<T> implements Strategies {
 						});
 					}
 
-					return promise;
+					return <Promise<U>> promise;
 				});
 			};
 		}
@@ -675,21 +675,22 @@ export default class Command<T> implements Strategies {
 	 * @param {string} key
 	 */
 	static addElementMethod<U>(target: Command<U>, key: string): void {
+		const anyTarget = <any> target;
 		if (key.charAt(0) !== '_') {
 			// some methods, like `click`, exist on both Session and Element; deduplicate these methods by appending the
 			// element ones with 'Element'
-			const targetKey = key + (target[key] ? 'Element' : '');
-			target[targetKey] = function (...args: any[]): Command<U> {
-				return new Command(this, function (setContext) {
+			const targetKey = key + (anyTarget[key] ? 'Element' : '');
+			anyTarget[targetKey] = function (this: Command<U>, ...args: any[]): Command<U> {
+				return new Command(this, function (this: Command<U>, setContext: Function) {
 					const parentContext = this._context;
-					let promise;
-					let fn = parentContext[0] && parentContext[0][key];
+					let promise: Promise<any>;
+					let fn = (<any> parentContext)[0] && (<any> parentContext)[0][key];
 
 					if (parentContext.isSingle) {
 						promise = fn.apply(parentContext[0], args);
 					}
 					else {
-						promise = Promise.all(parentContext.map(function (element) {
+						promise = Promise.all(parentContext.map(function (element: any) {
 							return element[key].apply(element, args);
 						}));
 					}
@@ -701,7 +702,7 @@ export default class Command<T> implements Strategies {
 						});
 					}
 
-					return promise;
+					return <Promise<U>> promise;
 				});
 			};
 		}
@@ -844,7 +845,7 @@ util.applyMixins(Command, [ Strategies ]);
 
 (function () {
 	for (let key in Session.prototype) {
-		Command.addSessionMethod(Command.prototype, key, Session.prototype[key]);
+		Command.addSessionMethod(Command.prototype, key, (<any> Session.prototype)[key]);
 	}
 
 	for (let key in Element.prototype) {
@@ -859,7 +860,7 @@ try {
 
 // TODO: Add unit test
 if (chaiAsPromised) {
-	(<any> chaiAsPromised).transferPromiseness = function (assertion, promise) {
+	(<any> chaiAsPromised).transferPromiseness = function (assertion: any, promise: any) {
 		assertion.then = promise.then.bind(promise);
 		for (let method in promise) {
 			if (typeof promise[method] === 'function') {

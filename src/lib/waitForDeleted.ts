@@ -25,8 +25,8 @@ export default class WaitForDeleted {
 					const always = function () {
 						const error: any = new Error();
 						error.status = 21;
-						error.name = statusCodes[error.status][0];
-						error.message = statusCodes[error.status][1];
+						error.name = (<any> statusCodes)[error.status][0];
+						error.message = (<any> statusCodes)[error.status][1];
 						dfd.reject(error);
 					};
 					session.setTimeout('implicit', originalTimeout).then(always, always);
