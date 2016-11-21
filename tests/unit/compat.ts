@@ -117,16 +117,16 @@ let lastWarning: any;
 let suite = {
 	name: 'leadfoot/compat',
 
-	beforeEach: function () {
+	beforeEach() {
 		lastWarning = null;
 	},
 
-	teardown: function () {
+	teardown() {
 		handle.remove();
 		lastWarning = command = handle = null;
 	},
 
-	'assertion sanity check': function () {
+	'assertion sanity check'() {
 		assert.throws(function () {
 			assertWarn('a');
 		});
@@ -143,52 +143,52 @@ let suite = {
 		});
 	}),
 
-	'#sessionID': function () {
+	'#sessionID'() {
 		assert.strictEqual(command.sessionID, command.session.sessionId);
 		assertWarn('Command#sessionID', 'Command#session.sessionId');
 	},
 
-	'#status': function () {
+	'#status'() {
 		return command.status().then(function (value) {
 			assert.strictEqual(value, 'hapy');
 			assertWarn('Command#status');
 		});
 	},
 
-	'#init': function () {
+	'#init'() {
 		assert.strictEqual(command.init(), command);
 		assertWarn('Command#init');
 	},
 
-	'#sessions': function () {
+	'#sessions'() {
 		return command.sessions().then(function (value) {
 			assert.strictEqual(value, 'many things');
 			assertWarn('Command#sessions');
 		});
 	},
 
-	'#sessionCapabilities': function () {
+	'#sessionCapabilities'() {
 		return command.sessionCapabilities().then(function (capabilities) {
 			assert.strictEqual(capabilities, command.session.capabilities);
 			assertWarn('Command#sessionCapabilities', 'Command#session.capabilities');
 		});
 	},
 
-	'#altSessionCapabilities': function () {
+	'#altSessionCapabilities'() {
 		return command.altSessionCapabilities().then(function (capabilities) {
 			assert.strictEqual(capabilities, command.session.capabilities);
 			assertWarn('Command#altSessionCapabilities', 'Command#session.capabilities');
 		});
 	},
 
-	'#getSessionId': function () {
+	'#getSessionId'() {
 		return command.getSessionId().then(function (sessionId) {
 			assert.strictEqual(sessionId, command.session.sessionId);
 			assertWarn('Command#getSessionId', 'Command#session.sessionId');
 		});
 	},
 
-	'#getSessionID': function () {
+	'#getSessionID'() {
 		return command.getSessionID().then(function (sessionId) {
 			assert.strictEqual(sessionId, command.session.sessionId);
 			assertWarn('Command#getSessionID', 'Command#session.sessionId');
@@ -317,7 +317,7 @@ let suite = {
 	'#textPresent': (function () {
 		let originalMethod;
 		return {
-			setup: function () {
+			setup() {
 				originalMethod = command.getVisibleText;
 				command.getVisibleText = function () {
 					return new Command(this, function () {
@@ -325,10 +325,10 @@ let suite = {
 					});
 				};
 			},
-			teardown: function () {
+			teardown() {
 				command.getVisibleText = originalMethod;
 			},
-			'pass-through': function () {
+			'pass-through'() {
 				return command.textPresent('foo').then(function (result) {
 					assert.isTrue(result);
 					assertWarn('Command#textPresent', 'Command#getVisibleText');
@@ -337,7 +337,7 @@ let suite = {
 					assert.isFalse(result);
 				});
 			},
-			'with element': function () {
+			'with element'() {
 				let element = {
 					getVisibleText: function () {
 						return Promise.resolve('baz');
@@ -509,14 +509,14 @@ let suite = {
 			});
 		});
 	}),
-	'#sauceJobUpdate': function () {
+	'#sauceJobUpdate'() {
 		let updateCommand = command.sauceJobUpdate();
 		return updateCommand.then(function () {
 			assert.strictEqual(updateCommand, command);
 			assertWarn('Command#sauceJobUpdate');
 		});
 	},
-	'#sauceJobStatus': function () {
+	'#sauceJobStatus'() {
 		let updateCommand = command.sauceJobStatus();
 		return updateCommand.then(function () {
 			assert.strictEqual(updateCommand, command);
@@ -524,7 +524,7 @@ let suite = {
 		});
 	},
 	'#wait': deprecate('wait', 'sleep'),
-	'#reset': function () {
+	'#reset'() {
 		let resetCommand = command.reset();
 		return resetCommand.then(function () {
 			assert.strictEqual(resetCommand, command);
