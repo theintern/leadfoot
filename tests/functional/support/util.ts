@@ -1,55 +1,49 @@
-/* jshint dojo:true */
-define([
-	'intern/dojo/node!dojo/Promise',
-	'intern/dojo/node!dojo/lang',
-	'intern/dojo/node!../../../../lib/util',
-	'intern/dojo/node!../../../../Server',
-	'intern/dojo/node!../../../../Session'
-], function (Promise, lang, util, Server, Session) {
-	return lang.delegate(util, {
-		createServer: function (config) {
-			return new Server(config);
-		},
+import Server from '../../../src/Server';
+import Session from '../../../src/Session';
+import Command from '../../../src/Command';
+import { LeadfootURL } from '../../../src/interfaces';
 
-		createServerFromRemote: function (remote) {
-			if (remote.session && remote.session.server) {
-				return new Server(remote.session.server.url);
+export * from '../../../src/lib/util';
+
+export function createServer(config: LeadfootURL|string) {
+	return new Server(config);
+}
+
+export function createServerFromRemote(remote: any) {
+	if (remote.session && remote.session.server) {
+		return new Server(remote.session.server.url);
+	}
+
+	throw new Error('Unsupported remote');
+}
+
+export function createSessionFromRemote(remote: Command<any>, SessionCtor: any = Session) {
+	const server = createServerFromRemote(remote);
+
+	function fixGet(session: any) {
+		const oldGet = session.get;
+		session.get = function (this: Session, url: string) {
+			if (!/^[A-Za-z][A-Za-z0-9+.-]+:/.test(url)) {
+				url = convertPathToUrl(remote, url);
 			}
 
-			throw new Error('Unsupported remote');
-		},
+			return oldGet.call(this, url);
+		};
+	}
 
-		createSessionFromRemote: function (remote, SessionCtor) {
-			SessionCtor = SessionCtor || Session;
-			var self = this;
-			var server = this.createServerFromRemote(remote);
+	if (remote.session) {
+		const session = new SessionCtor(remote.session.sessionId, server, remote.session.capabilities);
+		fixGet(session);
+		return (<any> server)._fillCapabilities(session);
+	}
 
-			function fixGet(session) {
-				var oldGet = session.get;
-				session.get = function (url) {
-					if (!/^[A-Za-z][A-Za-z0-9+.-]+:/.test(url)) {
-						url = self.convertPathToUrl(remote, url);
-					}
+	throw new Error('Unsupported remote');
+}
 
-					return oldGet.call(this, url);
-				};
-			}
+export function convertPathToUrl(session: any, url: string) {
+	if (session.session) {
+		session = session.session;
+	}
 
-			if (remote.session) {
-				var session = new SessionCtor(remote.session.sessionId, server, remote.session.capabilities);
-				fixGet(session);
-				return server._fillCapabilities(session);
-			}
-
-			throw new Error('Unsupported remote');
-		},
-
-		convertPathToUrl: function (session, url) {
-			if (session.session) {
-				session = session.session;
-			}
-
-			return session.proxyUrl + url.slice(session.proxyBasePathLength);
-		}
-	});
-});
+	return session.proxyUrl + url.slice(session.proxyBasePathLength);
+}

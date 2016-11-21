@@ -23,6 +23,11 @@ export const loaderOptions = {
 	]
 };
 
+export const loaders = {
+	'host-browser': 'node_modules/dojo-loader/loader.js',
+	'host-node': 'dojo-loader'
+};
+
 export const suites = [
 	'dojo/has!host-node?leadfoot/tests/unit/lib/util',
 	'dojo/has!host-node?leadfoot/tests/unit/compat'

@@ -300,7 +300,7 @@ TOP_CONTEXT.depth = 0;
  * @borrows module:leadfoot/Element#getComputedStyle as module:leadfoot/Command#getComputedStyle
  */
 export default class Command<T> implements Strategies {
-	private _parent: Command<T>|Session;
+	private _parent: Command<any>|Session;
 	private _session: Session;
 	private _context: Context;
 	private _promise: Promise<T|void>;
@@ -845,7 +845,7 @@ util.applyMixins(Command, [ Strategies ]);
 
 (function () {
 	const sessionPrototype = <any> Session.prototype;
-	const elementPrototype = <any> Session.prototype;
+	const elementPrototype = <any> Element.prototype;
 
 	for (let key in Session.prototype) {
 		if (typeof sessionPrototype[key] === 'function') {

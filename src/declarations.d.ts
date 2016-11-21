@@ -20,6 +20,9 @@ declare module 'dojo/node!fs' {
 declare module 'dojo/node!path' {
 	export * from 'path';
 }
+declare module 'dojo/node!url' {
+	export * from 'url';
+}
 declare module 'dojo/node!jszip' {
 	import JSZip = require('jszip');
 	export = JSZip;

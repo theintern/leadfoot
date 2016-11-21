@@ -62,11 +62,16 @@ export interface Thenable<T> {
 	then<U>(onFulfilled?: (value?: T) => Thenable<U> | U, onRejected?: (error?: Error) => Thenable<U> | U): Thenable<U>;
 }
 
-interface WebDriverCookie {
+export interface WebDriverCookie {
 	name: string;
 	value: string;
 	path?: string;
 	domain?: string;
 	secure?: boolean;
 	expiry?: string|Date|number;
+}
+
+export interface LeadfootURL extends URL {
+	accessKey: string;
+	auth: string;
 }

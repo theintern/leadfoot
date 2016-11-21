@@ -10,9 +10,9 @@ import request = require('dojo/request');
 import Session from './Session';
 import statusCodes from './lib/statusCodes';
 import Element from './Element';
-import * as urlUtil from 'url';
+import * as urlUtil from 'dojo/node!url';
 import * as util from './lib/util';
-import { Capabilities } from './interfaces';
+import { Capabilities, LeadfootURL } from './interfaces';
 
 function isMacSafari(capabilities: Capabilities): boolean {
 	return capabilities.browserName === 'safari' &&
@@ -240,13 +240,6 @@ function returnValue(response: { value: any }): any {
  * The Server class represents a remote HTTP server implementing the WebDriver wire protocol that can be used to
  * generate new remote control sessions.
  *
- * @constructor module:leadfoot/Server
- * @param {(Object|string)} url
- * The fully qualified URL to the JsonWireProtocol endpoint on the server. The default endpoint for a
- * JsonWireProtocol HTTP server is http://localhost:4444/wd/hub. You may also pass a parsed URL object which will
- * be converted to a string.
- * @param {{ proxy: string }=} options
- * Additional request options to be used for requests to the server.
  */
 export default class Server {
 	url: string;
@@ -268,7 +261,16 @@ export default class Server {
 	 */
 	fixSessionCapabilities: boolean = true;
 
-	constructor(url: any|string, options: { proxy: string }) {
+	/**
+	 * @constructor module:leadfoot/Server
+	 * @param {(Object|string)} url
+	 * The fully qualified URL to the JsonWireProtocol endpoint on the server. The default endpoint for a
+	 * JsonWireProtocol HTTP server is http://localhost:4444/wd/hub. You may also pass a parsed URL object which will
+	 * be converted to a string.
+	 * @param {{ proxy: string }=} options
+	 * Additional request options to be used for requests to the server.
+	 */
+	constructor(url: LeadfootURL|string, options: { proxy?: string } = {}) {
 		if (typeof url === 'object') {
 			url = Object.create(url);
 			if (url.username || url.password || url.accessKey) {
@@ -276,8 +278,8 @@ export default class Server {
 			}
 		}
 
-		this.url = urlUtil.format(url).replace(/\/*$/, '/');
-		this.requestOptions = options || {};
+		this.url = <any> urlUtil.format(<any> url).replace(/\/*$/, '/');
+		this.requestOptions = options;
 	}
 
 	private _get(path: string, requestData?: Object, pathParts?: string[]): Promise<any> {

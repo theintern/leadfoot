@@ -58,9 +58,9 @@ import Promise = require('dojo/Promise');
  *         // value was never set
  *     });
  */
-function pollUntil(poller: Function|string, args?: any[], timeout?: number, pollInterval?: number): () => Promise<any>;
-function pollUntil(poller: Function|string, timeout?: number, pollInterval?: number): () => Promise<any>;
-function pollUntil(...allArgs: any[]): () => Promise<any> {
+export default function pollUntil(poller: Function|string, args?: any[], timeout?: number, pollInterval?: number): () => Promise<any>;
+export default function pollUntil(poller: Function|string, timeout?: number, pollInterval?: number): () => Promise<any>;
+export default function pollUntil(...allArgs: any[]): () => Promise<any> {
 	let [ poller, args, timeout, pollInterval ] = allArgs;
 	if (typeof args === 'number') {
 		pollInterval = timeout;
@@ -136,5 +136,3 @@ function pollUntil(...allArgs: any[]): () => Promise<any> {
 		});
 	};
 }
-
-export = pollUntil;
