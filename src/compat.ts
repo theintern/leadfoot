@@ -9,7 +9,7 @@ import Command from './Command';
 import Element from './Element';
 import Promise = require('dojo/Promise');
 import pollUntil from './helpers/pollUntil';
-import Strategies, { suffixes } from './lib/strategies';
+import Strategies, { strategies, suffixes } from './lib/strategies';
 import * as topic from 'dojo/topic';
 
 /**
@@ -564,7 +564,7 @@ suffixes.forEach(function (suffix, index) {
 	const wdSuffix = suffix === 'Xpath' ? 'XPath' : suffix;
 	const method = 'elementBy' + wdSuffix;
 	const toMethod = 'findBy' + suffix;
-	const using = (<any> Strategies.prototype)[index];
+	const using = strategies[index];
 	addStrategy(method, toMethod, suffix, wdSuffix, using);
 	if (suffix === 'CssSelector') {
 		addStrategy('elementByCss', toMethod, suffix, 'Css', using);

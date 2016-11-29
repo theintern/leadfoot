@@ -13,7 +13,8 @@ export interface SetContextMethod<T> {
 	(context: T|T[]): void;
 }
 
-export interface Context extends Array<Element> {
+// TODO: is this the correct type of array?
+export interface Context extends Array<any> {
 	isSingle?: boolean;
 	depth?: number;
 }
@@ -433,7 +434,7 @@ export default class Command<T> implements Strategies {
 	 * @returns {module:leadfoot/Command.<void>}
 	 */
 	sleep(ms: number) {
-		return new Command(this, function () {
+		return new (this.constructor as typeof Command)(this, function () {
 			return util.sleep(ms);
 		});
 	}
@@ -457,7 +458,7 @@ export default class Command<T> implements Strategies {
 	 * @returns {module:leadfoot/Command.<void>}
 	 */
 	end(numCommandsToPop: number = 1): Command<T> {
-		return new Command<void>(this, function (this: Command<T>, setContext: Function) {
+		return new (this.constructor as typeof Command)<void>(this, function (this: Command<T>, setContext: Function) {
 			let command = this;
 			let depth: number = this.context.depth;
 
@@ -507,7 +508,7 @@ export default class Command<T> implements Strategies {
 			return returnValue;
 		}
 
-		return new Command(this, callback && function (this: Command<T>, setContext: SetContextMethod<T>, value: T) {
+		return new (this.constructor as typeof Command)(this, callback && function (this: Command<T>, setContext: SetContextMethod<T>, value: T) {
 			return runCallback(this, callback, value, setContext);
 		}, errback && function (this: Command<T>, setContext: SetContextMethod<T>, value: any) {
 			return runCallback(this, errback, value, setContext);
@@ -554,7 +555,7 @@ export default class Command<T> implements Strategies {
 	 * @returns {Command}
 	 */
 	private _createElementMethod<U>(method: string, ...args: string[]): Command<U> {
-		return new Command<U>(this, function (this: Command<U>, setContext: SetContextMethod<U>) {
+		return new (this.constructor as typeof Command)<U>(this, function (this: Command<U>, setContext: SetContextMethod<U>) {
 			const parentContext = this._context;
 			let promise: Promise<U>;
 
@@ -618,7 +619,7 @@ export default class Command<T> implements Strategies {
 		// the Command constructor (for copying functions from sessions) as well as the Command factory below
 		if (key.charAt(0) !== '_' && !(<any> target)[key] && typeof originalFn === 'function') {
 			(<any> target)[key] = function (this: Command<U>, ...args: any[]): Command<U> {
-				return new Command<U>(this, function (this: Command<U>, setContext: Function) {
+				return new (this.constructor as typeof Command)<U>(this, function (this: Command<U>, setContext: Function) {
 					const parentContext = this._context;
 					const session = this._session;
 					let promise: Promise<any>;
@@ -681,7 +682,7 @@ export default class Command<T> implements Strategies {
 			// element ones with 'Element'
 			const targetKey = key + (anyTarget[key] ? 'Element' : '');
 			anyTarget[targetKey] = function (this: Command<T>, ...args: any[]): Command<T> {
-				return new Command(this, function (this: Command<T>, setContext: Function) {
+				return new (this.constructor as typeof Command)(this, function (this: Command<T>, setContext: Function) {
 					const parentContext = this._context;
 					let promise: Promise<any>;
 					let fn = (<any> parentContext)[0] && (<any> parentContext)[0][key];

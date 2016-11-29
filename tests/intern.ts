@@ -4,17 +4,18 @@ export const capabilities = {
 };
 
 export const environments = [
-	{ browserName: 'microsoftedge', fixSessionCapabilities: false },
-	{ browserName: 'internet explorer', version: '11', platform: 'WIN8', fixSessionCapabilities: false },
-	{ browserName: 'internet explorer', version: '10', platform: 'WIN8', fixSessionCapabilities: false },
-	{ browserName: 'internet explorer', version: '9', platform: 'WINDOWS', fixSessionCapabilities: false },
-	{ browserName: 'firefox', version: '33', platform: [ 'WINDOWS', 'MAC' ], fixSessionCapabilities: false },
-	{ browserName: 'chrome', version: '38', platform: [ 'WINDOWS', 'MAC' ], fixSessionCapabilities: false },
-	{ browserName: 'safari', version: '9', platform: 'MAC', fixSessionCapabilities: false }
+	{ browserName : 'chrome' }
+	// { browserName: 'microsoftedge', fixSessionCapabilities: false },
+	// { browserName: 'internet explorer', version: '11', platform: 'WIN8', fixSessionCapabilities: false },
+	// { browserName: 'internet explorer', version: '10', platform: 'WIN8', fixSessionCapabilities: false },
+	// { browserName: 'internet explorer', version: '9', platform: 'WINDOWS', fixSessionCapabilities: false },
+	// { browserName: 'firefox', version: '33', platform: [ 'WINDOWS', 'MAC' ], fixSessionCapabilities: false },
+	// { browserName: 'chrome', version: '38', platform: [ 'WINDOWS', 'MAC' ], fixSessionCapabilities: false },
+	// { browserName: 'safari', version: '9', platform: 'MAC', fixSessionCapabilities: false }
 ];
 
 export const maxConcurrency = 2;
-export const tunnel = 'BrowserStackTunnel';
+export const tunnel = 'NullTunnel';
 
 export const loaderOptions = {
 	packages: [
@@ -42,4 +43,4 @@ export const functionalSuites = [
 	'leadfoot/tests/functional/compat'
 ];
 
-export const excludeInstrumentation = /^(?:tests|node_modules)\//;
+export const excludeInstrumentation = true; // /^(?:tests|node_modules)\//;

@@ -1441,9 +1441,9 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 			return this.execute(simulateMouse, [ {
 				action: 'mousemove',
 				position: this._lastMousePosition,
-				element: element,
-				xOffset: xOffset,
-				yOffset: yOffset
+				element,
+				xOffset,
+				yOffset
 			} ]).then(newPosition => {
 				this._lastMousePosition = newPosition;
 			});
@@ -1472,9 +1472,9 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 		}
 
 		return this._post('moveto', {
-			element: element,
-			xoffset: xOffset,
-			yoffset: yOffset
+			element,
+			xOffset,
+			yOffset
 		}).then(() => {
 			this._movedToElement = true;
 		});

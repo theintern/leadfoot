@@ -67,7 +67,7 @@ export function trimStack(stack: string): string {
 export function applyMixins(derivedCtor: any, baseCtors: any[], includePrivates: boolean = true): void {
 	baseCtors.forEach(baseCtor => {
 		Object.getOwnPropertyNames(baseCtor.prototype).forEach(name => {
-			if (includePrivates || name.charAt(0) !== '_') {
+			if (name !== 'constructor' && (includePrivates || name.charAt(0) !== '_')) {
 				derivedCtor.prototype[name] = baseCtor.prototype[name];
 			}
 		});

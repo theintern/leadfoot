@@ -1,4 +1,5 @@
 import Promise = require('dojo/Promise');
+import { Url } from 'url';
 
 export interface Capabilities {
 	brokenActiveElement?: boolean;
@@ -45,11 +46,32 @@ export interface Capabilities {
 	deviceName?: string;
 	mouseEnabled?: boolean;
 	supportsCssTransforms?: boolean;
+	supportsExecuteAsync?: boolean;
+	brokenNavigation?: boolean;
+	brokenExecuteElementReturn?: boolean;
+	takesScreenshot?: boolean;
+	brokenParentFrameSwitch?: boolean;
+	brokenWindowSwitch?: boolean;
+	brokenWindowClose?: boolean;
+	dynamicViewport?: boolean;
+	brokenWindowPosition?: boolean;
+	brokenWindowSize?: boolean;
+	brokenCookies?: boolean;
+	brokenElementSerialization?: boolean;
+	handlesAlerts?: boolean;
+	brokenMoveFinger?: boolean;
+	brokenLongTap?: boolean;
+	brokenFlickFinger?: boolean;
+	rotatable?: boolean;
 	_filled?: boolean;
+	brokenFileSendKeys?: boolean;
+	brokenOptionSelect?: boolean;
 }
 
 export interface GeoLocation {
-	altitude: number;
+	altitude?: number;
+	latitude?: number;
+	longitude?: number;
 }
 
 export interface LogEntry {
@@ -71,7 +93,8 @@ export interface WebDriverCookie {
 	expiry?: string|Date|number;
 }
 
-export interface LeadfootURL extends URL {
-	accessKey: string;
-	auth: string;
+export interface LeadfootURL extends Url {
+	username?: string;
+	password?: string;
+	accessKey?: string;
 }

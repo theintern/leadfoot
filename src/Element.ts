@@ -33,7 +33,8 @@ export type ElementOrElementId = { ELEMENT: string; } | Element | string;
 export default class Element implements WaitForDeleted, FindDisplayed, Strategies {
 	private _elementId: string;
 	private _session: Session;
-	constructor(elementId: /*ElementOrElementId*/any, session: Session) {
+
+	constructor(elementId: /*ElementOrElementId*/any, session?: Session) {
 		this._elementId = elementId.ELEMENT || elementId.elementId || elementId;
 		this._session = session;
 	}

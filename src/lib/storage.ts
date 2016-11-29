@@ -66,5 +66,5 @@ function applyTo(prototype: any, type: string): void {
 	}
 }
 
-applyTo(LocalStorage, 'local');
-applyTo(SessionStorage, 'session');
+applyTo(LocalStorage.prototype, 'local');
+applyTo(SessionStorage.prototype, 'session');

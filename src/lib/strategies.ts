@@ -6,7 +6,7 @@ import Element from '../Element';
 //   2. link text
 //   3. partial link text
 //   4. xpath
-const STRATEGIES = [
+export const strategies = [
 	'class name',
 	'css selector',
 	'id',
@@ -17,7 +17,7 @@ const STRATEGIES = [
 	'xpath'
 ];
 
-export const suffixes = STRATEGIES.map(function (strategy) {
+export const suffixes = strategies.map(function (strategy) {
 	return strategy.replace(/(?:^| )([a-z])/g, function (_, letter) {
 		return letter.toUpperCase();
 	});
