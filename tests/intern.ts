@@ -19,7 +19,7 @@ export const tunnel = 'NullTunnel';
 
 export const loaderOptions = {
 	packages: [
-		{ name: 'leadfoot', location: 'dist' },
+		{ name: 'leadfoot', location: '_build' },
 		{ name: 'dojo', location: 'node_modules/dojo'}
 	]
 };

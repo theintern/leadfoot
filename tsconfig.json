@@ -1,16 +1,16 @@
 {
 	"compilerOptions": {
+		"allowSyntheticDefaultImports": true,
+		"declaration": true,
 		"experimentalDecorators": true,
 		"module": "umd",
 		"moduleResolution": "node",
 		"noImplicitAny": true,
 		"noImplicitThis": true,
-		"declaration": true,
-		"removeComments": true,
+		"outDir": "./_build",
 		"preserveConstEnums": true,
-		"allowSyntheticDefaultImports": true,
+		"removeComments": true,
 		"sourceMap": true,
-		"outDir": "./dist",
 		"target": "ES5"
 	},
 	"files": [

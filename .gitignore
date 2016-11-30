@@ -1,4 +1,4 @@
-node_modules
+node_modules/
 coverage-final.json
-dist/
+_build/
 html-report/

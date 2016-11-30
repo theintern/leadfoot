@@ -15,7 +15,15 @@
     "@types/node": "~6.0.0",
     "dojo-loader": "^2.0.0-beta.7",
     "intern": "3.2.3",
+    "shelljs": "^0.7.5",
+    "tslint": "^4.0.2",
     "typescript": "~2.0.0"
+  },
+  "scripts": {
+    "clean": "node ./support/clean.js",
+    "lint": "node ./support/lint.js",
+	"build": "./node_modules/.bin/tsc",
+	"test": "node ./support/test.js"
   },
   "bugs": "https://github.com/theintern/leadfoot/issues",
   "keywords": [
