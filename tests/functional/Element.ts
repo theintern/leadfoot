@@ -6,18 +6,19 @@ import { strategies, suffixes } from '../../src/lib/strategies';
 import Element from '../../src/Element';
 import Session from '../../src/Session';
 import { IRequire } from 'dojo/loader';
+import Test = require('intern/lib/Test');
 
 declare const require: IRequire;
 
-function createStubbedSuite(stubbedMethodName, testMethodName, placeholders, firstArguments) {
-	let originalMethod;
-	let calledWith;
-	let extraArguments = [];
+function createStubbedSuite(stubbedMethodName: string, testMethodName: string, placeholders: string[], firstArguments: any[]) {
+	let originalMethod: Function;
+	let calledWith: any;
+	let extraArguments: any[] = [];
 	let element = new Element('test');
 	const suite = {
 		setup: function () {
-			originalMethod = element[stubbedMethodName];
-			element[stubbedMethodName] = function () {
+			originalMethod = (<any> element)[stubbedMethodName];
+			(<any> element)[stubbedMethodName] = function () {
 				calledWith = arguments;
 			};
 
@@ -30,16 +31,16 @@ function createStubbedSuite(stubbedMethodName, testMethodName, placeholders, fir
 		},
 
 		teardown: function () {
-			element[stubbedMethodName] = originalMethod;
+			(<any> element)[stubbedMethodName] = originalMethod;
 		}
 	};
 
-	placeholders.forEach(function (placeholder, index) {
+	placeholders.forEach(function (placeholder: string, index: number) {
 		const method = testMethodName.replace('_', placeholder);
 
-		suite['#' + method] = function () {
-			assert.isFunction(element[method]);
-			element[method].apply(element, extraArguments);
+		(<any> suite)['#' + method] = function () {
+			assert.isFunction((<any> element)[method]);
+			(<any> element)[method].apply(element, extraArguments);
 			assert.ok(calledWith);
 			assert.strictEqual(calledWith[0], firstArguments[index]);
 			assert.deepEqual(Array.prototype.slice.call(calledWith, 1), extraArguments);
@@ -56,8 +57,9 @@ registerSuite(function () {
 	return {
 		name: 'Element',
 
-		setup: function () {
-			return util.createSessionFromRemote(this.remote).then(function () {
+		setup: function (this: Test) {
+			const remote = <any> this.remote;
+			return util.createSessionFromRemote(remote).then(function () {
 				session = arguments[0];
 			});
 		},
@@ -76,7 +78,7 @@ registerSuite(function () {
 		},
 
 		'#find': (function () {
-			function getId(element) {
+			function getId(element: Element) {
 				assert.property(element, 'elementId', 'Returned object should look like an element object');
 				return element.getAttribute('id');
 			}
@@ -108,7 +110,7 @@ registerSuite(function () {
 				'by css selector': function () {
 					return element.find('css selector', '#j b.i')
 						.then(getId)
-						.then(function (id) {
+						.then(function (id: string) {
 							assert.strictEqual(id, 'i2');
 						});
 				},
@@ -116,7 +118,7 @@ registerSuite(function () {
 				'by name': function () {
 					return element.find('name', 'nothing')
 						.then(getId)
-						.then(function (id) {
+						.then(function (id: string) {
 							assert.strictEqual(id, 'nothing1');
 						});
 				},
@@ -217,7 +219,7 @@ registerSuite(function () {
 		})(),
 
 		'#findAll': (function () {
-			function getIds(elements) {
+			function getIds(elements: Element[]) {
 				elements.forEach(function (element, index) {
 					assert.property(element, 'elementId', 'Returned object ' + index +
 						' should look like an element object');
@@ -364,7 +366,7 @@ registerSuite(function () {
 			strategies
 		),
 
-		'#click': function () {
+		'#click': function (this: Test) {
 			if (!session.capabilities.mouseEnabled) {
 				this.skip('mouse not enabled');
 			}
@@ -465,7 +467,7 @@ registerSuite(function () {
 			});
 		},
 
-		'#type -> file upload': function () {
+		'#type -> file upload': function (this: Test) {
 			if (!session.capabilities.remoteFiles || session.capabilities.brokenFileSendKeys) {
 				this.skip('Remote file uploads not supported by server');
 			}
@@ -594,7 +596,7 @@ registerSuite(function () {
 				});
 			},
 
-			'change selection': function () {
+			'change selection': function (this: Test) {
 				if (session.capabilities.brokenOptionSelect) {
 					this.skip('broken option select');
 				}
@@ -762,14 +764,14 @@ registerSuite(function () {
 
 			for (let id in visibilities) {
 				(function (id, expected) {
-					suite[id] = function () {
+					(<any> suite)[id] = function () {
 						return session.findById(id).then(function (element) {
 							return element.isDisplayed();
 						}).then(function (isDisplayed) {
 							assert.strictEqual(isDisplayed, expected);
 						});
 					};
-				})(id, visibilities[id]);
+				})(id, (<any> visibilities)[id]);
 			}
 
 			return suite;
@@ -798,8 +800,8 @@ registerSuite(function () {
 			};
 
 			for (let id in positions) {
-				(function (id, expected) {
-					suite[id] = function () {
+				(function (id: string, expected: any) {
+					(<any> suite)[id] = function () {
 						return session.findById(id).then(function (element) {
 							return element.getPosition();
 						}).then(function (position) {
@@ -838,7 +840,7 @@ registerSuite(function () {
 
 			for (let id in dimensions) {
 				(function (id, expected) {
-					suite[id] = function () {
+					(<any> suite)[id] = function () {
 						return session.findById(id).then(function (element) {
 							return element.getSize();
 						}).then(function (dimensions) {

@@ -43,4 +43,4 @@ export const functionalSuites = [
 	'leadfoot/tests/functional/compat'
 ];
 
-export const excludeInstrumentation = true; // /^(?:tests|node_modules)\//;
+export const excludeInstrumentation = /^(?:tests|node_modules)\//;

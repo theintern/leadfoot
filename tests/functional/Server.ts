@@ -5,6 +5,8 @@ import Promise = require('dojo/Promise');
 import Server from '../../src/Server';
 import Session from '../../src/Session';
 import * as urlUtil from 'url';
+import Test = require('intern/lib/Test');
+import { Capabilities } from '../../src/interfaces';
 
 registerSuite(function () {
 	let server: Server;
@@ -12,8 +14,9 @@ registerSuite(function () {
 	return {
 		name: 'Server',
 
-		setup: function () {
-			server = util.createServerFromRemote(this.remote);
+		setup: function (this: Test) {
+			const remote = <any> this.remote;
+			server = util.createServerFromRemote(remote);
 		},
 
 		'object constructor with string'() {
@@ -58,7 +61,7 @@ registerSuite(function () {
 		'error handling'() {
 			return (<any> server)._get('invalidCommand').then(function () {
 				throw new Error('Request to invalid command should not be successful');
-			}, function (error) {
+			}, function (error: Error) {
 				assert.strictEqual(error.name, 'UnknownCommand', 'Unknown command should throw error');
 			});
 		},
@@ -73,7 +76,7 @@ registerSuite(function () {
 
 			return (<any> testServer)._get('invalidCommand').then(function () {
 				throw new Error('Request to invalid command should not be successful');
-			}, function (error) {
+			}, function (error: Error) {
 				assert.notInclude(error.message, url.auth,
 					'HTTP auth credentials should not be displayed in errors');
 
@@ -88,12 +91,12 @@ registerSuite(function () {
 			});
 		},
 
-		'#getSessions'() {
-			const currentSessionId = this.remote.session ? this.remote.session.sessionId : this.remote.sessionId;
-			return server.getSessions().then(function (result) {
+		'#getSessions'(this: Test) {
+			const currentSessionId = this.remote.session ? (<any> this.remote.session).sessionId : (<any> this.remote).sessionId;
+			return server.getSessions().then(function (result: any[]) {
 				assert.isArray(result);
 				assert.operator(result.length, '>=', 1);
-				assert.isTrue(result.some(function (session) {
+				assert.isTrue(result.some(function (session: any) {
 					return currentSessionId === session.id;
 				}));
 			}).catch(function (error) {
@@ -105,12 +108,12 @@ registerSuite(function () {
 			});
 		},
 
-		'#getSessionCapabilities'() {
+		'#getSessionCapabilities'(this: Test) {
 			// Intern 2 has remote.session; Intern 1 does not
 			const sessionId = this.remote.session.sessionId;
-			const remoteCapabilities = this.remote.session.capabilities;
+			const remoteCapabilities = <Capabilities> this.remote.session.capabilities;
 
-			return server.getSessionCapabilities(sessionId).then(function (capabilities) {
+			return server.getSessionCapabilities(sessionId).then(function (capabilities: Capabilities) {
 				assert.isObject(capabilities);
 				assert.strictEqual(capabilities.browserName, remoteCapabilities.browserName);
 				assert.strictEqual(capabilities.version, remoteCapabilities.version);
@@ -120,19 +123,25 @@ registerSuite(function () {
 		},
 
 		'#createSession & .sessionConstructor': (function () {
-			function CustomSession(sessionId, server, capabilities) {
-				this.sessionId = sessionId;
-				this.server = server;
-				this.capabilities = capabilities;
+			class CustomSession {
+				sessionId: string;
+				server: Server;
+				capabilities: Capabilities;
+
+				constructor(sessionId: string, server: Server, capabilities: Capabilities) {
+					this.sessionId = sessionId;
+					this.server = server;
+					this.capabilities = capabilities;
+				}
 			}
 
-			let oldCtor;
-			let oldPost;
+			let oldCtor: any;
+			let oldPost: any;
 			let mockCapabilities = {
 				isMockCapabilities: true
 			};
-			let desiredCapabilities = {};
-			let requiredCapabilities = {};
+			let desiredCapabilities: Capabilities = {};
+			let requiredCapabilities: Capabilities = {};
 
 			return {
 				setup() {
@@ -140,7 +149,7 @@ registerSuite(function () {
 					oldPost = (<any> server)._post;
 					server.sessionConstructor = <any> CustomSession;
 					server.fixSessionCapabilities = false;
-					(<any> server)._post = function (method, data) {
+					(<any> server)._post = function (method: string, data: any) {
 						assert.strictEqual(method, 'session');
 						assert.strictEqual(data.desiredCapabilities, desiredCapabilities);
 						assert.strictEqual(data.requiredCapabilities, requiredCapabilities);
@@ -171,7 +180,7 @@ registerSuite(function () {
 
 		'#deleteSession'() {
 			const oldDelete = (<any> server)._delete;
-			(<any> server)._delete = function (command, data, pathData) {
+			(<any> server)._delete = function (command: string, data: any, pathData: string[]) {
 				assert.strictEqual(command, 'session/$0');
 				assert.deepEqual(pathData, [ 'test' ]);
 				return Promise.resolve(null);

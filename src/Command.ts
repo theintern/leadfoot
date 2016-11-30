@@ -7,7 +7,7 @@ import Element from './Element';
 import Promise = require('dojo/Promise');
 import Session from './Session';
 import Strategies from './lib/strategies';
-import { LogEntry, GeoLocation, WebDriverCookie } from './interfaces';
+import { LogEntry, Geolocation, WebDriverCookie } from './interfaces';
 
 export interface SetContextMethod<T> {
 	(context: T|T[]): void;
@@ -806,8 +806,8 @@ export default class Command<T> implements Strategies {
 	// flickFinger(element: Element, xOffset: number, yOffset: number, speed?: number): Command<void>;
 	// flickFinger(xOffset: number, yOffset: number, speed?: number): Command<void>;
 	flickFinger: (...args: any[]) => Command<void>;
-	getGeolocation: () => Command<GeoLocation>;
-	setGeolocation: (location: GeoLocation) => Command<void>;
+	getGeolocation: () => Command<Geolocation>;
+	setGeolocation: (location: Geolocation) => Command<void>;
 	getLogsFor: (type: string) => Command<LogEntry[]>;
 	getAvailableLogTypes: () => Command<string[]>;
 	getApplicationCacheStatus: () => Command<number>;

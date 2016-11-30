@@ -45,10 +45,9 @@ declare module 'intern/main' {
 }
 
 declare module 'intern!bdd' {
-	import Promise = require('dojo/Promise');
 	import Test = require('intern/lib/Test');
 
-	var bdd: {
+	const bdd: {
 		after(fn: () => any): void;
 		afterEach(fn: (test: Test) => any): void;
 		before(fn: () => any): void;
@@ -61,7 +60,7 @@ declare module 'intern!bdd' {
 }
 
 declare module 'intern!object' {
-	var createSuite: {
+	const createSuite: {
 		(definition: {}): void;
 		(definition:() => {}): void;
 	};
@@ -73,7 +72,7 @@ declare module 'intern!tdd' {
 	import Promise = require('dojo/Promise');
 	import Test = require('intern/lib/Test');
 
-	var tdd: {
+	const tdd: {
 		after(fn: () => any): void;
 		afterEach(fn: (test: Test) => any): void;
 		before(fn: () => any): void;
@@ -90,12 +89,12 @@ declare module 'intern/chai!' {
 }
 
 declare module 'intern/chai!assert' {
-	var assert: Chai.AssertStatic;
+	const assert: Chai.AssertStatic;
 	export = assert;
 }
 
 declare module 'intern/chai!expect' {
-	var expect: Chai.ExpectStatic;
+	const expect: Chai.ExpectStatic;
 	export = expect;
 }
 
@@ -380,9 +379,9 @@ declare module 'intern/lib/util' {
 	 */
 	export function createDiff(actual: Object, expected: Object): string;
 
-	export function assertSafeModuleId(moduleId: string);
+	export function assertSafeModuleId(moduleId: string): void;
 
-	export function isAbsoluteUrl(url: string);
+	export function isAbsoluteUrl(url: string): boolean;
 
 	/**
 	 * Create a Deferred with some additional utility methods.
@@ -400,12 +399,12 @@ declare module 'intern/lib/util' {
 	 * @param maxConcurrency Number of functions to execute at once.
 	 * @returns A function that can be used to push new functions onto the queue.
 	 */
-	export function createQueue(maxConcurrency: number);
+	export function createQueue(maxConcurrency: number): Function;
 
 	/**
 	 * Escape special characters in a regexp string
 	 */
-	export function escapeRegExp(str: any);
+	export function escapeRegExp(str: any): string;
 
 	/**
 	 * Generates a full error message from a plain Error object, avoiding duplicate error messages that might be
@@ -419,9 +418,9 @@ declare module 'intern/lib/util' {
 	/**
 	 * Return the module for a given module ID
 	 */
-	export function getModule(moduleId: string, loader?: IRequire);
+	export function getModule(moduleId: string, loader?: IRequire): any;
 
-	export function getShouldWait(waitMode: (string|boolean), message: string|any[]);
+	export function getShouldWait(waitMode: (string|boolean), message: string|any[]): boolean;
 
 	/**
 	 * Instrument a given file, saving its coverage source map.
@@ -432,18 +431,18 @@ declare module 'intern/lib/util' {
 	 *
 	 * @returns {string} A string of instrumented code
 	 */
-	export function instrument(filedata: string, filepath: string, instrumenterOptions?: any);
+	export function instrument(filedata: string, filepath: string, instrumenterOptions?: any): string;
 
 	/**
 	 * Return true if the module ID is a glob expression. This is similar to node-glob.hasMagic, but considers some
 	 * special cases for AMD identifiers, like 'dojo/has!host-node?fs'.
 	 */
-	export function isGlobModuleId(moduleId: string);
+	export function isGlobModuleId(moduleId: string): boolean;
 
 	/**
 	 * Normalize a path (e.g., resolve '..')
 	 */
-	export function normalizePath(path: string);
+	export function normalizePath(path: string): string;
 
 	/**
 	 * Resolve a module ID that contains a glob expression.
@@ -453,7 +452,7 @@ declare module 'intern/lib/util' {
 	/**
 	 * Run an async callback until it resolves, up to numRetries times
 	 */
-	export function retry(callback: Function, numRetries: number);
+	export function retry(callback: Function, numRetries: number): Promise<any>;
 
 	/**
 	 * Creates a serialised representation of an object.
@@ -471,5 +470,5 @@ declare module 'intern/lib/util' {
 	 * @param basePath The base path for all code
 	 * @param instrumenterOptions Extra options for the instrumenter
 	 */
-	export function setInstrumentationHooks(excludeInstrumentation: (RegExp|boolean), basePath: string, instrumenterOptions: any);
+	export function setInstrumentationHooks(excludeInstrumentation: (RegExp|boolean), basePath: string, instrumenterOptions: any): { remove: Function };
 }

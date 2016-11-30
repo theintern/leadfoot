@@ -6,6 +6,7 @@ import Collector = require('dojo/node!istanbul/lib/collector');
 import JsonReporter = require('dojo/node!istanbul/lib/report/json');
 import LcovHtmlReporter = require('dojo/node!istanbul/lib/report/html');
 import TextReporter = require('dojo/node!istanbul/lib/report/text');
+import Test = require('intern/lib/Test');
 
 const collector = new Collector();
 let reporters: any = [];
@@ -22,15 +23,15 @@ const reporter = {
 		console.log('Running ' + intern.mode + ' tests…');
 	},
 
-	'/session/start'(remote) {
+	'/session/start'(remote: { environmentType: string }) {
 		console.log('Testing ' + remote.environmentType);
 	},
 
-	'/coverage'(sessionId, coverage) {
+	'/coverage'(sessionId: string, coverage: any) {
 		collector.add(coverage);
 	},
 
-	'/error'(error) {
+	'/error'(error: Error) {
 		// util.logError(error);
 	},
 
@@ -38,15 +39,15 @@ const reporter = {
 		console.log('Starting launcher');
 	},
 
-	'/launcher/download/progress'(launcher, progress) {
+	'/launcher/download/progress'(launcher: any, progress: { received: number, total: number }) {
 		console.log('Download ' + (progress.received / progress.total * 100) + '% complete');
 	},
 
-	'/launcher/status'(launcher, status) {
+	'/launcher/status'(launcher: any, status: any) {
 		console.log('Launcher: ' + status);
 	},
 
-	'/test/fail'(test) {
+	'/test/fail'(test: Test) {
 		console.error('FAIL: ' + test.id);
 		// util.logError(test.error);
 	},
@@ -56,7 +57,7 @@ const reporter = {
 			collector.add(JSON.parse(fs.readFileSync('coverage-final.json').toString()));
 		}
 
-		reporters.forEach(function (reporter) {
+		reporters.forEach(function (reporter: any) {
 			reporter.writeReport(collector, true);
 		});
 	}

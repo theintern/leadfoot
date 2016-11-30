@@ -4,6 +4,8 @@ import Command from '../../src/Command';
 import * as compat from '../../src/compat';
 import * as util from './support/util';
 import { IRequire } from 'dojo/loader';
+import Test = require('intern/lib/Test');
+import Session from '../../src/Session';
 
 declare const require: IRequire;
 
@@ -12,8 +14,9 @@ registerSuite(function () {
 	return {
 		name: 'leadfoot/compat',
 
-		setup() {
-			return util.createSessionFromRemote(this.remote).then(function (session) {
+		setup(this: Test) {
+			const remote = <any> this.remote;
+			return util.createSessionFromRemote(remote).then(function (session: Session) {
 				class CompatCommand extends Command<any> {
 				}
 				compat.applyTo(CompatCommand.prototype);
@@ -27,7 +30,7 @@ registerSuite(function () {
 				.get(require.toUrl('tests/functional/data/default.html'))
 				.waitForElement('id', 'not-existing', 100).then(function () {
 					throw new Error('Non-existing element should cause rejection');
-				}, function (error) {
+				}, function (error: Error) {
 					assert.strictEqual(error.name, 'NoSuchElement');
 					return command.get(require.toUrl('tests/functional/data/elements.html'))
 						.findById('makeD')
@@ -43,7 +46,7 @@ registerSuite(function () {
 			return command
 				.get(require.toUrl('tests/functional/data/default.html'))
 				.waitForElementByTagName('p')
-				.then(function () {
+				.then(function (this: Command<any>) {
 					assert.lengthOf(this.context, 0, 'waitForElement should not generate an element context');
 				});
 		},
@@ -54,7 +57,7 @@ registerSuite(function () {
 				.waitForVisible('id', 'not-existing', 100)
 				.then(function () {
 					throw new Error('Non-existing element should cause rejection');
-				}, function (error) {
+				}, function (error: Error) {
 					assert.strictEqual(error.name, 'NoSuchElement');
 					return command.get(require.toUrl('tests/functional/data/elements.html'))
 						.findById('makeD')
@@ -68,24 +71,24 @@ registerSuite(function () {
 			return command
 				.get(require.toUrl('tests/functional/data/visibility.html'))
 				.findById('normal')
-					.then(function (element) {
-						return command.isVisible(element).then(function (isVisible) {
+					.then(function (element: Element) {
+						return command.isVisible(element).then(function (isVisible: boolean) {
 							assert.isTrue(isVisible);
 						});
 					})
 					.isVisible()
-					.then(function (isVisible) {
+					.then(function (isVisible: boolean) {
 						assert.isTrue(isVisible);
 					})
 					.end()
 				.findById('noDisplay')
 					.isVisible()
-					.then(function (isVisible) {
+					.then(function (isVisible: boolean) {
 						assert.isFalse(isVisible);
 					})
 					.end()
 				.isVisible('id', 'noDisplay')
-				.then(function (isVisible) {
+				.then(function (isVisible: boolean) {
 					assert.isFalse(isVisible);
 				});
 		},
@@ -97,7 +100,7 @@ registerSuite(function () {
 			return command
 				.get(require.toUrl('tests/functional/data/frame.html'))
 				.text()
-				.then(function (text) {
+				.then(function (text: string) {
 					assert.strictEqual(
 						text,
 						expected,
@@ -105,12 +108,12 @@ registerSuite(function () {
 					);
 				})
 				.text('body')
-				.then(function (text) {
+				.then(function (text: string) {
 					assert.strictEqual(text, expected);
 				})
 				.findById('child')
 					.text()
-					.then(function (text) {
+					.then(function (text: string) {
 						assert.strictEqual(text, 'Frame');
 					});
 		}

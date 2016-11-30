@@ -16,7 +16,7 @@ import { LocalStorage, SessionStorage } from './lib/storage';
 import Strategies from './lib/strategies';
 import * as util from './lib/util';
 import WaitForDeleted from './lib/waitForDeleted';
-import { Capabilities, GeoLocation, LogEntry, WebDriverCookie } from './interfaces';
+import { Capabilities, Geolocation, LogEntry, WebDriverCookie } from './interfaces';
 
 /**
  * Decorator for the {@link module:leadfoot/lib/util#forCommand} method
@@ -24,9 +24,7 @@ import { Capabilities, GeoLocation, LogEntry, WebDriverCookie } from './interfac
 function forCommand(properties: { usesElement?: boolean, createsContext?: boolean }) {
 	return function (target: any, property: string, descriptor: PropertyDescriptor) {
 		const fn = <Function> target[property];
-		descriptor.value = function () {
-			return util.forCommand(fn, properties);
-		};
+		descriptor.value = util.forCommand(fn, properties);
 	};
 }
 
@@ -1426,11 +1424,13 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 *
 	 * @returns {Promise.<void>}
 	 */
+	moveMouseTo(): Promise<void>;
 	moveMouseTo(xOffset?: number, yOffset?: number): Promise<void>;
 	moveMouseTo(element?: Element, xOffset?: number, yOffset?: number): Promise<void>;
 	@forCommand({ usesElement: true })
 	moveMouseTo(...args: any[]): Promise<void> {
 		let [ element, xOffset, yOffset ] = args;
+
 		if (typeof yOffset === 'undefined' && typeof xOffset !== 'undefined') {
 			yOffset = xOffset;
 			xOffset = element;
@@ -1441,10 +1441,10 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 			return this.execute(simulateMouse, [ {
 				action: 'mousemove',
 				position: this._lastMousePosition,
-				element,
-				xOffset,
-				yOffset
-			} ]).then(newPosition => {
+				element: element,
+				xOffset: xOffset,
+				yOffset: yOffset
+			} ]).then((newPosition) => {
 				this._lastMousePosition = newPosition;
 			});
 		}
@@ -1472,9 +1472,9 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 		}
 
 		return this._post('moveto', {
-			element,
-			xOffset,
-			yOffset
+			element: element,
+			xoffset: xOffset,
+			yoffset: yOffset
 		}).then(() => {
 			this._movedToElement = true;
 		});
@@ -1765,7 +1765,7 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * Latitude and longitude are specified using standard WGS84 decimal latitude/longitude. Altitude is specified
 	 * as meters above the WGS84 ellipsoid. Not all environments support altitude.
 	 */
-	getGeolocation(): Promise<GeoLocation> {
+	getGeolocation(): Promise<Geolocation> {
 		return this._get('location').then(location => {
 			// ChromeDriver 2.9 ignores altitude being set and then returns 0; to match the Geolocation API
 			// specification, we will just pretend that altitude is not supported by the browser at all by
@@ -1787,14 +1787,14 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	setGeolocation(location: GeoLocation): Promise<void> {
+	setGeolocation(location: Geolocation): Promise<void> {
 		// TODO: Is it weird that this accepts an object argument? `setCookie` does too, but nothing else does.
 		if (location.altitude !== undefined) {
 			this._lastAltitude = location.altitude;
 		}
 
 		return this._post('location', {
-			location: location
+			location
 		}).then(noop);
 	}
 

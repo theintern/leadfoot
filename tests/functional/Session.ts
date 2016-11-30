@@ -5,22 +5,27 @@ import * as util from './support/util';
 import { strategies, suffixes } from '../../src/lib/strategies';
 import Session from '../../src/Session';
 import { IRequire } from 'dojo/loader';
+import Test = require('intern/lib/Test');
+import Element from '../../src/Element';
+import { WebDriverCookie, Geolocation } from '../../src/interfaces';
 
 declare const require: IRequire;
 declare let interns: any;
 
+type Position = { x: number, y: number };
+
 registerSuite(function () {
-	let session: Session;
+	let session: any;
 	let resetBrowserState = true;
 
-	function createStubbedSuite(stubbedMethodName, testMethodName, placeholders, firstArguments) {
-		let originalMethod;
-		let calledWith;
-		let extraArguments = [];
-		const suite = {
+	function createStubbedSuite(stubbedMethodName: string, testMethodName: string, placeholders: string[], firstArguments: any) {
+		let originalMethod: Function;
+		let calledWith: any;
+		let extraArguments: any[] = [];
+		const suite: any = {
 			setup: function () {
-				originalMethod = session[stubbedMethodName];
-				session[stubbedMethodName] = function () {
+				originalMethod = (<any> session)[stubbedMethodName];
+				(<any> session)[stubbedMethodName] = function () {
 					calledWith = arguments;
 				};
 
@@ -33,7 +38,7 @@ registerSuite(function () {
 			},
 
 			teardown: function () {
-				session[stubbedMethodName] = originalMethod;
+				(<any> session)[stubbedMethodName] = originalMethod;
 			}
 		};
 
@@ -41,8 +46,8 @@ registerSuite(function () {
 			const method = testMethodName.replace('_', placeholder);
 
 			suite['#' + method] = function () {
-				assert.isFunction(session[method]);
-				session[method].apply(session, extraArguments);
+				assert.isFunction((<any> session)[method]);
+				(<any> session)[method].apply(session, extraArguments);
 				assert.ok(calledWith);
 				assert.strictEqual(calledWith[0], firstArguments[index]);
 				assert.deepEqual(Array.prototype.slice.call(calledWith, 1), extraArguments);
@@ -52,7 +57,7 @@ registerSuite(function () {
 		return suite;
 	}
 
-	function createStorageTests(type) {
+	function createStorageTests(type: string) {
 		const clear = 'clear' + type + 'Storage';
 		const getKeys = 'get' + type + 'StorageKeys';
 		const get = 'get' + type + 'StorageItem';
@@ -60,7 +65,7 @@ registerSuite(function () {
 		const del = 'delete' + type + 'StorageItem';
 		const getLength = 'get' + type + 'StorageLength';
 
-		return function () {
+		return function (this: Test) {
 			if (!session.capabilities.webStorageEnabled) {
 				this.skip('web storage not enabled');
 			}
@@ -71,7 +76,7 @@ registerSuite(function () {
 				return session[clear]();
 			}).then(function () {
 				return session[getLength]();
-			}).then(function (length) {
+			}).then(function (length: number) {
 				assert.strictEqual(length, 0, 'Cleared storage should contain no data');
 				return session[set]('foo', 'foo');
 			}).then(function () {
@@ -80,26 +85,26 @@ registerSuite(function () {
 				return session[set]('foo', 'foofoo');
 			}).then(function () {
 				return session[getLength]();
-			}).then(function (length) {
+			}).then(function (length: number) {
 				assert.strictEqual(length, 2, 'Getting size should return the number of data items in storage');
 				return session[getKeys]();
-			}).then(function (keys) {
+			}).then(function (keys: string[]) {
 				assert.sameMembers(keys, [ 'foo', 'bar' ], 'Storage should contain set keys');
 				return session[get]('foo');
-			}).then(function (value) {
+			}).then(function (value: string) {
 				assert.strictEqual(value, 'foofoo', 'Getting item should retrieve correct stored value');
 				return session[del]('not-existing');
 			}).then(function () {
 				return session[getLength]();
-			}).then(function (length) {
+			}).then(function (length: number) {
 				assert.strictEqual(length, 2, 'Deleting non-existing key should not change size of storage');
 				return session[del]('foo');
 			}).then(function () {
 				return session[getKeys]();
-			}).then(function (keys) {
+			}).then(function (keys: string[]) {
 				assert.deepEqual(keys, [ 'bar' ], 'Deleting existing key should reduce size of storage');
 				return session[clear]();
-			}).catch(function (error) {
+			}).catch(function (error: Error) {
 				return session[clear]().then(function () {
 					throw error;
 				});
@@ -107,10 +112,10 @@ registerSuite(function () {
 		};
 	}
 
-	function getScrollPosition(element) {
+	function getScrollPosition(element: Element) {
 		// touchScroll scrolls in device pixels; scroll position is normally in reference pixels,
 		// so get the correct device pixel location to verify that it worked properly
-		return session.execute(function (element) {
+		return session.execute(function (element?: HTMLElement) {
 			if (!element) {
 				element = document.documentElement;
 				if (!element.scrollLeft && !element.scrollTop) {
@@ -128,13 +133,14 @@ registerSuite(function () {
 	return {
 		name: 'Session',
 
-		setup: function () {
-			return util.createSessionFromRemote(this.remote).then(function () {
+		setup(this: Test) {
+			const remote = <any> this.remote;
+			return util.createSessionFromRemote(remote).then(function () {
 				session = arguments[0];
 			});
 		},
 
-		beforeEach: function () {
+		beforeEach() {
 			if (resetBrowserState) {
 				return session.get('about:blank').then(function () {
 					return session.setTimeout('implicit', 0);
@@ -142,24 +148,24 @@ registerSuite(function () {
 			}
 		},
 
-		'#getTimeout script': function () {
+		'#getTimeout script'(this: Test) {
 			if (!session.capabilities.supportsExecuteAsync) {
 				this.skip('executeAsync not supported');
 			}
 
-			return session.getTimeout('script').then(function (value) {
+			return session.getTimeout('script').then(function (value: number) {
 				assert.strictEqual(value, 0, 'Async execution timeout should be default value');
 			});
 		},
 
-		'#getTimeout implicit': function () {
-			return session.getTimeout('implicit').then(function (value) {
+		'#getTimeout implicit'() {
+			return session.getTimeout('implicit').then(function (value: number) {
 				assert.strictEqual(value, 0, 'Implicit timeout should be default value');
 			});
 		},
 
-		'#getTimeout page load': function () {
-			return session.getTimeout('page load').then(function (value) {
+		'#getTimeout page load'() {
+			return session.getTimeout('page load').then(function (value: number) {
 				assert.strictEqual(value, Infinity, 'Page load timeout should be default value');
 			});
 		},
@@ -178,14 +184,14 @@ registerSuite(function () {
 			[ 'script', 'implicit', 'page load' ]
 		),
 
-		'window handle information (#getCurrentWindowHandle, #getAllWindowHandles)': function () {
-			let currentHandle;
+		'window handle information (#getCurrentWindowHandle, #getAllWindowHandles)'() {
+			let currentHandle: any;
 
-			return session.getCurrentWindowHandle().then(function (handle) {
+			return session.getCurrentWindowHandle().then(function (handle: string) {
 				assert.isString(handle);
 				currentHandle = handle;
 				return session.getAllWindowHandles();
-			}).then(function (handles) {
+			}).then(function (handles: string[]) {
 				assert.isArray(handles);
 
 				// At least Selendroid 0.9.0 runs the browser inside a WebView wrapper; this is not really a
@@ -205,25 +211,25 @@ registerSuite(function () {
 			});
 		},
 
-		'#get': function () {
+		'#get'() {
 			return session.get(require.toUrl('tests/functional/data/default.html'));
 		},
 
-		'#get 404': function () {
+		'#get 404'() {
 			return session.get(require.toUrl('tests/functional/data/404.html'));
 		},
 
-		'#getCurrentUrl': function () {
+		'#getCurrentUrl'(this: Test) {
 			const expectedUrl = util.convertPathToUrl(this.remote, require.toUrl('tests/functional/data/default.html'));
 
 			return session.get(expectedUrl).then(function () {
 				return session.getCurrentUrl();
-			}).then(function (currentUrl) {
+			}).then(function (currentUrl: string) {
 				assert.strictEqual(currentUrl, expectedUrl);
 			});
 		},
 
-		'navigation (#goBack, #goForward, #refresh)': function () {
+		'navigation (#goBack, #goForward, #refresh)'(this: Test) {
 			if (session.capabilities.brokenNavigation) {
 				this.skip('navigation is broken');
 			}
@@ -237,22 +243,22 @@ registerSuite(function () {
 				return session.goBack();
 			}).then(function () {
 				return session.getCurrentUrl();
-			}).then(function (currentUrl) {
+			}).then(function (currentUrl: string) {
 				assert.strictEqual(currentUrl, expectedBackUrl);
 				return session.goForward();
 			}).then(function () {
 				return session.getCurrentUrl();
-			}).then(function (currentUrl) {
+			}).then(function (currentUrl: string) {
 				assert.strictEqual(currentUrl, expectedUrl);
 				return session.refresh();
 			}).then(function () {
 				return session.getCurrentUrl();
-			}).then(function (currentUrl) {
+			}).then(function (currentUrl: string) {
 				assert.strictEqual(currentUrl, expectedUrl, 'Refreshing the page should load the same URL');
 			});
 		},
 
-		'#execute string': function () {
+		'#execute string'() {
 			return session.get(require.toUrl('tests/functional/data/scripting.html'))
 				.then(function () {
 					return session.execute(
@@ -260,25 +266,25 @@ registerSuite(function () {
 						[ 'ness', 'paula' ]
 					);
 				})
-				.then(function (result) {
+				.then(function (result: string) {
 					assert.strictEqual(result, 'NessPaula');
 				});
 		},
 
-		'#execute function': function () {
+		'#execute function'() {
 			return session.get(require.toUrl('tests/functional/data/scripting.html'))
 				.then(function () {
-					return session.execute(function (first, second) {
+					return session.execute(function (first: string, second: string) {
 						/*global interns:false */
 						return interns[first] + interns[second];
 					}, [ 'ness', 'paula' ]);
 				})
-				.then(function (result) {
+				.then(function (result: string) {
 					assert.strictEqual(result, 'NessPaula');
 				});
 		},
 
-		'#execute -> element': function () {
+		'#execute -> element'(this: Test) {
 			if (session.capabilities.brokenExecuteElementReturn) {
 				this.skip('execute element broken');
 			}
@@ -289,15 +295,15 @@ registerSuite(function () {
 						return document.getElementById('child');
 					});
 				})
-				.then(function (element) {
+				.then(function (element: Element) {
 					assert.property(element, 'elementId', 'Returned value should be an Element object');
 					return element.getAttribute('id');
-				}).then(function (id) {
+				}).then(function (id: string) {
 					assert.strictEqual(id, 'child');
 				});
 		},
 
-		'#execute -> elements': function () {
+		'#execute -> elements'(this: Test) {
 			if (session.capabilities.brokenExecuteElementReturn) {
 				this.skip('execute element broken');
 			}
@@ -308,17 +314,17 @@ registerSuite(function () {
 						return [ interns.poo, document.getElementById('child') ];
 					});
 				})
-				.then(function (elements) {
+				.then(function (elements: any[]) {
 					assert.isArray(elements);
 					assert.strictEqual(elements[0], 'Poo', 'Non-elements should not be converted');
 					assert.property(elements[1], 'elementId', 'Returned elements should be Element objects');
 					return elements[1].getAttribute('id');
-				}).then(function (id) {
+				}).then(function (id: string) {
 					assert.strictEqual(id, 'child');
 				});
 		},
 
-		'#execute -> error': function () {
+		'#execute -> error'() {
 			return session.get(require.toUrl('tests/functional/data/scripting.html'))
 				.then(function () {
 					return session.execute(function () {
@@ -328,7 +334,7 @@ registerSuite(function () {
 				})
 				.then(function () {
 					throw new Error('Invalid code execution should throw error');
-				}, function (error) {
+				}, function (error: Error) {
 					assert.strictEqual(
 						error.name,
 						'JavaScriptError',
@@ -337,7 +343,7 @@ registerSuite(function () {
 				});
 		},
 
-		'#execute -> undefined': function () {
+		'#execute -> undefined'() {
 			return session.get(require.toUrl('tests/functional/data/scripting.html'))
 				.then(function () {
 					return Promise.all([
@@ -345,38 +351,38 @@ registerSuite(function () {
 						session.execute('return undefined;')
 					]);
 				})
-				.then(function (values) {
+				.then(function (values: any[]) {
 					assert.deepEqual(values, [ 'not undefined', null ]);
 				});
 		},
 
-		'#execute non-array args': function () {
+		'#execute non-array args'() {
 			assert.throws(function () {
 				session.execute('return window;', <any> 'oops');
 			}, /Arguments passed to execute must be an array/);
 		},
 
-		'#executeAsync non-array args': function () {
+		'#executeAsync non-array args'() {
 			assert.throws(function () {
 				session.executeAsync('return window;', <any> 'oops');
 			}, /Arguments passed to executeAsync must be an array/);
 		},
 
 		'#executeAsync': (function () {
-			let originalTimeout;
+			let originalTimeout: number;
 
 			return {
-				setup: function () {
+				setup(this: Test) {
 					if (!session.capabilities.supportsExecuteAsync) {
 						this.skip('executeAsync not supported');
 					}
 
-					return session.getTimeout('script').then(function (value) {
+					return session.getTimeout('script').then(function (value: number) {
 						originalTimeout = value;
 						return session.setTimeout('script', 1000);
 					});
 				},
-				'string': function () {
+				'string'(this: Test) {
 					if (!session.capabilities.supportsExecuteAsync) {
 						this.skip('executeAsync not supported');
 					}
@@ -390,42 +396,42 @@ registerSuite(function () {
 								[ 'ness', 'paula' ]
 							);
 						})
-						.then(function (result) {
+						.then(function (result: string) {
 							assert.strictEqual(result, 'NessPaula');
 						});
 				},
-				'function': function () {
+				'function'(this: Test) {
 					if (!session.capabilities.supportsExecuteAsync) {
 						this.skip('executeAsync not supported');
 					}
 
 					return session.get(require.toUrl('tests/functional/data/scripting.html'))
 						.then(function () {
-							return session.executeAsync(function (first, second, done) {
+							return session.executeAsync(function (first: string, second: string, done: Function) {
 								setTimeout(function () {
 									done(interns[first] + interns[second]);
 								}, 100);
 							}, [ 'ness', 'paula' ]);
 						})
-						.then(function (result) {
+						.then(function (result: string) {
 							assert.strictEqual(result, 'NessPaula');
 						});
 				},
-				' -> error': function () {
+				' -> error'(this: Test) {
 					if (!session.capabilities.supportsExecuteAsync) {
 						this.skip('executeAsync not supported');
 					}
 
 					return session.get(require.toUrl('tests/functional/data/scripting.html'))
 						.then(function () {
-							return session.executeAsync(function (done) {
+							return session.executeAsync(function (done: Function) {
 								/*global interns:false */
 								done(interns());
 							});
 						})
 						.then(function () {
 							throw new Error('Invalid code execution should throw error');
-						}, function (error) {
+						}, function (error: Error) {
 							assert.strictEqual(
 								error.name,
 								'JavaScriptError',
@@ -433,7 +439,7 @@ registerSuite(function () {
 							);
 						});
 				},
-				teardown: function () {
+				teardown(this: Test) {
 					if (!session.capabilities.supportsExecuteAsync) {
 						this.skip('executeAsync not supported');
 					}
@@ -443,7 +449,7 @@ registerSuite(function () {
 			};
 		})(),
 
-		'#takeScreenshot': function () {
+		'#takeScreenshot'(this: Test) {
 			if (!session.capabilities.takesScreenshot) {
 				this.skip('screenshots not supported');
 			}
@@ -452,7 +458,7 @@ registerSuite(function () {
 
 			this.async(30000);
 
-			return session.takeScreenshot().then(function (screenshot) {
+			return session.takeScreenshot().then(function (screenshot: any) {
 				/*jshint node:true */
 				assert.isTrue(Buffer.isBuffer(screenshot), 'Screenshot should be a Buffer');
 				assert.deepEqual(screenshot.slice(0, 8).toJSON().data, magic, 'Screenshot should be a PNG file');
@@ -461,7 +467,7 @@ registerSuite(function () {
 
 		// TODO: There appear to be no drivers that support IME input to actually test IME commands
 
-		'frame switching (#switchToFrame, #switchToParentFrame)': function () {
+		'frame switching (#switchToFrame, #switchToParentFrame)'(this: Test) {
 			if (session.capabilities.brokenParentFrameSwitch) {
 				this.skip('switch to parent frame not supported');
 			}
@@ -469,20 +475,20 @@ registerSuite(function () {
 			return session.get(require.toUrl('tests/functional/data/window.html')).then(function () {
 				return session.findById('child');
 			})
-			.then(function (child) {
+			.then(function (child: any) {
 				return child.getVisibleText();
 			})
-			.then(function (text) {
+			.then(function (text: string) {
 				assert.strictEqual(text, 'Main');
 				return session.switchToFrame('inlineFrame');
 			})
 			.then(function () {
 				return session.findById('child');
 			})
-			.then(function (child) {
+			.then(function (child: any) {
 				return child.getVisibleText();
 			})
-			.then(function (text) {
+			.then(function (text: string) {
 				assert.strictEqual(text, 'Frame');
 
 				if (session.capabilities.scriptedParentFrameCrashesBrowser) {
@@ -494,15 +500,15 @@ registerSuite(function () {
 			.then(function () {
 				return session.findById('child');
 			})
-			.then(function (child) {
+			.then(function (child: any) {
 				return child.getVisibleText();
 			})
-			.then(function (text) {
+			.then(function (text: string) {
 				assert.strictEqual(text, 'Main');
 			});
 		},
 
-		'window switching (#switchToWindow, #closeCurrentWindow)': function () {
+		'window switching (#switchToWindow, #closeCurrentWindow)'(this: Test) {
 			if (session.capabilities.brokenWindowSwitch) {
 				this.skip('window switching is broken');
 			}
@@ -511,19 +517,19 @@ registerSuite(function () {
 				this.skip('window closing is broken');
 			}
 
-			let mainHandle;
-			let popupHandle;
-			let allHandles;
+			let mainHandle: string;
+			let popupHandle: string;
+			let allHandles: string[];
 
 			return session.get(require.toUrl('tests/functional/data/window.html')).then(function () {
 				return session.getAllWindowHandles();
-			}).then(function (handles) {
+			}).then(function (handles: string[]) {
 				allHandles = handles;
 				return session.getCurrentWindowHandle();
-			}).then(function (handle) {
+			}).then(function (handle: string) {
 				mainHandle = handle;
 				return session.findById('windowOpener');
-			}).then(function (opener) {
+			}).then(function (opener: Element) {
 				return opener.click();
 			}).then(function () {
 				// Give the new window time to open
@@ -531,7 +537,7 @@ registerSuite(function () {
 					setTimeout(resolve, 1000);
 				});
 			}).then(function () {
-				return session.getAllWindowHandles().then(function (handles) {
+				return session.getAllWindowHandles().then(function (handles: string[]) {
 					assert.lengthOf(handles, allHandles.length + 1, 'New handle should have been created');
 
 					// Return the new handle
@@ -541,36 +547,37 @@ registerSuite(function () {
 						}
 					}
 				});
-			}).then(function (newHandle) {
+			}).then(function (newHandle: string) {
 				popupHandle = newHandle;
 				return session.switchToWindow(newHandle);
 			}).then(function () {
 				return session.getCurrentWindowHandle();
-			}).then(function (handle) {
+			}).then(function (handle: string) {
 				assert.strictEqual(handle, popupHandle, 'Window handle should have switched to pop-up');
 				return session.closeCurrentWindow();
 			}).then(function () {
 				return session.getCurrentWindowHandle().then(function () {
 					throw new Error('Window should have closed');
-				}, function (error) {
+				}, function (error: Error) {
 					assert.strictEqual(error.name, 'NoSuchWindow');
 					return session.switchToWindow(mainHandle);
 				});
 			}).then(function () {
 				return session.getCurrentWindowHandle();
-			}).then(function (handle) {
+			}).then(function (handle: string) {
 				assert.strictEqual(handle, mainHandle, 'Window handle should have switched back to main window');
 			});
 		},
 
-		'window sizing (#getWindowSize, #setWindowSize)': function () {
+		'window sizing (#getWindowSize, #setWindowSize)'(this: Test) {
 			if (session.capabilities.brokenWindowSize) {
 				this.skip('window size commands are broken');
 			}
 
-			let originalSize;
-			let resizedSize;
-			return session.getWindowSize().then(function (size) {
+			type Size = { height: number, width: number };
+			let originalSize: Size;
+			let resizedSize: Size;
+			return session.getWindowSize().then(function (size: Size) {
 				assert.property(size, 'width');
 				assert.property(size, 'height');
 				originalSize = size;
@@ -578,14 +585,14 @@ registerSuite(function () {
 				if (session.capabilities.dynamicViewport) {
 					return session.setWindowSize(size.width - 20, size.height - 20).then(function () {
 						return session.getWindowSize();
-					}).then(function (size) {
+					}).then(function (size: Size) {
 						assert.strictEqual(size.width, originalSize.width - 20);
 						assert.strictEqual(size.height, originalSize.height - 20);
 						resizedSize = size;
 						return session.maximizeWindow();
 					}).then(function () {
 						return session.getWindowSize();
-					}).then(function (size) {
+					}).then(function (size: Size) {
 						assert.operator(size.width, '>', resizedSize.width);
 						assert.operator(size.height, '>', resizedSize.height);
 					}).then(function () {
@@ -595,7 +602,7 @@ registerSuite(function () {
 			});
 		},
 
-		'window positioning (#getWindowPosition, #setWindowPosition)': function () {
+		'window positioning (#getWindowPosition, #setWindowPosition)'(this: Test) {
 			if (!session.capabilities.dynamicViewport) {
 				this.skip('dynamic viewport not supported');
 			}
@@ -603,8 +610,8 @@ registerSuite(function () {
 				this.skip('window position is broken');
 			}
 
-			let originalPosition;
-			return session.getWindowPosition().then(function (position) {
+			let originalPosition: Position;
+			return session.getWindowPosition().then(function (position: Position) {
 				assert.property(position, 'x');
 				assert.property(position, 'y');
 				originalPosition = position;
@@ -612,12 +619,12 @@ registerSuite(function () {
 				return session.setWindowPosition(position.x + 2, position.y + 2);
 			}).then(function () {
 				return session.getWindowPosition();
-			}).then(function (position) {
+			}).then(function (position: Position) {
 				assert.deepEqual(position, { x: originalPosition.x + 2, y: originalPosition.y + 2 });
 			});
 		},
 
-		'cookies (#getCookies, #setCookie, #clearCookies, #deleteCookie)': function () {
+		'cookies (#getCookies, #setCookie, #clearCookies, #deleteCookie)'(this: Test) {
 			if (session.capabilities.brokenCookies) {
 				this.skip('cookies are broken');
 			}
@@ -628,7 +635,7 @@ registerSuite(function () {
 				return session.clearCookies();
 			}).then(function () {
 				return session.getCookies();
-			}).then(function (cookies) {
+			}).then(function (cookies: WebDriverCookie[]) {
 				assert.lengthOf(cookies, 0, 'Clearing cookies should cause no cookies to exist');
 				return session.setCookie({ name: 'foo', value: '1=3' });
 			}).then(function () {
@@ -637,18 +644,18 @@ registerSuite(function () {
 				return session.setCookie({ name: 'baz', value: '3=5' });
 			}).then(function () {
 				return session.getCookies();
-			}).then(function (cookies) {
+			}).then(function (cookies: WebDriverCookie[]) {
 				assert.lengthOf(cookies, 3, 'Setting cookies with unique names should create new cookies');
 
 				return session.setCookie({ name: 'baz', value: '4=6' });
 			}).then(function () {
 				return session.getCookies();
-			}).then(function (cookies) {
+			}).then(function (cookies: WebDriverCookie[]) {
 				assert.lengthOf(cookies, 3, 'Overwriting cookies should not cause new cookies to be created');
 				return session.deleteCookie('bar');
 			}).then(function () {
 				return session.getCookies();
-			}).then(function (cookies) {
+			}).then(function (cookies: WebDriverCookie[]) {
 				assert.lengthOf(cookies, 2, 'Deleting a cookie should reduce the number of cookies');
 
 				// Different browsers return cookies in different orders; some return the last modified cookie
@@ -663,137 +670,137 @@ registerSuite(function () {
 				return session.clearCookies();
 			}).then(function () {
 				return session.getCookies();
-			}).then(function (cookies) {
+			}).then(function (cookies: WebDriverCookie[]) {
 				assert.lengthOf(cookies, 0);
 				return session.clearCookies();
-			}).catch(function (error) {
+			}).catch(function (error: Error) {
 				return session.clearCookies().then(function () {
 					throw error;
 				});
 			});
 		},
 
-		'#getPageSource': function () {
+		'#getPageSource'() {
 			// Page source is serialised from the current DOM, so will not match the original source on file
 			return session.get(require.toUrl('tests/functional/data/default.html')).then(function () {
 				return session.getPageSource();
-			}).then(function (source) {
+			}).then(function (source: string) {
 				assert.include(source, '<meta charset="utf-8"');
 				assert.include(source, '<title>Default &amp;');
 				assert.include(source, 'Are you kay-o?');
 			});
 		},
 
-		'#getPageTitle': function () {
+		'#getPageTitle'() {
 			return session.get(require.toUrl('tests/functional/data/default.html')).then(function () {
 				return session.getPageTitle();
-			}).then(function (pageTitle) {
+			}).then(function (pageTitle: string) {
 				assert.strictEqual(pageTitle, 'Default & <b>default</b>');
 			});
 		},
 
 		'#find': (function () {
-			function getId(element) {
+			function getId(element: Element) {
 				assert.property(element, 'elementId', 'Returned object should look like an element object');
 				return element.getAttribute('id');
 			}
 
 			return {
-				setup: function () {
+				setup() {
 					resetBrowserState = false;
 					return session.get(require.toUrl('tests/functional/data/elements.html'));
 				},
 
-				teardown: function () {
+				teardown() {
 					resetBrowserState = true;
 				},
 
-				'by id': function () {
+				'by id'() {
 					return session.find('id', 'a')
 						.then(getId)
-						.then(function (id) {
+						.then(function (id: string) {
 							assert.strictEqual(id, 'a');
 						});
 				},
 
-				'by class name': function () {
+				'by class name'() {
 					return session.find('class name', 'b')
 						.then(getId)
-						.then(function (id) {
+						.then(function (id: string) {
 							assert.strictEqual(id, 'b2', 'Returned element should be the first in the document');
 						});
 				},
 
-				'by css selector': function () {
+				'by css selector'() {
 					return session.find('css selector', '#c span.b')
 						.then(getId)
-						.then(function (id) {
+						.then(function (id: string) {
 							assert.strictEqual(id, 'b3');
 						});
 				},
 
-				'by name': function () {
+				'by name'() {
 					return session.find('name', 'makeD')
 						.then(getId)
-						.then(function (id) {
+						.then(function (id: string) {
 							assert.strictEqual(id, 'makeD');
 						});
 				},
 
-				'by link text': function () {
+				'by link text'() {
 					return session.find('link text', 'What a cute, yellow backpack.')
 						.then(getId)
-						.then(function (id) {
+						.then(function (id: string) {
 							assert.strictEqual(id, 'c');
 						});
 				},
 
-				'by partial link text': function () {
+				'by partial link text'() {
 					return session.find('partial link text', 'cute, yellow')
 						.then(getId)
-						.then(function (id) {
+						.then(function (id: string) {
 							assert.strictEqual(id, 'c');
 						});
 				},
 
-				'by link text (hidden text)': function () {
+				'by link text (hidden text)'() {
 					return session.find('link text', 'What a cute backpack.')
 						.then(getId)
-						.then(function (id) {
+						.then(function (id: string) {
 							assert.strictEqual(id, 'c3');
 						});
 				},
 
-				'by partial link text (hidden text)': function () {
+				'by partial link text (hidden text)'() {
 					return session.find('partial link text', 'cute backpack')
 						.then(getId)
-						.then(function (id) {
+						.then(function (id: string) {
 							assert.strictEqual(id, 'c3');
 						});
 				},
 
-				'by tag name': function () {
+				'by tag name'() {
 					return session.find('tag name', 'span')
 						.then(getId)
-						.then(function (id) {
+						.then(function (id: string) {
 							assert.strictEqual(id, 'b3');
 						});
 				},
 
-				'by xpath': function () {
+				'by xpath'() {
 					return session.find('xpath', 'id("e")/span[1]')
 						.then(getId)
-						.then(function (id) {
+						.then(function (id: string) {
 							assert.strictEqual(id, 'f');
 						});
 				},
 
-				'non-existent element': function () {
+				'non-existent element'() {
 					return session.find('id', 'does-not-exist').then(
 						function () {
 							throw new Error('Requesting non-existing element should throw error');
 						},
-						function (error) {
+						function (error: Error) {
 							if (error.name !== 'NoSuchElement') {
 								throw error;
 							}
@@ -804,7 +811,7 @@ registerSuite(function () {
 		})(),
 
 		'#find (with implicit timeout)': (function () {
-			let startTime;
+			let startTime: number;
 			return function () {
 				return session.get(require.toUrl('tests/functional/data/elements.html')).then(function () {
 					return session.setTimeout('implicit', 2000);
@@ -821,136 +828,136 @@ registerSuite(function () {
 					);
 				}).then(function () {
 					return session.find('id', 'makeD');
-				}).then(function (element) {
+				}).then(function (element: Element) {
 					return element.click();
 				}).then(function () {
 					return session.setTimeout('implicit', 10000);
 				}).then(function () {
 					startTime = Date.now();
 					return session.find('id', 'd');
-				}).then(function (element) {
+				}).then(function (element: Element) {
 					assert.operator(Date.now(), '<', startTime + 9000,
 						'Driver should not wait until end of implicit timeout once element is available');
 					assert.property(element, 'elementId');
 					return element.getAttribute('id');
-				}).then(function (id) {
+				}).then(function (id: string) {
 					assert.strictEqual(id, 'd');
 				});
 			};
 		})(),
 
 		'#findAll': (function () {
-			function getIds(elements) {
+			function getIds(elements: Element[]) {
 				elements.forEach(function (element, index) {
 					assert.property(element, 'elementId', 'Returned object ' + index +
 						' should look like an element object');
 				});
 
-				return Promise.all(elements.map(function (element) {
+				return Promise.all(elements.map(function (element: Element) {
 					return element.getAttribute('id');
 				}));
 			}
 
 			return {
-				setup: function () {
+				setup() {
 					resetBrowserState = false;
 					return session.get(require.toUrl('tests/functional/data/elements.html'));
 				},
 
-				teardown: function () {
+				teardown() {
 					resetBrowserState = true;
 				},
 
-				'by id': function () {
+				'by id'() {
 					return session.findAll('id', 'a')
 						.then(getIds)
-						.then(function (ids) {
+						.then(function (ids: string[]) {
 							assert.deepEqual(ids, [ 'a' ]);
 						});
 				},
 
-				'by class name': function () {
+				'by class name'() {
 					return session.findAll('class name', 'b')
 						.then(getIds)
-						.then(function (ids) {
+						.then(function (ids: string[]) {
 							assert.deepEqual(ids, [ 'b2', 'b1', 'b3', 'b4' ]);
 						});
 				},
 
-				'by css selecctor': function () {
+				'by css selector'() {
 					return session.findAll('css selector', '#c span.b')
 						.then(getIds)
-						.then(function (ids) {
+						.then(function (ids: string[]) {
 							assert.deepEqual(ids, [ 'b3', 'b4' ]);
 						});
 				},
 
-				'by name': function () {
+				'by name'() {
 					return session.findAll('name', 'makeD')
 						.then(getIds)
-						.then(function (ids) {
+						.then(function (ids: string[]) {
 							assert.deepEqual(ids, [ 'makeD', 'killE' ]);
 						});
 				},
 
-				'by link text': function () {
+				'by link text'() {
 					return session.findAll('link text', 'What a cute, yellow backpack.')
 						.then(getIds)
-						.then(function (ids) {
+						.then(function (ids: string[]) {
 							assert.deepEqual(ids, [ 'c', 'c2' ]);
 						});
 				},
 
-				'by partial link text': function () {
+				'by partial link text'() {
 					return session.findAll('partial link text', 'cute, yellow')
 						.then(getIds)
-						.then(function (ids) {
+						.then(function (ids: string[]) {
 							assert.deepEqual(ids, [ 'c', 'c2' ]);
 						});
 				},
 
-				'by link text (hidden text)': function () {
+				'by link text (hidden text)'() {
 					return session.findAll('link text', 'What a cute backpack.')
 						.then(getIds)
-						.then(function (ids) {
+						.then(function (ids: string[]) {
 							assert.deepEqual(ids, [ 'c3' ]);
 						});
 				},
 
-				'by partial link text (hidden text)': function () {
+				'by partial link text (hidden text)'() {
 					return session.findAll('partial link text', 'cute backpack')
 						.then(getIds)
-						.then(function (ids) {
+						.then(function (ids: string[]) {
 							assert.deepEqual(ids, [ 'c3' ]);
 						});
 				},
 
-				'by tag name': function () {
+				'by tag name'() {
 					return session.findAll('tag name', 'span')
 						.then(getIds)
-						.then(function (ids) {
+						.then(function (ids: string[]) {
 							assert.deepEqual(ids, [ 'b3', 'b4', 'f', 'g' ]);
 						});
 				},
 
-				'by xpath': function () {
+				'by xpath'() {
 					return session.findAll('xpath', 'id("e")/span')
 						.then(getIds)
-						.then(function (ids) {
+						.then(function (ids: string[]) {
 							assert.deepEqual(ids, [ 'f', 'g' ]);
 						});
 				},
 
-				'non-existent': function () {
+				'non-existent'() {
 					return session.findAll('id', 'does-not-exist')
-						.then(function (elements) {
+						.then(function (elements: Element[]) {
 							assert.deepEqual(elements, []);
 						});
 				}
 			};
 		})(),
 
-		'#findDisplayed': function () {
+		'#findDisplayed'(this: Test) {
 			if (session.capabilities.brokenElementSerialization) {
 				this.skip('element serialization is broken');
 			}
@@ -960,7 +967,7 @@ registerSuite(function () {
 					function () {
 						throw new Error('findDisplayed should not find non-existing elements');
 					},
-					function (error) {
+					function (error: Error) {
 						assert.strictEqual(error.name, 'NoSuchElement',
 							'Non-existing element should throw NoSuchElement error after timeout');
 					}
@@ -970,16 +977,16 @@ registerSuite(function () {
 					function () {
 						throw new Error('findDisplayed should not find hidden elements');
 					},
-					function (error) {
+					function (error: Error) {
 						assert.strictEqual(error.name, 'ElementNotVisible',
 							'Existing but hidden element should throw ElementNotVisible error after timeout');
 					}
 				);
 			}).then(function () {
 				return session.findDisplayed('class name', 'multipleVisible');
-			}).then(function (element) {
+			}).then(function (element: Element) {
 				return element.getVisibleText();
-			}).then(function (text) {
+			}).then(function (text: string) {
 				assert.strictEqual(text, 'b',
 					'The first visible element should be returned, even if it is not the first' +
 					' element of any visibility that matches the query');
@@ -987,13 +994,13 @@ registerSuite(function () {
 				return session.setFindTimeout(2000);
 			}).then(function () {
 				return session.findById('makeVisible');
-			}).then(function (element) {
+			}).then(function (element: Element) {
 				return element.click();
 			}).then(function () {
 				return session.findDisplayed('id', 'noDisplay');
-			}).then(function (element) {
+			}).then(function (element: Element) {
 				return element.getProperty('id');
-			}).then(function (id) {
+			}).then(function (id: string) {
 				assert.strictEqual(id, 'noDisplay');
 			});
 		},
@@ -1019,8 +1026,8 @@ registerSuite(function () {
 			strategies
 		),
 
-		'#waitForDeleted': function () {
-			let startTime;
+		'#waitForDeleted'() {
+			let startTime: number;
 
 			return session.get(require.toUrl('tests/functional/data/elements.html')).then(function () {
 				// Verifies element to be deleted exists at the start of the test
@@ -1029,7 +1036,7 @@ registerSuite(function () {
 				return session.setFindTimeout(5000);
 			}).then(function () {
 				return session.findById('killE');
-			}).then(function (element) {
+			}).then(function (element: Element) {
 				startTime = Date.now();
 				return element.click();
 			}).then(function () {
@@ -1043,8 +1050,8 @@ registerSuite(function () {
 			});
 		},
 
-		'#waitForDeleted -> timeout': function () {
-			let startTime;
+		'#waitForDeleted -> timeout'() {
+			let startTime: number;
 
 			return session.get(require.toUrl('tests/functional/data/elements.html')).then(function () {
 				// Verifies element to be deleted exists at the start of the test
@@ -1069,58 +1076,58 @@ registerSuite(function () {
 			strategies
 		),
 
-		'#getActiveElement': function () {
+		'#getActiveElement'(this: Test) {
 			if (session.capabilities.brokenElementSerialization) {
 				this.skip('element serialization is broken');
 			}
 
 			return session.get(require.toUrl('tests/functional/data/form.html')).then(function () {
 				return session.getActiveElement();
-			}).then(function (element) {
+			}).then(function (element: Element) {
 				return element.getTagName();
-			}).then(function (tagName) {
+			}).then(function (tagName: string) {
 				assert.strictEqual(tagName, 'body');
 				return session.execute(function () {
 					document.getElementById('input').focus();
 				});
 			}).then(function () {
 				return session.getActiveElement();
-			}).then(function (element) {
+			}).then(function (element: Element) {
 				return element.getAttribute('id');
-			}).then(function (id) {
+			}).then(function (id: string) {
 				assert.strictEqual(id, 'input');
 			});
 		},
 
-		'#pressKeys': function () {
-			let formElement;
+		'#pressKeys'() {
+			let formElement: Element;
 
 			// TODO: Complex characters, tabs and arrows, copy and paste
 			return session.get(require.toUrl('tests/functional/data/form.html')).then(function () {
 				return session.findById('input');
-			}).then(function (element) {
+			}).then(function (element: Element) {
 				formElement = element;
 				return element.click();
 			}).then(function () {
 				return session.pressKeys('hello, world');
 			}).then(function () {
 				return formElement.getProperty('value');
-			}).then(function (value) {
+			}).then(function (value: string) {
 				assert.strictEqual(value, 'hello, world');
 			});
 		},
 
-		'#getOrientation': function () {
+		'#getOrientation'(this: Test) {
 			if (!session.capabilities.rotatable) {
 				this.skip('not rotatable');
 			}
 
-			return session.getOrientation().then(function (value) {
+			return session.getOrientation().then(function (value: string) {
 				assert.include([ 'PORTRAIT', 'LANDSCAPE' ], value);
 			});
 		},
 
-		'#setOrientation': function () {
+		'#setOrientation'(this: Test) {
 			if (!session.capabilities.rotatable) {
 				this.skip('not rotatable');
 			}
@@ -1130,116 +1137,116 @@ registerSuite(function () {
 			});
 		},
 
-		'#getAlertText': function () {
+		'#getAlertText'(this: Test) {
 			if (!session.capabilities.handlesAlerts) {
 				this.skip('cannot handle alerts');
 			}
 
 			return session.get(require.toUrl('tests/functional/data/prompts.html')).then(function () {
 				return session.findById('alert');
-			}).then(function (element) {
+			}).then(function (element: Element) {
 				return element.click();
 			}).then(function () {
 				return session.getAlertText();
-			}).then(function (alertText) {
+			}).then(function (alertText: string) {
 				assert.strictEqual(alertText, 'Oh, you thank.');
 				return session.acceptAlert();
 			}).then(function () {
 				return session.execute('return result.alert;');
-			}).then(function (result) {
+			}).then(function (result: boolean) {
 				assert.isTrue(result);
 			});
 		},
 
-		'#typeInPrompt': function () {
+		'#typeInPrompt'(this: Test) {
 			if (!session.capabilities.handlesAlerts) {
 				this.skip('cannot handle alerts');
 			}
 
 			return session.get(require.toUrl('tests/functional/data/prompts.html')).then(function () {
 				return session.findById('prompt');
-			}).then(function (element) {
+			}).then(function (element: Element) {
 				return element.click();
 			}).then(function () {
 				return session.getAlertText();
-			}).then(function (alertText) {
+			}).then(function (alertText: string) {
 				assert.strictEqual(alertText, 'The monkey... got charred. Is he all right?');
 				return session.typeInPrompt('yes');
 			}).then(function () {
 				return session.acceptAlert();
 			}).then(function () {
 				return session.execute('return result.prompt;');
-			}).then(function (result) {
+			}).then(function (result: string) {
 				assert.strictEqual(result, 'yes');
 			});
 		},
 
-		'#typeInPrompt array': function () {
+		'#typeInPrompt array'(this: Test) {
 			if (!session.capabilities.handlesAlerts) {
 				this.skip('cannot handle alerts');
 			}
 
 			return session.get(require.toUrl('tests/functional/data/prompts.html')).then(function () {
 				return session.findById('prompt');
-			}).then(function (element) {
+			}).then(function (element: Element) {
 				return element.click();
 			}).then(function () {
 				return session.getAlertText();
-			}).then(function (alertText) {
+			}).then(function (alertText: string) {
 				assert.strictEqual(alertText, 'The monkey... got charred. Is he all right?');
 				return session.typeInPrompt([ 'y', 'e', 's' ]);
 			}).then(function () {
 				return session.acceptAlert();
 			}).then(function () {
 				return session.execute('return result.prompt;');
-			}).then(function (result) {
+			}).then(function (result: string) {
 				assert.strictEqual(result, 'yes');
 			});
 		},
 
-		'#acceptAlert': function () {
+		'#acceptAlert'(this: Test) {
 			if (!session.capabilities.handlesAlerts) {
 				this.skip('cannot handle alerts');
 			}
 
 			return session.get(require.toUrl('tests/functional/data/prompts.html')).then(function () {
 				return session.findById('confirm');
-			}).then(function (element) {
+			}).then(function (element: Element) {
 				return element.click();
 			}).then(function () {
 				return session.getAlertText();
-			}).then(function (alertText) {
+			}).then(function (alertText: string) {
 				assert.strictEqual(alertText, 'Would you like some bananas?');
 				return session.acceptAlert();
 			}).then(function () {
 				return session.execute('return result.confirm;');
-			}).then(function (result) {
+			}).then(function (result: boolean) {
 				assert.isTrue(result);
 			});
 		},
 
-		'#dismissAlert': function () {
+		'#dismissAlert'(this: Test) {
 			if (!session.capabilities.handlesAlerts) {
 				this.skip('cannot handle alerts');
 			}
 
 			return session.get(require.toUrl('tests/functional/data/prompts.html')).then(function () {
 				return session.findById('confirm');
-			}).then(function (element) {
+			}).then(function (element: Element) {
 				return element.click();
 			}).then(function () {
 				return session.getAlertText();
-			}).then(function (alertText) {
+			}).then(function (alertText: string) {
 				assert.strictEqual(alertText, 'Would you like some bananas?');
 				return session.dismissAlert();
 			}).then(function () {
 				return session.execute('return result.confirm;');
-			}).then(function (result) {
+			}).then(function (result: boolean) {
 				assert.isFalse(result);
 			});
 		},
 
-		'#moveMouseTo': function () {
+		'#moveMouseTo'(this: Test) {
 			/*jshint maxlen:140 */
 			if (!session.capabilities.mouseEnabled) {
 				this.skip('mouse not enabled');
@@ -1250,7 +1257,7 @@ registerSuite(function () {
 			}).then(function () {
 				return session.execute(
 					'return result.mousemove.a && result.mousemove.a[result.mousemove.a.length - 1];');
-			}).then(function (event) {
+			}).then(function (event: MouseEvent) {
 				assert.isObject(event);
 				assert.strictEqual(event.clientX, 100);
 				assert.strictEqual(event.clientY, 12);
@@ -1258,16 +1265,16 @@ registerSuite(function () {
 			}).then(function () {
 				return session.execute(
 					'return result.mousemove.b && result.mousemove.b[result.mousemove.b.length - 1];');
-			}).then(function (event) {
+			}).then(function (event: MouseEvent) {
 				assert.isObject(event);
 				assert.strictEqual(event.clientX, 200);
 				assert.strictEqual(event.clientY, 53);
 				return session.findById('c');
-			}).then(function (element) {
+			}).then(function (element: Element) {
 				return session.moveMouseTo(element).then(function () {
 					return session.execute(
 						'return result.mousemove.c && result.mousemove.c[result.mousemove.c.length - 1];');
-				}).then(function (event) {
+				}).then(function (event: MouseEvent) {
 					assert.isObject(event);
 					assert.closeTo(event.clientX, 450, 4);
 					assert.closeTo(event.clientY, 90, 4);
@@ -1276,32 +1283,32 @@ registerSuite(function () {
 			}).then(function () {
 				return session.execute(
 					'return result.mousemove.c && result.mousemove.c[result.mousemove.c.length - 1];');
-			}).then(function (event) {
+			}).then(function (event: MouseEvent) {
 				assert.isObject(event);
 				assert.closeTo(event.clientX, 352, 4);
 				assert.closeTo(event.clientY, 80, 4);
 			});
 		},
 
-		'#clickMouseButton': function () {
+		'#clickMouseButton'(this: Test) {
 			if (!session.capabilities.mouseEnabled) {
 				this.skip('mouse not enabled');
 			}
 
-			function click(button) {
+			function click(button: number) {
 				/*jshint maxlen:140 */
 				return function () {
 					return session.clickMouseButton(button).then(function () {
 						return session.execute('return result.click.a && result.click.a[0];');
-					}).then(function (event) {
+					}).then(function (event: any) {
 						assert.strictEqual(event.button, button);
 						return session.execute(
 							'return result.mousedown.a && result.mousedown.a[0];'
-						).then(function (mouseDownEvent) {
+						).then(function (mouseDownEvent: MouseEvent) {
 							assert.closeTo(event.timeStamp, mouseDownEvent.timeStamp, 300);
 							assert.operator(mouseDownEvent.timeStamp, '<=', event.timeStamp);
 							return session.execute('return result.mouseup.a && result.mouseup.a[0];');
-						}).then(function (mouseUpEvent) {
+						}).then(function (mouseUpEvent: MouseEvent) {
 							assert.closeTo(event.timeStamp, mouseUpEvent.timeStamp, 300);
 							assert.operator(mouseUpEvent.timeStamp, '<=', event.timeStamp);
 						});
@@ -1311,34 +1318,34 @@ registerSuite(function () {
 
 			return session.get(require.toUrl('tests/functional/data/pointer.html')).then(function () {
 				return session.findById('a');
-			}).then(function (element) {
+			}).then(function (element: Element) {
 				return session.moveMouseTo(element);
 			}).then(click(0));
 
 			// TODO: Right-click/middle-click are unreliable in browsers; find a way to test them.
 		},
 
-		'#pressMouseButton, #releaseMouseButton': function () {
+		'#pressMouseButton, #releaseMouseButton'(this: Test) {
 			if (!session.capabilities.mouseEnabled) {
 				this.skip('mouse not enabled');
 			}
 
 			return session.get(require.toUrl('tests/functional/data/pointer.html')).then(function () {
 				return session.findById('a');
-			}).then(function (element) {
+			}).then(function (element: Element) {
 				return session.moveMouseTo(element);
 			}).then(function () {
 				return session.pressMouseButton();
 			}).then(function () {
 				return session.findById('b');
-			}).then(function (element) {
+			}).then(function (element: Element) {
 				return session.moveMouseTo(element);
 			}).then(function () {
 				return session.releaseMouseButton();
 			}).then(function () {
 				/*jshint maxlen:140 */
 				return session.execute('return result;');
-			}).then(function (result) {
+			}).then(function (result: any) {
 				assert.isUndefined(result.mouseup.a);
 				assert.isUndefined(result.mousedown.b);
 				assert.lengthOf(result.mousedown.a, 1);
@@ -1346,20 +1353,20 @@ registerSuite(function () {
 			});
 		},
 
-		'#doubleClick': function () {
+		'#doubleClick'(this: Test) {
 			if (!session.capabilities.mouseEnabled) {
 				this.skip('mouse not enabled');
 			}
 
 			return session.get(require.toUrl('tests/functional/data/pointer.html')).then(function () {
 				return session.findById('a');
-			}).then(function (element) {
+			}).then(function (element: Element) {
 				return session.moveMouseTo(element);
 			}).then(function () {
 				return session.doubleClick();
 			}).then(function () {
 				return session.execute('return result;');
-			}).then(function (result) {
+			}).then(function (result: any) {
 				assert.isArray(result.dblclick.a, 'dblclick should have occurred');
 				assert.isArray(result.mousedown.a, 'mousedown should have occurred');
 				assert.isArray(result.mouseup.a, 'mouseup should have occurred');
@@ -1375,18 +1382,18 @@ registerSuite(function () {
 			});
 		},
 
-		'#tap': function () {
+		'#tap'(this: Test) {
 			if (!session.capabilities.touchEnabled) {
 				this.skip('touch not supported');
 			}
 
 			return session.get(require.toUrl('tests/functional/data/pointer.html')).then(function () {
 				return session.findById('a');
-			}).then(function (element) {
+			}).then(function (element: Element) {
 				return session.tap(element);
 			}).then(function () {
 				return session.execute('return result;');
-			}).then(function (result) {
+			}).then(function (result: any) {
 				assert.lengthOf(result.touchstart.a, 1);
 				assert.lengthOf(result.touchend.a, 1);
 
@@ -1394,7 +1401,7 @@ registerSuite(function () {
 			});
 		},
 
-		'#pressFinger, #releaseFinger, #moveFinger': function () {
+		'#pressFinger, #releaseFinger, #moveFinger'(this: Test) {
 			if (!session.capabilities.touchEnabled) {
 				this.skip('touch not supported');
 			}
@@ -1410,7 +1417,7 @@ registerSuite(function () {
 				return session.releaseFinger(200, 53);
 			}).then(function () {
 				return session.execute('return result;');
-			}).then(function (result) {
+			}).then(function (result: any) {
 				assert.isUndefined(result.touchend.a);
 				assert.isUndefined(result.touchstart.b);
 				assert.lengthOf(result.touchstart.a, 1);
@@ -1418,45 +1425,45 @@ registerSuite(function () {
 			});
 		},
 
-		'DEBUG #touchScroll': function () {
+		'#touchScroll'(this: Test) {
 			if (!session.capabilities.touchEnabled) {
 				this.skip('touch is not enabled');
 			}
 
 			return session.get(require.toUrl('tests/functional/data/scrollable.html'))
 				.then(getScrollPosition)
-				.then(function (position) {
+				.then(function (position: Position) {
 					assert.deepEqual(position, { x: 0, y: 0 });
 					return session.touchScroll(20, 40);
 				}).then(getScrollPosition)
-				.then(function (position) {
+				.then(function (position: Position) {
 					assert.deepEqual(position, { x: 20, y: 40 });
 					return session.findById('viewport');
-				}).then(function (viewport) {
+				}).then(function (viewport: any) {
 					return session.touchScroll(viewport, 100, 200);
-				}).then(getScrollPosition).then(function (position) {
+				}).then(getScrollPosition).then(function (position: Position) {
 					assert.deepEqual(position, { x: 100, y: 3232 });
 				});
 		},
 
-		'#doubleTap': function () {
+		'#doubleTap'(this: Test) {
 			if (!session.capabilities.touchEnabled) {
 				this.skip('touch is not enabled');
 			}
 
 			return session.get(require.toUrl('tests/functional/data/pointer.html')).then(function () {
 				return session.findById('a');
-			}).then(function (element) {
+			}).then(function (element: Element) {
 				return session.doubleTap(element);
 			}).then(function () {
 				return session.execute('return result;');
-			}).then(function (result) {
+			}).then(function (result: any) {
 				assert.lengthOf(result.touchstart.a, 2);
 				assert.lengthOf(result.touchend.a, 2);
 			});
 		},
 
-		'#longTap': function () {
+		'#longTap'(this: Test) {
 			if (!session.capabilities.touchEnabled) {
 				this.skip('touch is not enabled');
 			}
@@ -1466,18 +1473,18 @@ registerSuite(function () {
 
 			return session.get(require.toUrl('tests/functional/data/pointer.html')).then(function () {
 				return session.findById('a');
-			}).then(function (element) {
+			}).then(function (element: Element) {
 				return session.longTap(element);
 			}).then(function () {
 				return session.execute('return result;');
-			}).then(function (result) {
+			}).then(function (result: any) {
 				assert.lengthOf(result.touchstart.a, 1);
 				assert.lengthOf(result.touchend.a, 1);
 				assert.operator(result.touchend.a[0].timeStamp - result.touchstart.a[0].timeStamp, '>=', 500);
 			});
 		},
 
-		'#flickFinger (element)': function () {
+		'#flickFinger (element)'(this: Test) {
 			if (!session.capabilities.touchEnabled) {
 				this.skip('touch is not enabled');
 			}
@@ -1487,21 +1494,21 @@ registerSuite(function () {
 
 			return session.get(require.toUrl('tests/functional/data/scrollable.html'))
 			.then(getScrollPosition)
-			.then(function (originalPosition) {
+			.then(function (originalPosition: Position) {
 				assert.deepEqual(originalPosition, { x: 0, y: 0 });
-				return session.findByTagName('body').then(function (element) {
+				return session.findByTagName('body').then(function (element: Element) {
 					return session.flickFinger(element, -100, -100, 100);
-				}).then(getScrollPosition).then(function (position) {
+				}).then(getScrollPosition).then(function (position: Position) {
 					assert.operator(originalPosition.x, '<', position.x);
 					assert.operator(originalPosition.y, '<', position.y);
 				});
 			}).then(function () {
 				return session.findById('viewport');
-			}).then(function (element) {
-				return getScrollPosition(element).then(function (originalPosition) {
+			}).then(function (element: Element) {
+				return getScrollPosition(element).then(function (originalPosition: Position) {
 					return session.flickFinger(element, -100, -100, 100).then(function () {
 						return getScrollPosition(element);
-					}).then(function (position) {
+					}).then(function (position: Position) {
 						assert.operator(originalPosition.x, '<', position.x);
 						assert.operator(originalPosition.y, '<', position.y);
 					});
@@ -1509,7 +1516,7 @@ registerSuite(function () {
 			});
 		},
 
-		'#flickFinger (no element)': function () {
+		'#flickFinger (no element)'(this: Test) {
 			if (!session.capabilities.touchEnabled) {
 				this.skip('touch is not enabled');
 			}
@@ -1519,13 +1526,13 @@ registerSuite(function () {
 
 			return session.get(require.toUrl('tests/functional/data/scrollable.html')).then(function () {
 				return session.flickFinger(400, 400);
-			}).then(getScrollPosition).then(function (position) {
+			}).then(getScrollPosition).then(function (position: Position) {
 				assert.operator(0, '<', position.x);
 				assert.operator(0, '<', position.y);
 			});
 		},
 
-		'geolocation (#getGeolocation, #setGeolocation)': function () {
+		'geolocation (#getGeolocation, #setGeolocation)'(this: Test) {
 			if (!session.capabilities.locationContextEnabled) {
 				this.skip('location context not enabled');
 			}
@@ -1534,7 +1541,7 @@ registerSuite(function () {
 				return session.setGeolocation({ latitude: 12, longitude: -22.334455, altitude: 1000 });
 			}).then(function () {
 				return session.getGeolocation();
-			}).then(function (location) {
+			}).then(function (location: Geolocation) {
 				assert.isObject(location);
 				assert.strictEqual(location.latitude, 12);
 				assert.strictEqual(location.longitude, -22.334455);
@@ -1547,16 +1554,16 @@ registerSuite(function () {
 			});
 		},
 
-		'#getLogsFor': function () {
+		'#getLogsFor'() {
 			return session.get(require.toUrl('tests/functional/data/default.html')).then(function () {
 				return session.getAvailableLogTypes();
-			}).then(function (types) {
+			}).then(function (types: any[]) {
 				if (!types.length) {
 					return [];
 				}
 
 				return session.getLogsFor(types[0]);
-			}).then(function (logs) {
+			}).then(function (logs: any[]) {
 				assert.isArray(logs);
 
 				if (logs.length) {
@@ -1572,22 +1579,22 @@ registerSuite(function () {
 			});
 		},
 
-		'#getAvailableLogTypes': function () {
+		'#getAvailableLogTypes'() {
 			return session.get(require.toUrl('tests/functional/data/default.html')).then(function () {
 				return session.getAvailableLogTypes();
-			}).then(function (types) {
+			}).then(function (types: any[]) {
 				assert.isArray(types);
 			});
 		},
 
-		'#getApplicationCacheStatus': function () {
+		'#getApplicationCacheStatus'(this: Test) {
 			if (!session.capabilities.applicationCacheEnabled) {
 				this.skip('application cache is not enabled');
 			}
 
 			return session.get(require.toUrl('tests/functional/data/default.html')).then(function () {
 				return session.getApplicationCacheStatus();
-			}).then(function (status) {
+			}).then(function (status: number) {
 				assert.strictEqual(status, 0);
 			});
 		},

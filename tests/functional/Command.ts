@@ -33,7 +33,7 @@ registerSuite(function () {
 					throw new Error('broken');
 				}).then(function () {
 					throw new Error('Error thrown in initialiser should reject the Command');
-				}, function (error) {
+				}, function (error: Error) {
 					assert.strictEqual(error.message, 'broken');
 					assert.include(error.stack, 'tests/functional/Command.js:33:31',
 						'Stack trace should point back to the error');
@@ -41,7 +41,7 @@ registerSuite(function () {
 					throw error;
 				}).then(function () {
 					throw new Error('Error thrown in parent Command should reject child Command');
-				}, function (error) {
+				}, function (error: Error) {
 					assert.strictEqual(error.message, 'broken 2');
 				});
 			},
@@ -60,7 +60,7 @@ registerSuite(function () {
 					.invalid()
 					.then(function () {
 						throw new Error('Invalid command should have thrown error');
-					}, function (error) {
+					}, function (error: Error) {
 						assert.strictEqual(error.message, 'Invalid call');
 						assert.include(error.stack.slice(0, error.stack.indexOf('\n')), error.message,
 							'Original error message should be provided on the first line of the stack trace');
@@ -73,7 +73,7 @@ registerSuite(function () {
 				return new Command(session)
 					.then(function () {
 						throw new Error('Boom');
-					}).catch(function () {
+					}).catch(function (this: Command<any>) {
 						const expected: Context = [];
 						expected.isSingle = true;
 						expected.depth = 0;
@@ -82,7 +82,7 @@ registerSuite(function () {
 			}
 		},
 
-		'initialisation': function () {
+		'initialisation': function (this: Test) {
 			assert.throws(function () {
 				/*jshint nonew:false */
 				new Command();
@@ -98,7 +98,7 @@ registerSuite(function () {
 			expectedContext.isSingle = true;
 			expectedContext.depth = 0;
 
-			const command = parent.then(function (returnValue) {
+			const command = parent.then(function (this: Command<any>, returnValue: string) {
 				const self = this;
 				// setTimeout is necessary because underlying Promise implementation resolves same-turn and so
 				// `command` is still not defined when this callback executes
@@ -116,12 +116,12 @@ registerSuite(function () {
 			const command = new Command(session);
 			return command.get(require.toUrl('tests/functional/data/default.html'))
 				.getPageTitle()
-				.then(function (pageTitle) {
+				.then(function (pageTitle: string) {
 					assert.strictEqual(pageTitle, 'Default & <b>default</b>');
 				})
 				.get(require.toUrl('tests/functional/data/form.html'))
 				.getPageTitle()
-				.then(function (pageTitle) {
+				.then(function (pageTitle: string) {
 					assert.strictEqual(pageTitle, 'Form');
 				});
 		},
@@ -130,11 +130,11 @@ registerSuite(function () {
 			const parent = new Command(session).get(require.toUrl('tests/functional/data/default.html'));
 			const child = parent.findByTagName('p');
 
-			return child.then(function (element) {
+			return child.then(function (element: Element) {
 					assert.notStrictEqual(child, parent, 'Getting an element should cause a new Command to be created');
 					assert.isObject(element, 'Element should be provided to first callback of new Command');
 				}).getTagName()
-				.then(function (tagName) {
+				.then(function (tagName: string) {
 					assert.strictEqual(tagName, 'p', 'Tag name of context element should be provided');
 				});
 		},
@@ -146,7 +146,7 @@ registerSuite(function () {
 					.click()
 					.type('hello')
 					.getProperty('value')
-					.then(function (value) {
+					.then(function (value: string) {
 						assert.strictEqual(value, 'hello', 'Typing into a form field should put data in the field');
 					});
 		},
@@ -155,7 +155,7 @@ registerSuite(function () {
 			return new Command(session).get(require.toUrl('tests/functional/data/elements.html'))
 				.findAllByClassName('b')
 				.getAttribute('id')
-				.then(function (ids) {
+				.then(function (ids: string[]) {
 					assert.deepEqual(ids, [ 'b2', 'b1', 'b3', 'b4' ]);
 				});
 		},
@@ -165,18 +165,18 @@ registerSuite(function () {
 				.findById('c')
 					.findAllByClassName('b')
 						.getAttribute('id')
-						.then(function (ids) {
+						.then(function (ids: string[]) {
 							assert.deepEqual(ids, [ 'b3', 'b4' ]);
 						})
 						.findAllByClassName('a')
-							.then(function (elements) {
+							.then(function (elements: Element[]) {
 								assert.lengthOf(elements, 0);
 							})
 					.end(2)
 				.end()
 				.findAllByClassName('b')
 					.getAttribute('id')
-					.then(function (ids) {
+					.then(function (ids: string[]) {
 						assert.deepEqual(ids, [ 'b2', 'b1', 'b3', 'b4' ]);
 					});
 		},
@@ -186,7 +186,7 @@ registerSuite(function () {
 				.findAllByTagName('div')
 					.findAllByCssSelector('span, a')
 						.getAttribute('id')
-						.then(function (ids) {
+						.then(function (ids: string[]) {
 							assert.deepEqual(ids, [ 'f', 'g', 'j', 'i1', 'k', 'zz' ]);
 						});
 		},
@@ -195,7 +195,7 @@ registerSuite(function () {
 			return new Command(session).get(require.toUrl('tests/functional/data/visibility.html'))
 				.findDisplayedByClassName('multipleVisible')
 				.getVisibleText()
-				.then(function (text) {
+				.then(function (text: string) {
 					assert.strictEqual(text, 'b', 'The first visible element should be returned');
 				});
 		},
@@ -203,7 +203,7 @@ registerSuite(function () {
 		// Check that when the mouse is pressed on one element and is moved over another element before being
 		// released, the mousedown event is generated for the first element and the mouseup event is generated for
 		// the second.
-		'DEBUG #moveMouseTo usesElement': function () {
+		'#moveMouseTo usesElement': function () {
 			return new Command(session).get(require.toUrl('tests/functional/data/pointer.html'))
 				.findById('a')
 				.moveMouseTo()
@@ -211,7 +211,7 @@ registerSuite(function () {
 				.moveMouseTo(110, 50)
 				.releaseMouseButton()
 				.execute('return result;')
-				.then(function (result) {
+				.then(function (result: any) {
 					assert.isTrue(result.mousedown.a && result.mousedown.a.length > 0, 'Expected mousedown event in element a');
 					assert.isTrue(result.mouseup.b && result.mouseup.b.length > 0, 'Expected mouseup event in element b');
 				});
@@ -233,29 +233,29 @@ registerSuite(function () {
 
 			return new Command(session, function (setContext) { setContext([ 'a' ]); })
 				.end(20)
-				.then(function () {
+				.then(function (this: Command<any>) {
 					assert.deepEqual(this.context, expected, 'Calling #end when there is nowhere else to go should be a no-op');
 				});
 		},
 
 		'#end in a long chain': function () {
-			return new Command(session).then(function (_, setContext) {
+			return new Command(session).then(function (_: any, setContext: Function) {
 				setContext([ 'a' ]);
 			})
 			.end()
-			.then(function () {
+			.then(function (this: Command<any>) {
 				assert.lengthOf(this.context, 0);
 			})
 			.end()
-			.then(function () {
+			.then(function (this: Command<any>) {
 				assert.lengthOf(this.context, 0, '#end should not ascend to higher depths earlier in the command chain');
 			});
 		},
 
 		'#catch': function () {
 			const command = new Command(session);
-			let callback;
-			let errback;
+			let callback: Function;
+			let errback: Function;
 			const expectedErrback = function () {};
 			command.then = <any> function () {
 				callback = arguments[0];
@@ -270,8 +270,8 @@ registerSuite(function () {
 
 		'#finally': function () {
 			const command = new Command(session);
-			let callback;
-			let errback;
+			let callback: Function;
+			let errback: Function;
 			const expected = function () {};
 			command.then = <any> function () {
 				callback = arguments[0];
@@ -293,7 +293,7 @@ registerSuite(function () {
 
 			return sleepCommand.then(function () {
 				throw new Error('Sleep command should have been cancelled');
-			}, function (error) {
+			}, function (error: Error) {
 				assert.operator(Date.now() - startTime, '<', 4000, 'Cancel should not wait for sleep to complete');
 				assert.strictEqual(error.name, 'CancelError');
 			});
@@ -308,7 +308,7 @@ registerSuite(function () {
 				return Promise.resolve('b');
 			}, { createsContext: true }));
 
-			return command.newContext().then(function () {
+			return command.newContext().then(function (this: Command<any>) {
 				const expected: Context = [ 'b' ];
 				expected.isSingle = true;
 				expected.depth = 1;
@@ -330,7 +330,7 @@ registerSuite(function () {
 
 			Command.addElementMethod(command, 'newContext');
 
-			return command.newContext().then(function () {
+			return command.newContext().then(function (this: Command<any>) {
 				const expected: Context = [ 'b' ];
 				expected.isSingle = true;
 				expected.depth = 1;
@@ -345,7 +345,7 @@ registerSuite(function () {
 				setContext('a');
 			});
 
-			Command.addSessionMethod(command, 'useElement', util.forCommand(function (context, arg) {
+			Command.addSessionMethod(command, 'useElement', util.forCommand(function (context: string, arg: string) {
 				assert.strictEqual(context, 'a',
 					'Context object should be passed as first argument to function annotated with usesElement');
 				assert.strictEqual(arg, 'arg1',
@@ -365,7 +365,7 @@ registerSuite(function () {
 				[ 'b', 'arg1' ]
 			];
 
-			Command.addSessionMethod(command, 'useElement', util.forCommand(function (context, arg) {
+			Command.addSessionMethod(command, 'useElement', util.forCommand(function (context: any, arg: any) {
 				const _expected = expected.shift();
 
 				assert.strictEqual(context, _expected[0],

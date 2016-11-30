@@ -4,8 +4,9 @@ import Promise = require('dojo/Promise');
 import Session from '../../src/Session';
 import Command from '../../src/Command';
 import * as compat from '../../src/compat';
-import Strategies, { suffixes } from '../../src/lib/strategies';
+import { strategies, suffixes } from '../../src/lib/strategies';
 import * as topic from 'dojo/topic';
+import { Capabilities } from '../../src/interfaces';
 
 function assertWarn(...args: any[]) {
 	assert.isNotNull(lastWarning);
@@ -14,13 +15,13 @@ function assertWarn(...args: any[]) {
 	}
 }
 
-function mockCommand(object, method, testName, test) {
-	let originalMethod;
-	let suite = {
+function mockCommand(object: any, method: string, testName: string, test: Function) {
+	let originalMethod: Function;
+	let suite: any = {
 		setup: function () {
 			originalMethod = object[method];
-			object[method] = function (...args: any[]) {
-				return new Command(this, function () {
+			object[method] = function (this: any, ...args: any[]) {
+				return new Command<any>(this, function () {
 					if (args[0] instanceof Error) {
 						return Promise.reject(args[0]);
 					}
@@ -40,7 +41,7 @@ function mockCommand(object, method, testName, test) {
 
 function deprecate(method: string, replacement?: string) {
 	return mockCommand(command, replacement, 'deprecate', function () {
-		return command[method]('a', 'b').then(function (value) {
+		return command[method]('a', 'b').then(function (value: string[]) {
 			assert.deepEqual(value, [ 'a', 'b' ], 'Replacement method should be invoked with same arguments');
 			assertWarn('Command#' + method, 'Command#' + replacement);
 		});
@@ -50,7 +51,7 @@ function deprecate(method: string, replacement?: string) {
 function deprecateElementSig(fromMethod: string, toMethod?: string, standardSigAlsoDeprecated?: boolean) {
 	return mockCommand(Command.prototype, fromMethod, 'deprecateElementSig', function () {
 		function testElementSig() {
-			return command[fromMethod](element, 'c', 'd').then(function (value) {
+			return command[fromMethod](element, 'c', 'd').then(function (value: string[]) {
 				assert.deepEqual(value, [ 'c', 'd' ]);
 				assertWarn('Command#' + fromMethod + '(element)', 'Command#find then Command#' + fromMethod);
 				assertWarn('Command#' + fromMethod + '(element)', 'element.' + (toMethod || fromMethod));
@@ -60,7 +61,7 @@ function deprecateElementSig(fromMethod: string, toMethod?: string, standardSigA
 		let element = {
 			elementId: 'test'
 		};
-		element[toMethod || fromMethod] = function () {
+		(<any> element)[toMethod || fromMethod] = function () {
 			return Promise.resolve(Array.prototype.slice.call(arguments, 0));
 		};
 
@@ -68,7 +69,7 @@ function deprecateElementSig(fromMethod: string, toMethod?: string, standardSigA
 			return testElementSig();
 		}
 
-		return command[fromMethod]('a', 'b').then(function (value) {
+		return (<any> command)[fromMethod]('a', 'b').then(function (value: string[]) {
 			assert.deepEqual(value, [ 'a', 'b' ], 'Unmodified method should be invoked with same arguments');
 			assert.isNull(lastWarning);
 			return testElementSig();
@@ -76,7 +77,7 @@ function deprecateElementSig(fromMethod: string, toMethod?: string, standardSigA
 	});
 }
 
-function deprecateElementAndStandardSig(method, replacement) {
+function deprecateElementAndStandardSig(method: string, replacement: string) {
 	return {
 		'element signature': deprecateElementSig(method, replacement, true),
 		'standard signature': deprecate(method, replacement)
@@ -133,12 +134,12 @@ let suite = {
 	},
 
 	'mockCommand sanity check': mockCommand(command, 'test', 'sanity check', function () {
-		return command.test('a', 'b').then(function (args) {
+		return command.test('a', 'b').then(function (args: string[]) {
 			assert.deepEqual(args, [ 'a', 'b' ]);
 			return command.test(new Error('Should reject'));
 		}).then(function () {
 			throw new Error('Should have rejected');
-		}, function (error) {
+		}, function (error: Error) {
 			assert.strictEqual(error.message, 'Should reject');
 		});
 	}),
@@ -149,7 +150,7 @@ let suite = {
 	},
 
 	'#status'() {
-		return command.status().then(function (value) {
+		return command.status().then(function (value: string) {
 			assert.strictEqual(value, 'hapy');
 			assertWarn('Command#status');
 		});
@@ -161,35 +162,35 @@ let suite = {
 	},
 
 	'#sessions'() {
-		return command.sessions().then(function (value) {
+		return command.sessions().then(function (value: string) {
 			assert.strictEqual(value, 'many things');
 			assertWarn('Command#sessions');
 		});
 	},
 
 	'#sessionCapabilities'() {
-		return command.sessionCapabilities().then(function (capabilities) {
+		return command.sessionCapabilities().then(function (capabilities: Capabilities) {
 			assert.strictEqual(capabilities, command.session.capabilities);
 			assertWarn('Command#sessionCapabilities', 'Command#session.capabilities');
 		});
 	},
 
 	'#altSessionCapabilities'() {
-		return command.altSessionCapabilities().then(function (capabilities) {
+		return command.altSessionCapabilities().then(function (capabilities: Capabilities) {
 			assert.strictEqual(capabilities, command.session.capabilities);
 			assertWarn('Command#altSessionCapabilities', 'Command#session.capabilities');
 		});
 	},
 
 	'#getSessionId'() {
-		return command.getSessionId().then(function (sessionId) {
+		return command.getSessionId().then(function (sessionId: string) {
 			assert.strictEqual(sessionId, command.session.sessionId);
 			assertWarn('Command#getSessionId', 'Command#session.sessionId');
 		});
 	},
 
 	'#getSessionID'() {
-		return command.getSessionID().then(function (sessionId) {
+		return command.getSessionID().then(function (sessionId: string) {
 			assert.strictEqual(sessionId, command.session.sessionId);
 			assertWarn('Command#getSessionID', 'Command#session.sessionId');
 		});
@@ -206,14 +207,14 @@ let suite = {
 	'#safeExecute': deprecate('safeExecute', 'execute'),
 	'#eval': mockCommand(command, 'execute', 'eval', function () {
 		/* jshint evil:true */
-		return command.eval('test').then(function (args) {
+		return command.eval('test').then(function (args: string[]) {
 			assert.strictEqual(args[0], 'return eval(arguments[0]);');
 			assert.deepEqual(args[1], [ 'test' ]);
 			assertWarn('Command#eval', 'Command#execute');
 		});
 	}),
 	'#safeEval': mockCommand(command, 'execute', 'eval', function () {
-		return command.safeEval('test').then(function (args) {
+		return command.safeEval('test').then(function (args: string[]) {
 			assert.strictEqual(args[0], 'return eval(arguments[0]);');
 			assert.deepEqual(args[1], [ 'test' ]);
 			assertWarn('Command#safeEval', 'Command#execute');
@@ -225,15 +226,15 @@ let suite = {
 	'#close': deprecate('close', 'closeCurrentWindow'),
 	'#windowSize': deprecate('windowSize', 'setWindowSize'),
 	'#setWindowSize': mockCommand(Command.prototype, 'setWindowSize', 'setWindowSize', function () {
-		return command.setWindowSize(1, 2).then(function (args) {
+		return command.setWindowSize(1, 2).then(function (args: number[]) {
 			assert.deepEqual(args, [ 1, 2 ]);
 			assert.isNull(lastWarning);
 			return command.setWindowSize('foo', 2, 3);
-		}).then(function (args) {
+		}).then(function (args: any[]) {
 			assert.deepEqual(args, [ 'foo', 2, 3 ]);
 			assert.isNull(lastWarning);
 			return command.setWindowSize(3, 4, 'bar');
-		}).then(function (args) {
+		}).then(function (args: any[]) {
 			assert.deepEqual(args, [ 'bar', 3, 4 ]);
 			assertWarn(
 				'Command#setWindowSize(width, height, handle)',
@@ -242,15 +243,15 @@ let suite = {
 		});
 	}),
 	'#setWindowPosition': mockCommand(Command.prototype, 'setWindowPosition', 'setWindowPosition', function () {
-		return command.setWindowPosition(1, 2).then(function (args) {
+		return command.setWindowPosition(1, 2).then(function (args: number[]) {
 			assert.deepEqual(args, [ 1, 2 ]);
 			assert.isNull(lastWarning);
 			return command.setWindowPosition('foo', 2, 3);
-		}).then(function (args) {
+		}).then(function (args: any[]) {
 			assert.deepEqual(args, [ 'foo', 2, 3 ]);
 			assert.isNull(lastWarning);
 			return command.setWindowPosition(3, 4, 'bar');
-		}).then(function (args) {
+		}).then(function (args: any[]) {
 			assert.deepEqual(args, [ 'bar', 3, 4 ]);
 			assertWarn('Command#setWindowPosition(x, y, handle)', 'Command#setWindowPosition(handle, x, y)');
 		});
@@ -274,7 +275,7 @@ let suite = {
 	'#elementsByClassName': deprecate('elementsByClassName', 'findAllByClassName'),
 	'#elementsByCssSelector': deprecate('elementsByCssSelector', 'findAllByCssSelector'),
 	'#elementsById': mockCommand(command, 'findAll', 'elementsById', function () {
-		return command.elementsById('a').then(function (args) {
+		return command.elementsById('a').then(function (args: string[]) {
 			assert.deepEqual(args, [ 'id', 'a' ]);
 			assertWarn('Command#elementsById', 'Command#findById');
 		});
@@ -286,27 +287,27 @@ let suite = {
 	'#elementsByXPath': deprecate('elementsByXPath', 'findAllByXpath'),
 	'#elementsByCss': deprecate('elementsByCss', 'findAllByCssSelector'),
 	'#elementOrNull': mockCommand(command, 'find', 'elementOrNull', function () {
-		return command.elementOrNull('a', 'b').then(function (args) {
+		return command.elementOrNull('a', 'b').then(function (args: string[]) {
 			assert.deepEqual(args, [ 'a', 'b' ]);
 			return command.elementOrNull(new Error('Should resolve to null, not reject'));
-		}).then(function (result) {
+		}).then(function (result: any) {
 			assert.isNull(result);
 		});
 	}),
 	'#elementIfExists': mockCommand(command, 'find', 'elementIfExists', function () {
-		return command.elementIfExists('a', 'b').then(function (args) {
+		return command.elementIfExists('a', 'b').then(function (args: string[]) {
 			assert.deepEqual(args, [ 'a', 'b' ]);
 			return command.elementIfExists(new Error('Should resolve to undefined, not reject'));
-		}).then(function (result) {
+		}).then(function (result: any) {
 			assert.isUndefined(result);
 		});
 	}),
 	'#hasElement': mockCommand(command, 'find', 'hasElement', function () {
-		return command.hasElement('a', 'b').then(function (hasElement) {
+		return command.hasElement('a', 'b').then(function (hasElement: boolean) {
 			assert.isTrue(hasElement);
 			assertWarn('Command#hasElement', 'Command#find');
 			return command.hasElement(new Error('Should resolve to false, not reject'));
-		}).then(function (hasElement) {
+		}).then(function (hasElement: boolean) {
 			assert.isFalse(hasElement);
 		});
 	}),
@@ -315,11 +316,11 @@ let suite = {
 	'#submit': deprecateElementSig('submit'),
 
 	'#textPresent': (function () {
-		let originalMethod;
+		let originalMethod: Function;
 		return {
 			setup() {
 				originalMethod = command.getVisibleText;
-				command.getVisibleText = function () {
+				command.getVisibleText = function (this: any) {
 					return new Command(this, function () {
 						return Promise.resolve('foo');
 					});
@@ -329,11 +330,11 @@ let suite = {
 				command.getVisibleText = originalMethod;
 			},
 			'pass-through'() {
-				return command.textPresent('foo').then(function (result) {
+				return command.textPresent('foo').then(function (result: boolean) {
 					assert.isTrue(result);
 					assertWarn('Command#textPresent', 'Command#getVisibleText');
 					return command.textPresent('bar');
-				}).then(function (result) {
+				}).then(function (result: boolean) {
 					assert.isFalse(result);
 				});
 			},
@@ -344,10 +345,10 @@ let suite = {
 					}
 				};
 
-				return command.textPresent('foo', element).then(function (result) {
+				return command.textPresent('foo', element).then(function (result: boolean) {
 					assert.isFalse(result);
 					return command.textPresent('baz', element);
-				}).then(function (result) {
+				}).then(function (result: boolean) {
 					assert.isTrue(result);
 				});
 			}
@@ -363,7 +364,7 @@ let suite = {
 	'#enabled': deprecateElementAndStandardSig('enabled', 'isEnabled'),
 	'#getAttribute': deprecateElementSig('getAttribute'),
 	'#getValue': mockCommand(command, 'getProperty', 'deprecate', function () {
-		return command.getValue().then(function (args) {
+		return command.getValue().then(function (args: string[]) {
 			assert.deepEqual(args, [ 'value' ]);
 			assertWarn('Command#getValue', 'Command#getProperty(\'value\')');
 
@@ -374,7 +375,7 @@ let suite = {
 				}
 			};
 
-			return command.getValue(element).then(function (args) {
+			return command.getValue(element).then(function (args: string[]) {
 				assert.deepEqual(args, [ 'value', 'fromElement' ]);
 				assertWarn('Command#getValue(element)', 'Command#getProperty(\'value\')');
 			});
@@ -385,18 +386,18 @@ let suite = {
 			elementId: 'other'
 		};
 
-		return command.equalsElement(otherElement).then(function (args) {
+		return command.equalsElement(otherElement).then(function (args: any[]) {
 			assert.deepEqual(args, [ otherElement ]);
 			assertWarn('Command#equalsElement', 'Command#equals');
 
 			let element = {
 				elementId: 'test',
-				equals: function (other) {
+				equals: function (other: any) {
 					return Promise.resolve([ other, 'fromElement' ]);
 				}
 			};
 
-			return command.equalsElement(element, otherElement).then(function (args) {
+			return command.equalsElement(element, otherElement).then(function (args: any[]) {
 				assert.deepEqual(args, [ otherElement, 'fromElement' ]);
 				assertWarn('Command#equalsElement', 'element.equals(other)');
 			});
@@ -406,7 +407,7 @@ let suite = {
 	'#displayed': deprecateElementAndStandardSig('displayed', 'isDisplayed'),
 	'#getLocation': deprecateElementAndStandardSig('getLocation', 'getPosition'),
 	'#getLocationInView': mockCommand(command, 'getPosition', 'deprecate', function () {
-		return command.getLocationInView('a', 'b').then(function (args) {
+		return command.getLocationInView('a', 'b').then(function (args: string[]) {
 			assert.deepEqual(args, [ 'a', 'b' ]);
 			assertWarn('Command#getLocationInView', 'Command#getPosition');
 		});
@@ -418,13 +419,13 @@ let suite = {
 	'#alertKeys': deprecate('alertKeys', 'typeInPrompt'),
 	'#moveTo': deprecateElementAndStandardSig('moveTo', 'moveMouseTo'),
 	'#click(button)': mockCommand(command, 'clickMouseButton', 'deprecate signature', function () {
-		return command.click(0).then(function (args) {
+		return command.click(0).then(function (args: number[]) {
 			assert.deepEqual(args, [ 0 ]);
 			assertWarn('Command#click(button)', 'Command#clickMouseButton(button)');
 		});
 	}),
 	'#click': mockCommand(Command.prototype, 'click', 'pass-through', function () {
-		return command.click().then(function (args) {
+		return command.click().then(function (args: any[]) {
 			assert.deepEqual(args, []);
 			assert.isNull(lastWarning);
 		});
@@ -440,13 +441,13 @@ let suite = {
 	'#log': deprecate('log', 'getLogsFor'),
 	'#logTypes': deprecate('logTypes', 'getAvailableLogTypes'),
 	'#newWindow': mockCommand(command, 'execute', 'deprecate', function () {
-		return command.newWindow('a', 'b').then(function (args) {
+		return command.newWindow('a', 'b').then(function (args: string[]) {
 			assert.deepEqual(args, [ 'window.open(arguments[0], arguments[1]);', [ 'a', 'b' ] ]);
 			assertWarn('Command#newWindow', 'Command#execute');
 		});
 	}),
 	'#windowName': mockCommand(command, 'execute', 'deprecate', function () {
-		return command.windowName().then(function (args) {
+		return command.windowName().then(function (args: string[]) {
 			assert.deepEqual(args, [ 'return window.name;' ]);
 			assertWarn('Command#windowName', 'Command#execute');
 		});
@@ -459,14 +460,14 @@ let suite = {
 		});
 	},
 	'#getPageIndex': function () {
-		let args;
+		let args: any[];
 		return command.getPageIndex({
 			elementId: 'test',
 			_get: function () {
 				args = Array.prototype.slice.call(arguments, 0);
 				return Promise.resolve('1');
 			}
-		}).then(function (result) {
+		}).then(function (result: string) {
 			assert.strictEqual(result, '1');
 			assertWarn('Command#getPageIndex');
 			assert.deepEqual(args, [ 'pageIndex' ]);
@@ -480,14 +481,14 @@ let suite = {
 		});
 	},
 	'#waitForCondition': mockCommand(command.session, 'executeAsync', 'deprecate', function () {
-		return command.waitForCondition('true', 1, 2).then(function (args) {
+		return command.waitForCondition('true', 1, 2).then(function (args: any) {
 			assert.isArray(args);
 			assert.isFunction(args[0]);
 			assert.deepEqual(args[1], [ 'return eval(arguments[0]) ? true : null;', [ 'true' ], 1, 2 ]);
 			assertWarn('Command#waitForCondition', 'Command#executeAsync');
 			assertWarn('Command#waitForCondition', 'leadfoot/helpers/pollUntil');
 
-			return command.waitForCondition('true').then(function (args) {
+			return command.waitForCondition('true').then(function (args: any[]) {
 				assert.isArray(args);
 				assert.isFunction(args[0]);
 				assert.deepEqual(args[1], [ 'return eval(arguments[0]) ? true : null;', [ 'true' ], 1000, 100 ]);
@@ -495,14 +496,14 @@ let suite = {
 		});
 	}),
 	'#waitForConditionInBrowser': mockCommand(command.session, 'executeAsync', 'deprecate', function () {
-		return command.waitForConditionInBrowser('true', 1000, 500).then(function (args) {
+		return command.waitForConditionInBrowser('true', 1000, 500).then(function (args: any[]) {
 			assert.isArray(args);
 			assert.isFunction(args[0]);
 			assert.deepEqual(args[1], [ 'return eval(arguments[0]) ? true : null;', [ 'true' ], 1000, 500 ]);
 			assertWarn('Command#waitForConditionInBrowser', 'Command#executeAsync');
 			assertWarn('Command#waitForConditionInBrowser', 'leadfoot/helpers/pollUntil');
 
-			return command.waitForConditionInBrowser('true').then(function (args) {
+			return command.waitForConditionInBrowser('true').then(function (args: any[]) {
 				assert.isArray(args);
 				assert.isFunction(args[0]);
 				assert.deepEqual(args[1], [ 'return eval(arguments[0]) ? true : null;', [ 'true' ], 1000, 100 ]);
@@ -534,33 +535,33 @@ let suite = {
 };
 
 suffixes.forEach(function (suffix, index) {
-	function addStrategy(method, toMethod, suffix, wdSuffix, using) {
-		suite['#' + method + 'OrNull'] = mockCommand(command, 'elementOrNull', 'deprecate', function () {
-			return command[method + 'OrNull']('a').then(function (args) {
+	function addStrategy(method: string, toMethod: string, suffix: string, wdSuffix: string, using: string) {
+		(<any> suite)['#' + method + 'OrNull'] = mockCommand(command, 'elementOrNull', 'deprecate', function () {
+			return command[method + 'OrNull']('a').then(function (args: any[]) {
 				assert.deepEqual(args, [ using, 'a' ]);
 			});
 		});
 
-		suite['#' + method + 'IfExists'] = mockCommand(command, 'elementIfExists', 'deprecate', function () {
-			return command[method + 'IfExists']('a').then(function (args) {
+		(<any> suite)['#' + method + 'IfExists'] = mockCommand(command, 'elementIfExists', 'deprecate', function () {
+			return command[method + 'IfExists']('a').then(function (args: any[]) {
 				assert.deepEqual(args, [ using, 'a' ]);
 			});
 		});
 
-		suite['#hasElementBy' + wdSuffix] = mockCommand(command, 'hasElement', 'deprecate', function () {
-			return command['hasElementBy' + wdSuffix]('a').then(function (args) {
+		(<any> suite)['#hasElementBy' + wdSuffix] = mockCommand(command, 'hasElement', 'deprecate', function () {
+			return command['hasElementBy' + wdSuffix]('a').then(function (args: any[]) {
 				assert.deepEqual(args, [ using, 'a' ]);
 			});
 		});
 
-		suite['#waitForElementBy' + wdSuffix] = mockCommand(command, 'waitForElement', 'deprecate', function () {
-			return command['waitForElementBy' + wdSuffix]('a', 123).then(function (args) {
+		(<any> suite)['#waitForElementBy' + wdSuffix] = mockCommand(command, 'waitForElement', 'deprecate', function () {
+			return command['waitForElementBy' + wdSuffix]('a', 123).then(function (args: any[]) {
 				assert.deepEqual(args, [ using, 'a', 123 ]);
 			});
 		});
 
-		suite['#waitForVisibleBy' + wdSuffix] = mockCommand(command, 'waitForVisible', 'deprecate', function () {
-			return command['waitForVisibleBy' + wdSuffix]('a', 123).then(function (args) {
+		(<any> suite)['#waitForVisibleBy' + wdSuffix] = mockCommand(command, 'waitForVisible', 'deprecate', function () {
+			return command['waitForVisibleBy' + wdSuffix]('a', 123).then(function (args: any[]) {
 				assert.deepEqual(args, [ using, 'a', 123 ]);
 			});
 		});
@@ -569,7 +570,7 @@ suffixes.forEach(function (suffix, index) {
 	let wdSuffix = suffix === 'Xpath' ? 'XPath' : suffix;
 	let method = 'elementBy' + wdSuffix;
 	let toMethod = 'findBy' + suffix;
-	let using = Strategies.prototype[index];
+	let using = strategies[index];
 	addStrategy(method, toMethod, suffix, wdSuffix, using);
 	if (suffix === 'CssSelector') {
 		addStrategy('elementByCss', toMethod, suffix, 'Css', using);
