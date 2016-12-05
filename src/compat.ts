@@ -9,7 +9,7 @@ import Command from './Command';
 import Element from './Element';
 import Promise = require('dojo/Promise');
 import pollUntil from './helpers/pollUntil';
-import Strategies, { strategies, suffixes } from './lib/strategies';
+import { strategies, suffixes } from './lib/strategies';
 import * as topic from 'dojo/topic';
 
 /**
