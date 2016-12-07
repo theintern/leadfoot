@@ -3,7 +3,7 @@
 		"allowSyntheticDefaultImports": true,
 		"declaration": true,
 		"experimentalDecorators": true,
-		"module": "umd",
+		"module": "commonjs",
 		"moduleResolution": "node",
 		"noImplicitAny": true,
 		"noImplicitThis": true,
@@ -11,17 +11,14 @@
 		"noUnusedParameters": false,
 		"outDir": "./_build",
 		"preserveConstEnums": true,
-		"removeComments": false,
+		"removeComments": true,
 		"sourceMap": true,
 		"target": "ES5"
 	},
 	"files": [
-		"./types/dojo2/dojo.d.ts",
+		"./node_modules/intern/typings/intern/intern.d.ts",
 		"./types/jszip/jszip.d.ts",
-		"./types/intern/intern.d.ts",
-		"./types/leadfoot/leadfoot.d.ts",
-		"./types/istanbul/istanbul.d.ts",
-		"./node_modules/intern/typings/chai/chai.d.ts"
+		"./types/istanbul/istanbul.d.ts"
 	],
 	"include": [
 		"./src/**/*.ts",

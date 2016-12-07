@@ -5,7 +5,7 @@
  */
 
 import FindDisplayed from './lib/findDisplayed';
-import * as fs from 'dojo/node!fs';
+import * as fs from 'fs';
 import  Strategies from './lib/strategies';
 import WaitForDeleted from './lib/waitForDeleted';
 import * as util from './lib/util';

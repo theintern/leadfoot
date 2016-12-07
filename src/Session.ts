@@ -6,10 +6,10 @@
 import Element, { ElementOrElementId } from './Element';
 import Server from './Server';
 import FindDisplayed from './lib/findDisplayed';
-import * as fs from 'dojo/node!fs';
-import JSZip = require('dojo/node!jszip');
+import * as fs from 'fs';
+import JSZip = require('jszip');
 import * as lang from 'dojo/lang';
-import * as path from 'dojo/node!path';
+import * as path from 'path';
 import Promise = require('dojo/Promise');
 import statusCodes from './lib/statusCodes';
 import { LocalStorage, SessionStorage } from './lib/storage';

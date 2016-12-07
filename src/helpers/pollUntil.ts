@@ -1,35 +1,33 @@
-/**
- * @module leadfoot/helpers/pollUntil
- */
-
 import * as util from '../lib/util';
 import Command from '../Command';
 import Promise = require('dojo/Promise');
 
 /**
- * A {@link module:leadfoot/Command} helper that polls for a value within the client environment until the value exists
+ * A [[Command]] helper that polls for a value within the client environment until the value exists
  * or a timeout is reached.
  *
- * @param {Function|string} poller
+ * @param poller
  * The poller function to execute on an interval. The function should return `null` or `undefined` if there is not a
  * result. If the poller function throws, polling will halt.
  *
- * @param {Array.<any>=} args
+ * @param args
  * An array of arguments to pass to the poller function when it is invoked. Only values that can be serialised to JSON,
  * plus {@link module:leadfoot/Element} objects, can be specified as arguments.
  *
- * @param {number=} timeout
+ * @param timeout
  * The maximum amount of time to wait for a successful result, in milliseconds. If not specified, the current
  * `executeAsync` maximum timeout for the session will be used.
  *
- * @param {number=} pollInterval
+ * @param pollInterval
  * The amount of time to wait between calls to the poller function, in milliseconds. If not specified, defaults to 67ms.
  *
- * @returns {function(): Promise.<any>}
- * A {@link module:leadfoot/Command#then} callback function that, when called, returns a promise that resolves to the
+ * @returns
+ * A [[Command]] callback function that, when called, returns a promise that resolves to the
  * value returned by the poller function on success and rejects on failure.
  *
  * @example
+ *
+ * ```js
  * var Command = require('leadfoot/Command');
  * var pollUntil = require('leadfoot/helpers/pollUntil');
  *
@@ -41,8 +39,11 @@ import Promise = require('dojo/Promise');
  *     }, function (error) {
  *         // element was not found
  *     });
+ * ```
  *
  * @example
+ *
+ * ```js
  * var Command = require('leadfoot/Command');
  * var pollUntil = require('leadfoot/helpers/pollUntil');
  *
@@ -57,6 +58,7 @@ import Promise = require('dojo/Promise');
  *     }, function (error) {
  *         // value was never set
  *     });
+ * ```
  */
 export default function pollUntil(poller: Function|string, args?: any[], timeout?: number, pollInterval?: number): () => Promise<any>;
 export default function pollUntil(poller: Function|string, timeout?: number, pollInterval?: number): () => Promise<any>;

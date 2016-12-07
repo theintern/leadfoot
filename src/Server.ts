@@ -119,7 +119,7 @@ function sendRequest(this: Server, method: string, path: string, requestData?: O
 				data = {
 					status: response.statusCode === 404 || response.statusCode === 501 ? 9 : 13,
 					value: {
-						message: response.text
+						message: (<any> response).text
 					}
 				};
 			}

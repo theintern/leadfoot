@@ -85,7 +85,7 @@ registerSuite(function () {
 		'initialisation': function (this: Test) {
 			assert.throws(function () {
 				/*jshint nonew:false */
-				new Command();
+				new (<any> Command)();
 			}, /A parent Command or Session must be provided to a new Command/);
 
 			const dfd = this.async();
