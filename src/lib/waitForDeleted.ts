@@ -4,16 +4,17 @@ import Session from '../Session';
 import Element from '../Element';
 import { Thenable } from '../interfaces';
 
-export default class WaitForDeleted {
+abstract class WaitForDeleted<E extends Thenable<Element>, V extends Thenable<void>> {
 	session?: Session;
-	find: (strategy: string, value: string) => Thenable<Element>;
 
-	waitForDeleted(strategy: string, value: string): Thenable<void> {
+	abstract find(strategy: string, value: string): E;
+
+	waitForDeleted(strategy: string, value: string): V {
 		const self = this;
 		const session = <Session> (this.session || this);
 		let originalTimeout: number;
 
-		return session.getTimeout('implicit').then(function (value) {
+		return <any> session.getTimeout('implicit').then(function (value) {
 			originalTimeout = value;
 			session.setTimeout('implicit', 0);
 		}).then(function () {
@@ -51,3 +52,5 @@ export default class WaitForDeleted {
 		});
 	}
 }
+
+export default WaitForDeleted;

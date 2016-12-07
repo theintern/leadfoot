@@ -1,0 +1,20 @@
+{
+	"extends": "../tsconfig-base.json",
+	"compilerOptions": {
+		"target": "ES5",
+		"module": "umd",
+		"baseUrl": "..",
+		"paths": {
+			"src/*": [ "./src/*" ]
+		}
+	},
+	"files": [
+		"../node_modules/intern/typings/intern/intern.d.ts",
+		"../types/jszip/jszip.d.ts",
+		"../src/declarations.d.ts",
+		"../types/istanbul/istanbul.d.ts"
+	],
+	"include": [
+		"./**/*.ts"
+	]
+}

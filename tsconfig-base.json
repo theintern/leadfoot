@@ -3,6 +3,7 @@
 		"allowSyntheticDefaultImports": true,
 		"declaration": true,
 		"experimentalDecorators": true,
+		"importHelpers": true,
 		"module": "commonjs",
 		"moduleResolution": "node",
 		"noImplicitAny": true,
@@ -11,17 +12,9 @@
 		"noUnusedParameters": false,
 		"outDir": "./_build",
 		"preserveConstEnums": true,
-		"removeComments": true,
+		"removeComments": false,
+		"rootDir": ".",
 		"sourceMap": true,
 		"target": "ES5"
-	},
-	"files": [
-		"./node_modules/intern/typings/intern/intern.d.ts",
-		"./types/jszip/jszip.d.ts",
-		"./types/istanbul/istanbul.d.ts"
-	],
-	"include": [
-		"./src/**/*.ts",
-		"./tests/**/*.ts"
-	]
+	}
 }

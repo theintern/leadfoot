@@ -10,7 +10,7 @@ import request = require('dojo/request');
 import Session from './Session';
 import statusCodes from './lib/statusCodes';
 import Element from './Element';
-import * as urlUtil from 'dojo/node!url';
+import * as urlUtil from 'url';
 import * as util from './lib/util';
 import { Capabilities, LeadfootURL } from './interfaces';
 

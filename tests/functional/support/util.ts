@@ -1,9 +1,9 @@
-import Server from '../../../src/Server';
-import Session from '../../../src/Session';
-import Command from '../../../src/Command';
+import Server from 'src/Server';
+import Session from 'src/Session';
+import Command from 'src/Command';
 import { LeadfootURL } from '../../../src/interfaces';
 
-export * from '../../../src/lib/util';
+export * from 'src/lib/util';
 
 export function createServer(config: LeadfootURL|string) {
 	return new Server(config);

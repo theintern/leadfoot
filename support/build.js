@@ -7,6 +7,9 @@ const exec = require('./common').exec;
 const dir = path.join(__dirname, '..');
 
 shell.cd(dir);
-shell.echo('### Linting Leadfoot');
+shell.echo('### Building Leadfoot');
 
-exec('./node_modules/.bin/tslint -c tslint.json ./src/**/*.ts');
+exec('./node_modules/.bin/tsc -p ./tests/tsconfig.json').then(function () {
+	shell.cp('./src/interfaces.d.ts', './_build/src/');
+	return exec('./node_modules/.bin/tsc -p ./src/tsconfig.json');
+});

@@ -1,6 +1,3 @@
-import { Thenable } from '../interfaces';
-import Element from '../Element';
-
 // Note that these are JSONWireProtocol strategies. W3C Webdriver only understands 4 strategies:
 //   1. css selector
 //   2. link text
@@ -23,106 +20,108 @@ export const suffixes = strategies.map(function (strategy) {
 	});
 });
 
-export default class Strategies {
-	find: (strategy: string, value: string) => Thenable<Element>;
-	findAll: (strategy: string, value: string) => Thenable<Element[]>;
-	findDisplayed: (strategy: string, value: string) => Thenable<Element>;
-	waitForDeleted: (strategy: string, value: string) => Thenable<void>;
+abstract class Strategies<E, L, V> {
+	abstract find(strategy: string, value: string): E;
+	abstract findAll(strategy: string, value: string): L;
+	abstract findDisplayed(strategy: string, value: string): E;
+	abstract waitForDeleted(strategy: string, value: string): V;
 
-	findByClassName(className: string): Thenable<Element> {
+	findByClassName(className: string): E {
 		return this.find('class name', className);
 	}
-	findByCssSelector(selector: string): Thenable<Element> {
+	findByCssSelector(selector: string): E {
 		return this.find('css selector', selector);
 	}
-	findById(id: string): Thenable<Element> {
+	findById(id: string): E {
 		return this.find('id', id);
 	}
-	findByName(name: string): Thenable<Element> {
+	findByName(name: string): E {
 		return this.find('name', name);
 	}
-	findByLinkText(text: string): Thenable<Element> {
+	findByLinkText(text: string): E {
 		return this.find('link text', text);
 	}
-	findByPartialLinkText(text: string): Thenable<Element> {
+	findByPartialLinkText(text: string): E {
 		return this.find('partial link text', text);
 	}
-	findByTagName(tagName: string): Thenable<Element> {
+	findByTagName(tagName: string): E {
 		return this.find('tag name', tagName);
 	}
-	findByXpath(path: string): Thenable<Element> {
+	findByXpath(path: string): E {
 		return this.find('xpath', path);
 	}
 
-	findAllByClassName(className: string): Thenable<Element[]> {
+	findAllByClassName(className: string): L {
 		return this.findAll('class name', className);
 	}
-	findAllByCssSelector(selector: string): Thenable<Element[]> {
+	findAllByCssSelector(selector: string): L {
 		return this.findAll('css selector', selector);
 	}
-	findAllByName(name: string): Thenable<Element[]> {
+	findAllByName(name: string): L {
 		return this.findAll('name', name);
 	}
-	findAllByLinkText(text: string): Thenable<Element[]> {
+	findAllByLinkText(text: string): L {
 		return this.findAll('link text', text);
 	}
-	findAllByPartialLinkText(text: string): Thenable<Element[]> {
+	findAllByPartialLinkText(text: string): L {
 		return this.findAll('partial link text', text);
 	}
-	findAllByTagName(tagName: string): Thenable<Element[]> {
+	findAllByTagName(tagName: string): L {
 		return this.findAll('tag name', tagName);
 	}
-	findAllByXpath(path: string): Thenable<Element[]> {
+	findAllByXpath(path: string): L {
 		return this.findAll('xpath', path);
 	}
 
-	findDisplayedByClassName(className: string): Thenable<Element> {
+	findDisplayedByClassName(className: string): E {
 		return this.findDisplayed('class name', className);
 	}
-	findDisplayedByCssSelector(selector: string): Thenable<Element> {
+	findDisplayedByCssSelector(selector: string): E {
 		return this.findDisplayed('css selector', selector);
 	}
-	findDisplayedById(id: string): Thenable<Element> {
+	findDisplayedById(id: string): E {
 		return this.findDisplayed('id', id);
 	}
-	findDisplayedByName(name: string): Thenable<Element> {
+	findDisplayedByName(name: string): E {
 		return this.findDisplayed('name', name);
 	}
-	findDisplayedByLinkText(text: string): Thenable<Element> {
+	findDisplayedByLinkText(text: string): E {
 		return this.findDisplayed('link text', text);
 	}
-	findDisplayedByPartialLinkText(text: string): Thenable<Element> {
+	findDisplayedByPartialLinkText(text: string): E {
 		return this.findDisplayed('partial link text', text);
 	}
-	findDisplayedByTagName(tagName: string): Thenable<Element> {
+	findDisplayedByTagName(tagName: string): E {
 		return this.findDisplayed('tag name', tagName);
 	}
-	findDisplayedByXpath(path: string): Thenable<Element> {
+	findDisplayedByXpath(path: string): E {
 		return this.findDisplayed('xpath', path);
 	}
 
-	waitForDeletedByClassName(className: string): Thenable<void> {
+	waitForDeletedByClassName(className: string): V {
 		return this.waitForDeleted('class name', className);
 	}
-	waitForDeletedByCssSelector(selector: string): Thenable<void> {
+	waitForDeletedByCssSelector(selector: string): V {
 		return this.waitForDeleted('css selector', selector);
 	}
-	waitForDeletedById(id: string): Thenable<void> {
+	waitForDeletedById(id: string): V {
 		return this.waitForDeleted('id', id);
 	}
-	waitForDeletedByName(name: string): Thenable<void> {
+	waitForDeletedByName(name: string): V {
 		return this.waitForDeleted('name', name);
 	}
-	waitForDeletedByLinkText(text: string): Thenable<void> {
+	waitForDeletedByLinkText(text: string): V {
 		return this.waitForDeleted('link text', text);
 	}
-	waitForDeletedByPartialLinkText(text: string): Thenable<void> {
+	waitForDeletedByPartialLinkText(text: string): V {
 		return this.waitForDeleted('partial link text', text);
 	}
-	waitForDeletedByTagName(tagName: string): Thenable<void> {
+	waitForDeletedByTagName(tagName: string): V {
 		return this.waitForDeleted('tag name', tagName);
 	}
-	waitForDeletedByXpath(path: string): Thenable<void> {
+	waitForDeletedByXpath(path: string): V {
 		return this.waitForDeleted('xpath', path);
 	}
 }
+
+export default Strategies;

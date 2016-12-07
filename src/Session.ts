@@ -333,7 +333,11 @@ function simulateMouse(kwArgs: any) {
 	}
 }
 
-export default class Session implements WaitForDeleted, FindDisplayed, Strategies, LocalStorage, SessionStorage {
+export default class Session extends Strategies<Promise<Element>, Promise<Element[]>, Promise<void>>
+							implements WaitForDeleted<Promise<Element>, Promise<void>>,
+								FindDisplayed<Promise<Element>>,
+								LocalStorage,
+								SessionStorage {
 	private _sessionId: string;
 	private _server: Server;
 	private _capabilities: Capabilities;
@@ -355,6 +359,8 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {Capabilities} capabilities A map of bugs and features that the remote environment exposes.
 	 */
 	constructor(sessionId: string, server: Server, capabilities: Capabilities) {
+		super();
+
 		this._sessionId = sessionId;
 		this._server = server;
 		this._capabilities = capabilities;
@@ -2084,8 +2090,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} className The CSS class name to search for.
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
-	findByClassName: (className: string) => Promise<Element>;
-
 	/**
 	 * Gets the first element in the currently active window/frame matching the given CSS selector.
 	 *
@@ -2094,8 +2098,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} selector The CSS selector to search for.
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
-	findByCssSelector: (selector: string) => Promise<Element>;
-
 	/**
 	 * Gets the first element in the currently active window/frame matching the given ID.
 	 *
@@ -2104,8 +2106,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} id The ID of the element.
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
-	findById: (id: string) => Promise<Element>;
-
 	/**
 	 * Gets the first element in the currently active window/frame matching the given name attribute.
 	 *
@@ -2114,8 +2114,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} name The name of the element.
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
-	findByName: (name: string) => Promise<Element>;
-
 	/**
 	 * Gets the first element in the currently active window/frame matching the given case-insensitive link text.
 	 *
@@ -2124,8 +2122,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} text The link text of the element.
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
-	findByLinkText: (text: string) => Promise<Element>;
-
 	/**
 	 * Gets the first element in the currently active window/frame partially matching the given case-insensitive
 	 * link text.
@@ -2135,8 +2131,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} text The partial link text of the element.
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
-	findByPartialLinkText: (text: string) => Promise<Element>;
-
 	/**
 	 * Gets the first element in the currently active window/frame matching the given HTML tag name.
 	 *
@@ -2145,8 +2139,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} tagName The tag name of the element.
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
-	findByTagName: (tagName: string) => Promise<Element>;
-
 	/**
 	 * Gets the first element in the currently active window/frame matching the given XPath selector.
 	 *
@@ -2155,8 +2147,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} path The XPath selector to search for.
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
-	findByXpath: (path: string) => Promise<Element>;
-
 	/**
 	 * Gets all elements in the currently active window/frame matching the given CSS class name.
 	 *
@@ -2165,8 +2155,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} className The CSS class name to search for.
 	 * @returns {Promise.<module:leadfoot/Element[]>}
 	 */
-	findAllByClassName: (className: string) => Promise<Element[]>;
-
 	/**
 	 * Gets all elements in the currently active window/frame matching the given CSS selector.
 	 *
@@ -2175,8 +2163,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} selector The CSS selector to search for.
 	 * @returns {Promise.<module:leadfoot/Element[]>}
 	 */
-	findAllByCssSelector: (selector: string) => Promise<Element[]>;
-
 	/**
 	 * Gets all elements in the currently active window/frame matching the given name attribute.
 	 *
@@ -2185,8 +2171,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} name The name of the element.
 	 * @returns {Promise.<module:leadfoot/Element[]>}
 	 */
-	findAllByName: (name: string) => Promise<Element[]>;
-
 	/**
 	 * Gets all elements in the currently active window/frame matching the given case-insensitive link text.
 	 *
@@ -2195,8 +2179,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} text The link text of the element.
 	 * @returns {Promise.<module:leadfoot/Element[]>}
 	 */
-	findAllByLinkText: (text: string) => Promise<Element[]>;
-
 	/**
 	 * Gets all elements in the currently active window/frame partially matching the given case-insensitive
 	 * link text.
@@ -2206,8 +2188,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} text The partial link text of the element.
 	 * @returns {Promise.<module:leadfoot/Element[]>}
 	 */
-	findAllByPartialLinkText: (text: string) => Promise<Element[]>;
-
 	/**
 	 * Gets all elements in the currently active window/frame matching the given HTML tag name.
 	 *
@@ -2216,8 +2196,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} tagName The tag name of the element.
 	 * @returns {Promise.<module:leadfoot/Element[]>}
 	 */
-	findAllByTagName: (tagName: string) => Promise<Element[]>;
-
 	/**
 	 * Gets all elements in the currently active window/frame matching the given XPath selector.
 	 *
@@ -2226,8 +2204,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} path The XPath selector to search for.
 	 * @returns {Promise.<module:leadfoot/Element[]>}
 	 */
-	findAllByXpath: (path: string) => Promise<Element[]>;
-
 	/**
 	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
 	 * matching the given query. This is inherently slower than {@link module:leadfoot/Session#find}, so should only be
@@ -2245,7 +2221,7 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 *
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
-	findDisplayed: (using: string, value: string) => Promise<Element>;
+	findDisplayed(using: string, value: string): Promise<Element> { return null; }
 
 	/**
 	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
@@ -2258,8 +2234,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} className The CSS class name to search for.
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
-	findDisplayedByClassName: (className: string) => Promise<Element>;
-
 	/**
 	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
 	 * matching the given CSS selector. This is inherently slower than {@link module:leadfoot/Session#find}, so should only
@@ -2271,8 +2245,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} selector The CSS selector to search for.
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
-	findDisplayedByCssSelector: (selector: string) => Promise<Element>;
-
 	/**
 	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
 	 * matching the given ID. This is inherently slower than {@link module:leadfoot/Session#find}, so should only be
@@ -2284,8 +2256,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} id The ID of the element.
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
-	findDisplayedById: (id: string) => Promise<Element>;
-
 	/**
 	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
 	 * matching the given name attribute. This is inherently slower than {@link module:leadfoot/Session#find}, so should
@@ -2297,8 +2267,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} name The name of the element.
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
-	findDisplayedByName: (name: string) => Promise<Element>;
-
 	/**
 	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
 	 * matching the given case-insensitive link text. This is inherently slower than {@link module:leadfoot/Session#find},
@@ -2310,8 +2278,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} text The link text of the element.
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
-	findDisplayedByLinkText: (text: string) => Promise<Element>;
-
 	/**
 	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
 	 * partially matching the given case-insensitive link text. This is inherently slower than
@@ -2324,8 +2290,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} text The partial link text of the element.
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
-	findDisplayedByPartialLinkText: (text: string) => Promise<Element>;
-
 	/**
 	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
 	 * matching the given HTML tag name. This is inherently slower than {@link module:leadfoot/Session#find}, so should
@@ -2337,8 +2301,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} tagName The tag name of the element.
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
-	findDisplayedByTagName: (tagName: string) => Promise<Element>;
-
 	/**
 	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
 	 * matching the given XPath selector. This is inherently slower than {@link module:leadfoot/Session#find}, so should
@@ -2350,8 +2312,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} path The XPath selector to search for.
 	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
-	findDisplayedByXpath: (path: string) => Promise<Element>;
-
 	/**
 	 * Waits for all elements in the currently active window/frame to be destroyed.
 	 *
@@ -2366,7 +2326,7 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 *
 	 * @returns {Promise.<void>}
 	 */
-	waitForDeleted: (using: string, value: string) => Promise<void>;
+	waitForDeleted(strategy: string, value: string): Promise<void> { return null; }
 
 	/**
 	 * Waits for all elements in the currently active window/frame matching the given CSS class name to be
@@ -2377,8 +2337,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} className The CSS class name to search for.
 	 * @returns {Promise.<void>}
 	 */
-	waitForDeletedByClassName: (className: string) => Promise<void>;
-
 	/**
 	 * Waits for all elements in the currently active window/frame matching the given CSS selector to be destroyed.
 	 *
@@ -2387,8 +2345,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} selector The CSS selector to search for.
 	 * @returns {Promise.<void>}
 	 */
-	waitForDeletedByCssSelector: (selector: string) => Promise<void>;
-
 	/**
 	 * Waits for all elements in the currently active window/frame matching the given ID to be destroyed.
 	 *
@@ -2397,8 +2353,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} id The ID of the element.
 	 * @returns {Promise.<void>}
 	 */
-	waitForDeletedById: (id: string) => Promise<void>;
-
 	/**
 	 * Waits for all elements in the currently active window/frame matching the given name attribute to be
 	 * destroyed.
@@ -2408,8 +2362,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} name The name of the element.
 	 * @returns {Promise.<void>}
 	 */
-	waitForDeletedByName: (name: string) => Promise<void>;
-
 	/**
 	 * Waits for all elements in the currently active window/frame matching the given case-insensitive link text
 	 * to be destroyed.
@@ -2419,8 +2371,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} text The link text of the element.
 	 * @returns {Promise.<void>}
 	 */
-	waitForDeletedByLinkText: (text: string) => Promise<void>;
-
 	/**
 	 * Waits for all elements in the currently active window/frame partially matching the given case-insensitive
 	 * link text to be destroyed.
@@ -2430,8 +2380,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} text The partial link text of the element.
 	 * @returns {Promise.<void>}
 	 */
-	waitForDeletedByPartialLinkText: (text: string) => Promise<void>;
-
 	/**
 	 * Waits for all elements in the currently active window/frame matching the given HTML tag name to be destroyed.
 	 *
@@ -2440,8 +2388,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} tagName The tag name of the element.
 	 * @returns {Promise.<void>}
 	 */
-	waitForDeletedByTagName: (tagName: string) => Promise<void>;
-
 	/**
 	 * Waits for all elements in the currently active window/frame matching the given XPath selector to be
 	 * destroyed.
@@ -2451,8 +2397,6 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	 * @param {string} path The XPath selector to search for.
 	 * @returns {Promise.<void>}
 	 */
-	waitForDeletedByXpath: (path: string) => Promise<void>;
-
 	/**
 	 * Gets the timeout for {@link module:leadfoot/Session#executeAsync} calls.
 	 *
@@ -2511,7 +2455,7 @@ export default class Session implements WaitForDeleted, FindDisplayed, Strategie
 	setPageLoadTimeout: (ms: string) => Promise<void>;
 }
 
-util.applyMixins(Session, [ WaitForDeleted, FindDisplayed, Strategies, SessionStorage, LocalStorage ]);
+util.applyMixins(Session, [ WaitForDeleted, FindDisplayed, SessionStorage, LocalStorage ]);
 
 (function (prototype: any) {
 	const timeouts: any = {

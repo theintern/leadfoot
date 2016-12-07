@@ -1,8 +1,8 @@
 import registerSuite = require('intern!object');
 import * as assert from 'intern/chai!assert';
-import Command from '../../../src/Command';
-import Session from '../../../src/Session';
-import pollUntil from '../../../src/helpers/pollUntil';
+import Command from 'src/Command';
+import Session from 'src/Session';
+import pollUntil from 'src/helpers/pollUntil';
 import * as util from '../support/util';
 import { IRequire } from 'dojo/loader';
 import Test = require('intern/lib/Test');

@@ -2,10 +2,10 @@ import registerSuite = require('intern!object');
 import * as assert from 'intern/chai!assert';
 import Promise = require('dojo/Promise');
 import * as util from './support/util';
-import { strategies, suffixes } from '../../src/lib/strategies';
+import { strategies, suffixes } from 'src/lib/strategies';
 import { IRequire } from 'dojo/loader';
 import Test = require('intern/lib/Test');
-import Element from '../../src/Element';
+import Element from 'src/Element';
 import { WebDriverCookie, Geolocation } from '../../src/interfaces';
 
 declare const require: IRequire;

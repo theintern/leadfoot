@@ -1,6 +1,6 @@
 import registerSuite = require('intern!object');
 import * as assert from 'intern/chai!assert';
-import * as util from '../../../src/lib/util';
+import * as util from 'src/lib/util';
 
 declare let __cov_abcdef: number;
 declare let a: any;

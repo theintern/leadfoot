@@ -1,10 +1,10 @@
 import registerSuite = require('intern!object');
 import * as assert from 'intern/chai!assert';
 import Promise = require('dojo/Promise');
-import Session from '../../src/Session';
-import Command from '../../src/Command';
-import * as compat from '../../src/compat';
-import { strategies, suffixes } from '../../src/lib/strategies';
+import Session from 'src/Session';
+import Command from 'src/Command';
+import * as compat from 'src/compat';
+import { strategies, suffixes } from 'src/lib/strategies';
 import * as topic from 'dojo/topic';
 import { Capabilities } from '../../src/interfaces';
 

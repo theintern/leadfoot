@@ -153,7 +153,7 @@ TOP_CONTEXT.depth = 0;
  * Note that returning `this`, or a command chain starting from `this`, from a callback or command initialiser will
  * deadlock the Command, as it waits for itself to settle before settling.
  */
-export default class Command<T> implements Strategies {
+export default class Command<T> extends Strategies<Command<Element>, Command<Element[]>, Command<void>> {
 	private _parent: Command<any>|Session;
 	private _session: Session;
 	private _context: Context;
@@ -175,6 +175,8 @@ export default class Command<T> implements Strategies {
 	 * Promise that it returns. If no context is explicitly provided, the context from the parent command will be used.
 	 */
 	constructor(parent: Session|Command<any>, initialiser?: (setContext: Function, value: any) => Promise<any>|any, errback?: (setContext: Function, error: Error) => Promise<any>|any) {
+		super();
+
 		const self = this;
 		let session: Session;
 		const trace: any = {};
@@ -639,39 +641,6 @@ export default class Command<T> implements Strategies {
 			};
 		}
 	}
-
-	// from Strategies mixin
-	findByClassName: (className: string) => Command<Element>;
-	findByCssSelector: (selector: string) => Command<Element>;
-	findById: (id: string) => Command<Element>;
-	findByName: (name: string) => Command<Element>;
-	findByLinkText: (text: string) => Command<Element>;
-	findByPartialLinkText: (text: string) => Command<Element>;
-	findByTagName: (tagName: string) => Command<Element>;
-	findByXpath: (path: string) => Command<Element>;
-	findAllByClassName: (className: string) => Command<Element[]>;
-	findAllByCssSelector: (selector: string) => Command<Element[]>;
-	findAllByName: (name: string) => Command<Element[]>;
-	findAllByLinkText: (text: string) => Command<Element[]>;
-	findAllByPartialLinkText: (text: string) => Command<Element[]>;
-	findAllByTagName: (tagName: string) => Command<Element[]>;
-	findAllByXpath: (path: string) => Command<Element[]>;
-	findDisplayedByClassName: (className: string) => Command<Element>;
-	findDisplayedByCssSelector: (selector: string) => Command<Element>;
-	findDisplayedById: (id: string) => Command<Element>;
-	findDisplayedByName: (name: string) => Command<Element>;
-	findDisplayedByLinkText: (text: string) => Command<Element>;
-	findDisplayedByPartialLinkText: (text: string) => Command<Element>;
-	findDisplayedByTagName: (tagName: string) => Command<Element>;
-	findDisplayedByXpath: (path: string) => Command<Element>;
-	waitForDeletedByClassName: (className: string) => Command<void>;
-	waitForDeletedByCssSelector: (selector: string) => Command<void>;
-	waitForDeletedById: (id: string) => Command<void>;
-	waitForDeletedByName: (name: string) => Command<void>;
-	waitForDeletedByLinkText: (text: string) => Command<void>;
-	waitForDeletedByPartialLinkText: (text: string) => Command<void>;
-	waitForDeletedByTagName: (tagName: string) => Command<void>;
-	waitForDeletedByXpath: (path: string) => Command<void>;
 
 	// Session methods
 
@@ -1538,11 +1507,6 @@ export default class Command<T> implements Strategies {
 	}
 
 }
-
-// Element retrieval strategies must be applied directly to Command because it has its own custom
-// find/findAll methods that operate based on the Command’s context, so can’t simply be delegated to the
-// underlying session
-util.applyMixins(Command, [ Strategies ]);
 
 let chaiAsPromised: any = null;
 try {

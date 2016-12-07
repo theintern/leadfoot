@@ -1,0 +1,11 @@
+{
+	"extends": "../tsconfig-base.json",
+	"files": [
+		"../types/dojo2/dojo.d.ts",
+		"../types/jszip/jszip.d.ts",
+		"../types/istanbul/istanbul.d.ts"
+	],
+	"include": [
+		"./**/*.ts"
+	]
+}

@@ -19,8 +19,26 @@ export const tunnel = 'BrowserStackTunnel';
 export const loaderOptions = {
 	packages: [
 		{ name: 'leadfoot', location: '_build' },
+		{ name: 'src', location: '_build/src' },
 		{ name: 'dojo', location: 'node_modules/dojo'}
-	]
+	],
+	map: {
+		'leadfoot/tests/unit/lib': {
+			'src': 'dojo/node!../../../src'
+		},
+		'leadfoot/tests/functional/helpers': {
+			'src': 'dojo/node!../../../src'
+		},
+		'leadfoot/tests/functional/support': {
+			'src': 'dojo/node!../../../src'
+		},
+		'leadfoot/tests/unit': {
+			'src': 'dojo/node!../../src'
+		},
+		'leadfoot/tests/functional': {
+			'src': 'dojo/node!../../src'
+		}
+	}
 };
 
 export const loaders = {

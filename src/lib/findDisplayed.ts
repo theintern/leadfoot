@@ -4,14 +4,14 @@ import Element from '../Element';
 import Session from '../Session';
 import { Thenable } from '../interfaces';
 
-export default class FindDisplayed {
+abstract class FindDisplayed<E> {
 	session?: Session;
 
-	findDisplayed(strategy: string, value: string): Thenable<Element> {
+	findDisplayed(strategy: string, value: string): E {
 		const self = <any> this;
 		const session = <Session> (this.session || this);
 
-		return session.getTimeout('implicit').then(function (originalTimeout) {
+		return <any> session.getTimeout('implicit').then(function (originalTimeout) {
 			const startTime = Date.now();
 
 			function poll() {
@@ -55,3 +55,4 @@ export default class FindDisplayed {
 		});
 	}
 }
+export default FindDisplayed;

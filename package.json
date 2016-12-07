@@ -9,7 +9,8 @@
   "license": "BSD-3-Clause",
   "dependencies": {
     "dojo": "2.0.0-alpha.7",
-    "jszip": "2.5.0"
+    "jszip": "2.5.0",
+    "tslib": "1.2.0"
   },
   "devDependencies": {
     "@types/node": "~6.0.0",
@@ -17,12 +18,12 @@
     "intern": "^3.4.2",
     "shelljs": "^0.7.5",
     "tslint": "^4.0.2",
-    "typescript": "~2.0.0"
+    "typescript": "2.1.1"
   },
   "scripts": {
     "clean": "node ./support/clean.js",
     "lint": "node ./support/lint.js",
-    "build": "./node_modules/.bin/tsc",
+    "build": "node ./support/build.js",
     "test": "node ./support/test.js"
   },
   "bugs": "https://github.com/theintern/leadfoot/issues",
