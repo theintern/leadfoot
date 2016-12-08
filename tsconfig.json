@@ -16,5 +16,13 @@
 		"rootDir": ".",
 		"sourceMap": true,
 		"target": "ES5"
-	}
+	},
+	"files": [
+		"./types/dojo2/dojo.d.ts",
+		"./types/jszip/jszip.d.ts",
+		"./types/istanbul/istanbul.d.ts"
+	],
+	"include": [
+		"./src/**/*.ts"
+	]
 }

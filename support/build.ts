@@ -6,6 +6,6 @@ const dir = join(__dirname, '..');
 cd(dir);
 echo('### Building Leadfoot');
 
-exec('./node_modules/.bin/tsc -p ./src/tsconfig.json');
+exec('./node_modules/.bin/tsc');
 cp('./src/interfaces.d.ts', './_build/src/');
 exec('./node_modules/.bin/tsc -p ./tests/tsconfig.json');
