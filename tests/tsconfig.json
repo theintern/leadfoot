@@ -10,9 +10,8 @@
 	"files": [
 		"../node_modules/intern/typings/intern/intern.d.ts",
 		"../types/jszip/jszip.d.ts",
-		"../src/declarations.d.ts",
-		"../types/istanbul/istanbul.d.ts",
-		"../node_modules/intern/typings/chai/chai.d.ts"
+		"./declarations.d.ts",
+		"../types/istanbul/istanbul.d.ts"
 	],
 	"include": [
 		"./**/*.ts"
