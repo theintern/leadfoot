@@ -488,7 +488,7 @@ export default class Server {
 			}
 
 			// IE11 will take screenshots, but it's very slow
-			if (capabilities.browserName === 'internet explorer' && capabilities.version == '11') {
+			if (capabilities.browserName === 'internet explorer' && capabilities.version === '11') {
 				testedCapabilities.takesScreenshot = true;
 			}
 			// At least Selendroid 0.9.0 will fail to take screenshots in certain device configurations, usually

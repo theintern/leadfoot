@@ -6,4 +6,4 @@ const dir = join(__dirname, '..');
 cd(dir);
 echo('### Linting Leadfoot');
 
-exec('./node_modules/.bin/tslint -c tslint.json ./src/**/*.ts');
+exec('./node_modules/.bin/tslint -c tslint.json --project tsconfig.json');
