@@ -17,25 +17,26 @@ function noop() {
 	// which is not correct
 }
 
-/**
- * An Element represents a DOM or UI element within the remote environment.
- *
- * @constructor module:leadfoot/Element
- *
- * @param {string|module:leadfoot/Element|{ ELEMENT: string }} elementId
- * The ID of the element, as provided by the remote.
- *
- * @param {module:leadfoot/Session} session
- * The session that the element belongs to.
- */
 export type ElementOrElementId = { ELEMENT: string; } | Element | string;
 
+/**
+ * An Element represents a DOM or UI element within the remote environment.
+ */
 export default class Element extends Strategies<Promise<Element>, Promise<Element[]>, Promise<void>>
 							implements WaitForDeleted<Promise<Element>, Promise<void>>,
 									FindDisplayed<Promise<Element>> {
 	private _elementId: string;
 	private _session: Session;
 
+	/**
+	 * @constructor module:leadfoot/Element
+	 *
+	 * @param elementId
+	 * The ID of the element, as provided by the remote.
+	 *
+	 * @param session
+	 * The session that the element belongs to.
+	 */
 	constructor(elementId: /*ElementOrElementId*/any, session?: Session) {
 		super();
 
@@ -46,8 +47,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * The opaque, remote-provided ID of the element.
 	 *
-	 * @member {string} elementId
-	 * @memberOf module:leadfoot/Element#
+	 * @member elementId
 	 * @readonly
 	 */
 	get elementId() {
@@ -55,10 +55,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	}
 
 	/**
-	 * The session that the element belongs to.
-	 *
-	 * @member {module:leadfoot/Session} session
-	 * @memberOf module:leadfoot/Element#
+	 * The [[Session]] that the element belongs to.
 	 * @readonly
 	 */
 	get session() {
@@ -82,17 +79,15 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Gets the first element within this element that matches the given query.
 	 *
-	 * @see {@link module:leadfoot/Session#setFindTimeout} to set the amount of time it the remote environment
+	 * @see [[Session.setFindTimeout]] to set the amount of time it the remote environment
 	 * should spend waiting for an element that does not exist at the time of the `find` call before timing
 	 * out.
 	 *
-	 * @param {string} using
-	 * The element retrieval strategy to use. See {@link module:leadfoot/Session#find} for options.
+	 * @param using
+	 * The element retrieval strategy to use. See [[Session.find]] for options.
 	 *
-	 * @param {string} value
-	 * The strategy-specific value to search for. See {@link module:leadfoot/Session#find} for details.
-	 *
-	 * @returns {Promise.<module:leadfoot/Element>}
+	 * @param value
+	 * The strategy-specific value to search for. See [[Session.find]] for details.
 	 */
 	find(using: string, value: string): Promise<Element> {
 		const session = this._session;
@@ -121,13 +116,11 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Gets all elements within this element that match the given query.
 	 *
-	 * @param {string} using
-	 * The element retrieval strategy to use. See {@link module:leadfoot/Session#find} for options.
+	 * @param using
+	 * The element retrieval strategy to use. See [[Session.find]] for options.
 	 *
-	 * @param {string} value
-	 * The strategy-specific value to search for. See {@link module:leadfoot/Session#find} for details.
-	 *
-	 * @returns {Promise.<module:leadfoot/Element[]>}
+	 * @param value
+	 * The strategy-specific value to search for. See [[Session.find]] for details.
 	 */
 	findAll(using: string, value: string): Promise<Element[]> {
 		const session = this._session;
@@ -154,8 +147,6 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Clicks the element. This method works on both mouse and touch platforms.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	click(): Promise<void> {
 		return this._post('click').then(() => {
@@ -169,8 +160,6 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Submits the element, if it is a form, or the form belonging to the element, if it is a form element.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	submit(): Promise<void> {
 		if (this.session.capabilities.brokenSubmitElement) {
@@ -190,8 +179,6 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Gets the visible text within the element. `<br>` elements are converted to line breaks in the returned
 	 * text, and whitespace is normalised per the usual XML/HTML whitespace normalisation rules.
-	 *
-	 * @returns {Promise.<string>}
 	 */
 	getVisibleText(): Promise<string> {
 		const result = this._get('text');
@@ -204,18 +191,16 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	}
 
 	/**
-	 * Types into the element. This method works the same as the {@link module:leadfoot/Session#pressKeys} method
+	 * Types into the element. This method works the same as the [[Session.pressKeys]] method
 	 * except that any modifier keys are automatically released at the end of the command. This method should be used
-	 * instead of {@link module:leadfoot/Session#pressKeys} to type filenames into file upload fields.
+	 * instead of [[Session.pressKeys]] to type filenames into file upload fields.
 	 *
 	 * Since 1.5, if the WebDriver server supports remote file uploads, and you type a path to a file on your local
 	 * computer, that file will be transparently uploaded to the remote server and the remote filename will be typed
-	 * instead. If you do not want to upload local files, use {@link module:leadfoot/Session#pressKeys} instead.
+	 * instead. If you do not want to upload local files, use [[Session.pressKeys]] instead.
 	 *
-	 * @param {string|string[]} value
-	 * The text to type in the remote environment. See {@link module:leadfoot/Session#pressKeys} for more information.
-	 *
-	 * @returns {Promise.<void>}
+	 * @param value
+	 * The text to type in the remote environment. See [[Session.pressKeys]] for more information.
 	 */
 	type(value: string|string[]): Promise<void> {
 		if (!Array.isArray(value)) {
@@ -249,8 +234,6 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Gets the tag name of the element. For HTML documents, the value is always lowercase.
-	 *
-	 * @returns {Promise.<string>}
 	 */
 	getTagName(): Promise<string> {
 		return this._get('name').then((name: string) => {
@@ -268,8 +251,6 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Clears the value of a form element.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	clearValue(): Promise<void> {
 		return this._post('clear').then(noop);
@@ -278,8 +259,6 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Returns whether or not a form element is currently selected (for drop-down options and radio buttons), or
 	 * whether or not the element is currently checked (for checkboxes).
-	 *
-	 * @returns {Promise.<boolean>}
 	 */
 	isSelected(): Promise<boolean> {
 		return this._get('selected');
@@ -287,8 +266,6 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Returns whether or not a form element can be interacted with.
-	 *
-	 * @returns {Promise.<boolean>}
 	 */
 	isEnabled(): Promise<boolean> {
 		return this._get('enabled');
@@ -296,8 +273,8 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Gets a property or attribute of the element according to the WebDriver specification algorithm. Use of this
-	 * method is not recommended; instead, use {@link module:leadfoot/Element#getAttribute} to retrieve DOM attributes
-	 * and {@link module:leadfoot/Element#getProperty} to retrieve DOM properties.
+	 * method is not recommended; instead, use [[Element.getAttribute]] to retrieve DOM attributes
+	 * and [[Element.getProperty]] to retrieve DOM properties.
 	 *
 	 * This method uses the following algorithm on the server to determine what value to return:
 	 *
@@ -316,8 +293,8 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	 *    value coerced to a string.
 	 * 9. If `name` corresponds to an attribute of the element, return the attribute value.
 	 *
-	 * @param {string} name The property or attribute name.
-	 * @returns {Promise.<string>} The value of the attribute as a string, or `null` if no such property or
+	 * @param name The property or attribute name.
+	 * @returns The value of the attribute as a string, or `null` if no such property or
 	 * attribute exists.
 	 */
 	getSpecAttribute(name: string): Promise<string> {
@@ -345,9 +322,9 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Gets an attribute of the element.
 	 *
-	 * @see Element#getProperty to retrieve an element property.
-	 * @param {string} name The name of the attribute.
-	 * @returns {Promise.<string>} The value of the attribute, or `null` if no such attribute exists.
+	 * @see [[Element.getProperty]] to retrieve an element property.
+	 * @param name The name of the attribute.
+	 * @returns The value of the attribute, or `null` if no such attribute exists.
 	 */
 	getAttribute(name: string): Promise<string> {
 		return this.session.execute('return arguments[0].getAttribute(arguments[1]);', [ this, name ]);
@@ -356,9 +333,9 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Gets a property of the element.
 	 *
-	 * @see Element#getAttribute to retrieve an element attribute.
-	 * @param {string} name The name of the property.
-	 * @returns {Promise.<any>} The value of the property.
+	 * @see [[Element.getAttribute]] to retrieve an element attribute.
+	 * @param name The name of the property.
+	 * @returns The value of the property.
 	 */
 	getProperty(name: string): Promise<any> {
 		return this.session.execute('return arguments[0][arguments[1]];', [ this, name ]);
@@ -366,9 +343,6 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Determines if this element is equal to another element.
-	 *
-	 * @param {module:leadfoot/Element} other
-	 * @returns {Promise.<boolean>}
 	 */
 	equals(other: Element): Promise<boolean> {
 		const elementId = other.elementId || other;
@@ -394,8 +368,6 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	 * 3. Elements positioned outside of the viewport that cannot be scrolled into view
 	 * 4. Elements with `opacity: 0`
 	 * 5. Elements with no `offsetWidth` or `offsetHeight`
-	 *
-	 * @returns {Promise.<boolean>}
 	 */
 	isDisplayed(): Promise<boolean> {
 		return this._get('displayed').then((isDisplayed: boolean) => {
@@ -429,8 +401,6 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Gets the position of the element relative to the top-left corner of the document, taking into account
 	 * scrolling and CSS transformations (if they are supported).
-	 *
-	 * @returns {Promise.<{ x: number, y: number }>}
 	 */
 	getPosition(): Promise<{ x: number, y: number }> {
 		if (this.session.capabilities.brokenElementPosition) {
@@ -453,8 +423,6 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Gets the size of the element, taking into account CSS transformations (if they are supported).
-	 *
-	 * @returns {Promise.<{ width: number, height: number }>}
 	 */
 	getSize(): Promise<{ width: number, height: number }> {
 		const getUsingExecute = () => {
@@ -484,10 +452,8 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Gets a CSS computed property value for the element.
 	 *
-	 * @param {string} propertyName
+	 * @param propertyName
 	 * The CSS property to retrieve. This argument must be hyphenated, *not* camel-case.
-	 *
-	 * @returns {Promise.<string>}
 	 */
 	getComputedStyle(propertyName: string): Promise<string> {
 		const manualGetStyle = () => {
@@ -531,233 +497,20 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	}
 
 	/**
-	 * Gets the first element inside this element matching the given CSS class name.
-	 *
-	 * @method findByClassName
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} className The CSS class name to search for.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first element inside this element matching the given CSS selector.
-	 *
-	 * @method findByCssSelector
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} selector The CSS selector to search for.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first element inside this element matching the given ID.
-	 *
-	 * @method findById
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} id The ID of the element.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first element inside this element matching the given name attribute.
-	 *
-	 * @method findByName
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} name The name of the element.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first element inside this element matching the given case-insensitive link text.
-	 *
-	 * @method findByLinkText
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} text The link text of the element.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first element inside this element partially matching the given case-insensitive link text.
-	 *
-	 * @method findByPartialLinkText
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} text The partial link text of the element.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first element inside this element matching the given HTML tag name.
-	 *
-	 * @method findByTagName
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} tagName The tag name of the element.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first element inside this element matching the given XPath selector.
-	 *
-	 * @method findByXpath
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} path The XPath selector to search for.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets all elements inside this element matching the given CSS class name.
-	 *
-	 * @method findAllByClassName
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} className The CSS class name to search for.
-	 * @returns {Promise.<module:leadfoot/Element[]>}
-	 */
-	/**
-	 * Gets all elements inside this element matching the given CSS selector.
-	 *
-	 * @method findAllByCssSelector
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} selector The CSS selector to search for.
-	 * @returns {Promise.<module:leadfoot/Element[]>}
-	 */
-	/**
-	 * Gets all elements inside this element matching the given name attribute.
-	 *
-	 * @method findAllByName
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} name The name of the element.
-	 * @returns {Promise.<module:leadfoot/Element[]>}
-	 */
-	/**
-	 * Gets all elements inside this element matching the given case-insensitive link text.
-	 *
-	 * @method findAllByLinkText
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} text The link text of the element.
-	 * @returns {Promise.<module:leadfoot/Element[]>}
-	 */
-	/**
-	 * Gets all elements inside this element partially matching the given case-insensitive link text.
-	 *
-	 * @method findAllByPartialLinkText
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} text The partial link text of the element.
-	 * @returns {Promise.<module:leadfoot/Element[]>}
-	 */
-	/**
-	 * Gets all elements inside this element matching the given HTML tag name.
-	 *
-	 * @method findAllByTagName
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} tagName The tag name of the element.
-	 * @returns {Promise.<module:leadfoot/Element[]>}
-	 */
-	/**
-	 * Gets all elements inside this element matching the given XPath selector.
-	 *
-	 * @method findAllByXpath
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} path The XPath selector to search for.
-	 * @returns {Promise.<module:leadfoot/Element[]>}
-	 */
-	/**
-	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
-	 * matching the given query. This is inherently slower than {@link module:leadfoot/Element#find}, so should only be
+	 * Gets the first [[Element.isDisplayed displayed]] element inside this element
+	 * matching the given query. This is inherently slower than [[Element.find]], so should only be
 	 * used in cases where the visibility of an element cannot be ensured in advance.
 	 *
-	 * @method findDisplayed
-	 * @memberOf module:leadfoot/Element#
 	 * @since 1.6
 	 *
-	 * @param {string} using
-	 * The element retrieval strategy to use. See {@link module:leadfoot/Session#find} for options.
+	 * @param using
+	 * The element retrieval strategy to use. See [[Session.find]] for options.
 	 *
-	 * @param {string} value
-	 * The strategy-specific value to search for. See {@link module:leadfoot/Session#find} for details.
-	 *
-	 * @returns {Promise.<module:leadfoot/Element>}
+	 * @param value
+	 * The strategy-specific value to search for. See [[Session.find]] for details.
 	 */
 	findDisplayed(using: string, value: string): Promise<Element> { return null; }
 
-	/**
-	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
-	 * matching the given CSS class name. This is inherently slower than {@link module:leadfoot/Element#find}, so should
-	 * only be used in cases where the visibility of an element cannot be ensured in advance.
-	 *
-	 * @method findDisplayedByClassName
-	 * @memberOf module:leadfoot/Element#
-	 * @since 1.6
-	 * @param {string} className The CSS class name to search for.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
-	 * matching the given CSS selector. This is inherently slower than {@link module:leadfoot/Element#find}, so should
-	 * only be used in cases where the visibility of an element cannot be ensured in advance.
-	 *
-	 * @method findDisplayedByCssSelector
-	 * @memberOf module:leadfoot/Element#
-	 * @since 1.6
-	 * @param {string} selector The CSS selector to search for.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
-	 * matching the given ID. This is inherently slower than {@link module:leadfoot/Element#find}, so should
-	 * only be used in cases where the visibility of an element cannot be ensured in advance.
-	 *
-	 * @method findDisplayedById
-	 * @memberOf module:leadfoot/Element#
-	 * @since 1.6
-	 * @param {string} id The ID of the element.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
-	 * matching the given name attribute. This is inherently slower than {@link module:leadfoot/Element#find}, so should
-	 * only be used in cases where the visibility of an element cannot be ensured in advance.
-	 *
-	 * @method findDisplayedByName
-	 * @memberOf module:leadfoot/Element#
-	 * @since 1.6
-	 * @param {string} name The name of the element.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
-	 * matching the given case-insensitive link text. This is inherently slower than {@link module:leadfoot/Element#find},
-	 * so should only be used in cases where the visibility of an element cannot be ensured in advance.
-	 *
-	 * @method findDisplayedByLinkText
-	 * @memberOf module:leadfoot/Element#
-	 * @since 1.6
-	 * @param {string} text The link text of the element.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
-	 * partially matching the given case-insensitive link text. This is inherently slower than
-	 * {@link module:leadfoot/Element#find}, so should only be used in cases where the visibility of an element cannot be
-	 * ensured in advance.
-	 *
-	 * @method findDisplayedByPartialLinkText
-	 * @memberOf module:leadfoot/Element#
-	 * @since 1.6
-	 * @param {string} text The partial link text of the element.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
-	 * matching the given HTML tag name. This is inherently slower than {@link module:leadfoot/Element#find}, so should
-	 * only be used in cases where the visibility of an element cannot be ensured in advance.
-	 *
-	 * @method findDisplayedByTagName
-	 * @memberOf module:leadfoot/Element#
-	 * @since 1.6
-	 * @param {string} tagName The tag name of the element.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element inside this element
-	 * matching the given XPath selector. This is inherently slower than {@link module:leadfoot/Element#find}, so should
-	 * only be used in cases where the visibility of an element cannot be ensured in advance.
-	 *
-	 * @method findDisplayedByXpath
-	 * @memberOf module:leadfoot/Element#
-	 * @since 1.6
-	 * @param {string} path The XPath selector to search for.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
 	/**
 	 * Waits for all elements inside this element that match the given query to be destroyed.
 	 *
@@ -773,72 +526,6 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	 * @returns {Promise.<void>}
 	 */
 	waitForDeleted(strategy: string, value: string): Promise<void> { return null; }
-
-	/**
-	 * Waits for all elements inside this element matching the given CSS class name to be destroyed.
-	 *
-	 * @method waitForDeletedByClassName
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} className The CSS class name to search for.
-	 * @returns {Promise.<void>}
-	 */
-	/**
-	 * Waits for all elements inside this element matching the given CSS selector to be destroyed.
-	 *
-	 * @method waitForDeletedByCssSelector
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} selector The CSS selector to search for.
-	 * @returns {Promise.<void>}
-	 */
-	/**
-	 * Waits for all elements inside this element matching the given ID to be destroyed.
-	 *
-	 * @method waitForDeletedById
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} id The ID of the element.
-	 * @returns {Promise.<void>}
-	 */
-	/**
-	 * Waits for all elements inside this element matching the given name attribute to be destroyed.
-	 *
-	 * @method waitForDeletedByName
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} name The name of the element.
-	 * @returns {Promise.<void>}
-	 */
-	/**
-	 * Waits for all elements inside this element matching the given case-insensitive link text to be destroyed.
-	 *
-	 * @method waitForDeletedByLinkText
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} text The link text of the element.
-	 * @returns {Promise.<void>}
-	 */
-	/**
-	 * Waits for all elements inside this element partially matching the given case-insensitive link text to be
-	 * destroyed.
-	 *
-	 * @method waitForDeletedByPartialLinkText
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} text The partial link text of the element.
-	 * @returns {Promise.<void>}
-	 */
-	/**
-	 * Waits for all elements inside this element matching the given HTML tag name to be destroyed.
-	 *
-	 * @method waitForDeletedByTagName
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} tagName The tag name of the element.
-	 * @returns {Promise.<void>}
-	 */
-	/**
-	 * Waits for all elements inside this element matching the given XPath selector to be destroyed.
-	 *
-	 * @method waitForDeletedByXpath
-	 * @memberOf module:leadfoot/Element#
-	 * @param {string} path The XPath selector to search for.
-	 * @returns {Promise.<void>}
-	 */
 }
 
 util.applyMixins(Element, [ Strategies, FindDisplayed, WaitForDeleted ]);
