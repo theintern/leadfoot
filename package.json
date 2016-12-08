@@ -9,8 +9,7 @@
   "license": "BSD-3-Clause",
   "dependencies": {
     "dojo": "2.0.0-alpha.7",
-    "jszip": "2.5.0",
-    "tslib": "1.2.0"
+    "jszip": "2.5.0"
   },
   "devDependencies": {
     "@types/node": "~6.0.0",
@@ -20,7 +19,7 @@
     "shelljs": "^0.7.5",
     "ts-node": "1.7.0",
     "tslint": "^4.0.2",
-    "typescript": "2.1.1"
+    "typescript": "2.1.4"
   },
   "scripts": {
     "clean": "ts-node ./support/clean.ts",
