@@ -14,17 +14,19 @@
   },
   "devDependencies": {
     "@types/node": "~6.0.0",
+    "@types/shelljs": "0.3.33",
     "dojo-loader": "^2.0.0-beta.7",
     "intern": "^3.4.2",
     "shelljs": "^0.7.5",
+    "ts-node": "1.7.0",
     "tslint": "^4.0.2",
     "typescript": "2.1.1"
   },
   "scripts": {
-    "clean": "node ./support/clean.js",
-    "lint": "node ./support/lint.js",
-    "build": "node ./support/build.js",
-    "test": "node ./support/test.js"
+    "clean": "ts-node ./support/clean.ts",
+    "lint": "ts-node ./support/lint.ts",
+    "build": "ts-node ./support/build.ts",
+    "test": "ts-node ./support/test.ts"
   },
   "bugs": "https://github.com/theintern/leadfoot/issues",
   "keywords": [

@@ -1,18 +1,18 @@
 {
-	"extends": "../tsconfig-base.json",
+	"extends": "../tsconfig.json",
 	"compilerOptions": {
-		"target": "ES5",
-		"module": "umd",
 		"baseUrl": "..",
+		"module": "umd",
 		"paths": {
-			"src/*": [ "./src/*" ]
+			"src/*": [ "./_build/src/*", "./src/*" ]
 		}
 	},
 	"files": [
 		"../node_modules/intern/typings/intern/intern.d.ts",
 		"../types/jszip/jszip.d.ts",
 		"../src/declarations.d.ts",
-		"../types/istanbul/istanbul.d.ts"
+		"../types/istanbul/istanbul.d.ts",
+		"../node_modules/intern/typings/chai/chai.d.ts"
 	],
 	"include": [
 		"./**/*.ts"
