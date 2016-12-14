@@ -1,19 +1,20 @@
 {
-	"extends": "../tsconfig.json",
-	"compilerOptions": {
-		"baseUrl": "..",
-		"module": "umd",
-		"paths": {
-			"src/*": [ "./_build/src/*", "./src/*" ]
-		}
-	},
-	"files": [
-		"../node_modules/intern/typings/intern/intern.d.ts",
-		"../types/jszip/jszip.d.ts",
-		"./declarations.d.ts",
-		"../types/istanbul/istanbul.d.ts"
-	],
-	"include": [
-		"./**/*.ts"
-	]
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "src/*": [
+        "../src/*", "../_build/src/*"
+      ]
+    }
+  },
+  "extends": "../tsconfig.json",
+  "files": [
+    "../node_modules/intern/typings/intern/intern.d.ts",
+    "../types/jszip/jszip.d.ts",
+    "./declarations.d.ts",
+    "../types/istanbul/istanbul.d.ts"
+  ],
+  "include": [
+    "./**/*.ts"
+  ]
 }

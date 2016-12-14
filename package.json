@@ -1,6 +1,6 @@
 {
   "name": "leadfoot",
-  "version": "1.7.0-pre",
+  "version": "2.0.0-pre",
   "description": "Leadfoot. A JavaScript client library that brings cross-platform consistency to the Selenium WebDriver API.",
   "repository": {
     "type": "git",
@@ -13,19 +13,18 @@
   },
   "devDependencies": {
     "@types/node": "~6.0.0",
-    "@types/shelljs": "0.3.33",
-    "dojo-loader": "^2.0.0-beta.7",
-    "intern": "^3.4.2",
-    "shelljs": "^0.7.5",
-    "ts-node": "1.7.0",
-    "tslint": "^4.0.2",
-    "typescript": "2.1.4"
+    "dojo-loader": "~2.0.0-beta.7",
+    "intern": "~3.4.2",
+    "tslint": "~4.0.2",
+    "typescript": "~2.1.4",
+    "intern-dev": "https://github.com/jason0x43/intern-dev/releases/download/0.1.0-pre/intern-dev-0.1.0-pre.tgz"
   },
   "scripts": {
-    "clean": "ts-node ./support/clean.ts",
-    "lint": "ts-node ./support/lint.ts",
-    "build": "ts-node ./support/build.ts",
-    "test": "ts-node ./support/test.ts"
+    "clean": "intern-dev-clean",
+    "lint": "intern-dev-lint",
+    "build": "intern-dev-clean && intern-dev-build",
+    "release": "intern-dev-release",
+    "test": "intern-dev-test"
   },
   "bugs": "https://github.com/theintern/leadfoot/issues",
   "keywords": [
