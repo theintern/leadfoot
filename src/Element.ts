@@ -11,6 +11,8 @@ import WaitForDeleted from './lib/waitForDeleted';
 import * as util from './lib/util';
 import Promise = require('dojo/Promise');
 import Session from './Session';
+import JSZip = require('jszip');
+import * as path from 'path';
 
 function noop() {
 	// At least ios-driver 0.6.6 returns an empty object for methods that are supposed to return no value at all,
@@ -77,6 +79,44 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	}
 
 	/**
+	 * Normalize whitespace in the same way that most browsers generate innerText.
+	 *
+	 * @param text
+	 * @returns Text with leading and trailing whitespace removed, with inner runs of spaces changed to a
+	 * single space, and with "\r\n" pairs converted to "\n".
+	 */
+	private _normalizeWhitespace(text: string): string {
+		if (text) {
+			text = text
+				.replace(/^\s+/, '')
+				.replace(/\s+$/, '')
+				.replace(/\s*\r\n\s*/g, '\n')
+				.replace(/ +/g, ' ');
+		}
+
+		return text;
+	}
+
+	/**
+	 * Uploads a file to a remote Selenium server for use when testing file uploads. This API is not part of the
+	 * WebDriver specification and should not be used directly. To send a file to a server that supports file uploads,
+	 * use [[Element.type]] to type the name of the local file into a file input field and the file
+	 * will be transparently transmitted and used by the server.
+	 */
+	private _uploadFile(filename: string): Promise<string> {
+		return new Promise(resolve => {
+			const content = fs.readFileSync(filename);
+
+			let zip = new JSZip();
+			zip.file(path.basename(filename), content);
+			const data = zip.generate({ type: 'base64' });
+			zip = null;
+
+			resolve(this._post('file', { file: data }));
+		});
+	}
+
+	/**
 	 * Gets the first element within this element that matches the given query.
 	 *
 	 * @see [[Session.setFindTimeout]] to set the amount of time it the remote environment
@@ -93,7 +133,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 		const session = this._session;
 
 		if (using.indexOf('link text') !== -1 && this.session.capabilities.brokenWhitespaceNormalization) {
-			return this.session.execute(/* istanbul ignore next */ this.session._manualFindByLinkText, [
+			return this.session.execute(/* istanbul ignore next */ this.session['_manualFindByLinkText'], [
 				using, value, false, this
 			]).then(function (element: ElementOrElementId) {
 				if (!element) {
@@ -126,7 +166,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 		const session = this._session;
 
 		if (using.indexOf('link text') !== -1 && this.session.capabilities.brokenWhitespaceNormalization) {
-			return this.session.execute(/* istanbul ignore next */ this.session._manualFindByLinkText, [
+			return this.session.execute(/* istanbul ignore next */ this.session['_manualFindByLinkText'], [
 				using, value, true, this
 			]).then(function (elements: ElementOrElementId[]) {
 				return elements.map(function (element) {
@@ -184,7 +224,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 		const result = this._get('text');
 
 		if (this.session.capabilities.brokenWhitespaceNormalization) {
-			return result.then(text => this.session._normalizeWhitespace(text));
+			return result.then(text => this._normalizeWhitespace(text));
 		}
 
 		return result;
@@ -214,7 +254,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 			// field
 			try {
 				if (fs.statSync(filename).isFile()) {
-					return this.session._uploadFile(filename).then((uploadedFilename: string) => {
+					return this._uploadFile(filename).then((uploadedFilename: string) => {
 						return this._post('value', {
 							value: [ uploadedFilename ]
 						}).then(noop);
@@ -517,15 +557,13 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	 * @method waitForDeleted
 	 * @memberOf module:leadfoot/Element#
 	 *
-	 * @param {string} using
-	 * The element retrieval strategy to use. See {@link module:leadfoot/Session#find} for options.
+	 * @param using
+	 * The element retrieval strategy to use. See [[Session.find]] for options.
 	 *
-	 * @param {string} value
-	 * The strategy-specific value to search for. See {@link module:leadfoot/Session#find} for details.
-	 *
-	 * @returns {Promise.<void>}
+	 * @param value
+	 * The strategy-specific value to search for. See [[Session.find]] for details.
 	 */
 	waitForDeleted(strategy: string, value: string): Promise<void> { return null; }
 }
 
-util.applyMixins(Element, [ Strategies, FindDisplayed, WaitForDeleted ]);
+util.applyMixins(Element, [ FindDisplayed, WaitForDeleted ]);

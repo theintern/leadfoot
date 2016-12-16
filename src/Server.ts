@@ -1,8 +1,3 @@
-/* global document:false */
-/**
- * @module leadfoot/Server
- */
-
 import keys from './keys';
 import * as lang from 'dojo/lang';
 import Promise = require('dojo/Promise');
@@ -24,16 +19,14 @@ function isMacSafari(capabilities: Capabilities): boolean {
  * A function that performs an HTTP request to a JsonWireProtocol endpoint and normalises response status and
  * data.
  *
- * @param {string} path
+ * @param path
  * The path-part of the JsonWireProtocol URL. May contain placeholders in the form `/\$\d/` that will be
  * replaced by entries in the `pathParts` argument.
  *
- * @param {Object} requestData
+ * @param requestData
  * The payload for the request.
  *
- * @param {Array.<string>=} pathParts Optional placeholder values to inject into the path of the URL.
- *
- * @returns {Promise.<Object>}
+ * @param pathParts Optional placeholder values to inject into the path of the URL.
  */
 function sendRequest(this: Server, method: string, path: string, requestData?: Object, pathParts?: string[]): Promise<any> {
 	const url = this.url + path.replace(/\$(\d)/, function (_, index) {
@@ -229,8 +222,8 @@ function sendRequest(this: Server, method: string, path: string, requestData?: O
 /**
  * Returns the actual response value from the remote environment.
  *
- * @param {Object} response JsonWireProtocol response object.
- * @returns {any} The actual response value.
+ * @param response JsonWireProtocol response object.
+ * @returns The actual response value.
  */
 function returnValue(response: { value: any }): any {
 	return response.value;
@@ -245,29 +238,28 @@ export default class Server {
 	url: string;
 
 	requestOptions: any;
+
 	/**
-	 * An alternative session constructor. Defaults to the standard {@link module:leadfoot/Session} constructor if
+	 * An alternative session constructor. Defaults to the standard [[Session]] constructor if
 	 * one is not provided.
 	 *
-	 * @type {module:leadfoot/Session}
 	 * @default Session
 	 */
 	sessionConstructor = Session;
 
 	/**
 	 * Whether or not to perform capabilities testing and correction when creating a new Server.
-	 * @type {boolean}
-	 * @default
+	 * @default true
 	 */
 	fixSessionCapabilities: boolean = true;
 
 	/**
-	 * @constructor module:leadfoot/Server
-	 * @param {(Object|string)} url
+	 * @param url
 	 * The fully qualified URL to the JsonWireProtocol endpoint on the server. The default endpoint for a
 	 * JsonWireProtocol HTTP server is http://localhost:4444/wd/hub. You may also pass a parsed URL object which will
 	 * be converted to a string.
-	 * @param {{ proxy: string }=} options
+	 *
+	 * @param options
 	 * Additional request options to be used for requests to the server.
 	 */
 	constructor(url: LeadfootURL|string, options: { proxy?: string } = {}) {
@@ -297,7 +289,7 @@ export default class Server {
 	/**
 	 * Gets the status of the remote server.
 	 *
-	 * @returns {Promise.<Object>} An object containing arbitrary properties describing the status of the remote
+	 * @returns An object containing arbitrary properties describing the status of the remote
 	 * server.
 	 */
 	getStatus(): Promise<Object> {
@@ -307,15 +299,13 @@ export default class Server {
 	/**
 	 * Creates a new remote control session on the remote server.
 	 *
-	 * @param {Capabilities} desiredCapabilities
+	 * @param desiredCapabilities
 	 * A hash map of desired capabilities of the remote environment. The server may return an environment that does
 	 * not match all the desired capabilities if one is not available.
 	 *
-	 * @param {Capabilities=} requiredCapabilities
+	 * @param requiredCapabilities
 	 * A hash map of required capabilities of the remote environment. The server will not return an environment that
 	 * does not match all the required capabilities if one is not available.
-	 *
-	 * @returns {Promise.<module:leadfoot/Session>}
 	 */
 	createSession(desiredCapabilities: Capabilities, requiredCapabilities: Capabilities): Promise<Session|void> {
 		const fixSessionCapabilities = desiredCapabilities.fixSessionCapabilities !== false &&
@@ -1041,7 +1031,7 @@ export default class Server {
 			// Check that the remote server will accept file uploads. There is a secondary test in discoverDefects that
 			// checks whether the server allows typing into file inputs.
 			testedCapabilities.remoteFiles = function () {
-				return session._post('file', {
+				return session['_post']('file', {
 					file: 'UEsDBAoAAAAAAD0etkYAAAAAAAAAAAAAAAAIABwAdGVzdC50eHRVVAkAA2WnXlVlp15VdXgLAAEE8gMAAATyAwAAUEsBAh4DCgAAAAAAPR62RgAAAAAAAAAAAAAAAAgAGAAAAAAAAAAAAKSBAAAAAHRlc3QudHh0VVQFAANlp15VdXgLAAEE8gMAAATyAwAAUEsFBgAAAAABAAEATgAAAEIAAAAAAA=='
 				}).then(function (filename: string) {
 					return filename && filename.indexOf('test.txt') > -1;
@@ -1092,7 +1082,7 @@ export default class Server {
 			}
 
 			// The W3C WebDriver standard does not support the session-level /keys command, but JsonWireProtocol does.
-			testedCapabilities.supportsKeysCommand = session._post('keys', { value: [ 'a' ] }).then(supported,
+			testedCapabilities.supportsKeysCommand = session['_post']('keys', { value: [ 'a' ] }).then(supported,
 				unsupported);
 
 			return Promise.all(testedCapabilities);
@@ -1125,8 +1115,6 @@ export default class Server {
 
 	/**
 	 * Gets a list of all currently active remote control sessions on this server.
-	 *
-	 * @returns {Promise.<Object[]>}
 	 */
 	getSessions(): Promise<any[]> {
 		return this._get('sessions').then(function (sessions: any[]) {
@@ -1151,9 +1139,6 @@ export default class Server {
 	 * Gets information on the capabilities of a given session from the server. The list of capabilities returned
 	 * by this command will not include any of the extra session capabilities detected by Leadfoot and may be
 	 * inaccurate.
-	 *
-	 * @param {string} sessionId
-	 * @returns {Promise.<Object>}
 	 */
 	getSessionCapabilities(sessionId: string): Promise<any> {
 		return this._get('session/$0', null, [ sessionId ]).then(returnValue);
@@ -1161,9 +1146,6 @@ export default class Server {
 
 	/**
 	 * Terminates a session on the server.
-	 *
-	 * @param {string} sessionId
-	 * @returns {Promise.<void>}
 	 */
 	deleteSession(sessionId: string): Promise<void> {
 		return this._delete('session/$0', null, [ sessionId ]).then(returnValue);

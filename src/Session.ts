@@ -1,25 +1,16 @@
-/*global document:false, window:false */
-/**
- * @module leadfoot/Session
- */
-
 import Element, { ElementOrElementId } from './Element';
 import Server from './Server';
 import FindDisplayed from './lib/findDisplayed';
-import * as fs from 'fs';
-import JSZip = require('jszip');
 import * as lang from 'dojo/lang';
-import * as path from 'path';
 import Promise = require('dojo/Promise');
 import statusCodes from './lib/statusCodes';
-import { LocalStorage, SessionStorage } from './lib/storage';
 import Strategies from './lib/strategies';
 import * as util from './lib/util';
 import WaitForDeleted from './lib/waitForDeleted';
 import { Capabilities, Geolocation, LogEntry, WebDriverCookie } from './interfaces';
 
 /**
- * Decorator for the {@link module:leadfoot/lib/util#forCommand} method
+ * Decorator for the [[util.forCommand]] method
  */
 function forCommand(properties: { usesElement?: boolean, createsContext?: boolean }) {
 	return function (target: any, property: string, descriptor: PropertyDescriptor) {
@@ -88,8 +79,6 @@ function noop() {
  * escaped key-value strings.
  *
  * @private
- * @param {Array} target
- * @param {Object} source
  */
 function pushCookieProperties(target: any[], source: any): void {
 	Object.keys(source).forEach(function (key) {
@@ -124,8 +113,8 @@ function pushCookieProperties(target: any[], source: any): void {
  * Returns the actual response value from the remote environment.
  *
  * @private
- * @param {Object} response JsonWireProtocol response object.
- * @returns {any} The actual response value.
+ * @param response JsonWireProtocol response object.
+ * @returns The actual response value.
  */
 function returnValue(response: any): any {
 	return response.value;
@@ -136,7 +125,7 @@ function returnValue(response: any): any {
  * Simulates a keyboard event as it would occur on Safari 7.
  *
  * @private
- * @param {Array.<string>} keys Keys to type.
+ * @param keys Keys to type.
  */
 function simulateKeys(keys: string[]): void {
 	const target = <any> document.activeElement;
@@ -203,7 +192,7 @@ function simulateKeys(keys: string[]): void {
  * Simulates a mouse event as it would occur on Safari 7.
  *
  * @private
- * @param {Object} kwArgs Parameters for the mouse event.
+ * @param kwArgs Parameters for the mouse event.
  */
 function simulateMouse(kwArgs: any) {
 	let position = kwArgs.position;
@@ -335,9 +324,7 @@ function simulateMouse(kwArgs: any) {
 
 export default class Session extends Strategies<Promise<Element>, Promise<Element[]>, Promise<void>>
 							implements WaitForDeleted<Promise<Element>, Promise<void>>,
-								FindDisplayed<Promise<Element>>,
-								LocalStorage,
-								SessionStorage {
+								FindDisplayed<Promise<Element>> {
 	private _sessionId: string;
 	private _server: Server;
 	private _capabilities: Capabilities;
@@ -353,10 +340,9 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * A Session represents a connection to a remote environment that can be driven programmatically.
 	 *
-	 * @constructor module:leadfoot/Session
-	 * @param {string} sessionId The ID of the session, as provided by the remote.
-	 * @param {module:leadfoot/Server} server The server that the session belongs to.
-	 * @param {Capabilities} capabilities A map of bugs and features that the remote environment exposes.
+	 * @param sessionId The ID of the session, as provided by the remote.
+	 * @param server The server that the session belongs to.
+	 * @param capabilities A map of bugs and features that the remote environment exposes.
 	 */
 	constructor(sessionId: string, server: Server, capabilities: Capabilities) {
 		super();
@@ -375,8 +361,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Information about the available features and bugs in the remote environment.
 	 *
-	 * @member {Capabilities} capabilities
-	 * @memberOf module:leadfoot/Session#
 	 * @readonly
 	 */
 	get capabilities() {
@@ -386,8 +370,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * The current session ID.
 	 *
-	 * @member {string} sessionId
-	 * @memberOf module:leadfoot/Session#
 	 * @readonly
 	 */
 	get sessionId() {
@@ -397,8 +379,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * The Server that the session runs on.
 	 *
-	 * @member {module:leadfoot/Server} server
-	 * @memberOf module:leadfoot/Session#
 	 * @readonly
 	 */
 	get server() {
@@ -406,14 +386,9 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	}
 
 	/**
-	 * Delegates the HTTP request for a method to the underlying {@link module:leadfoot/Server} object.
+	 * Delegates the HTTP request for a method to the underlying [[Server]] object.
 	 *
 	 * @private
-	 * @param {string} method
-	 * @param {string} path
-	 * @param {Object} requestData
-	 * @param {string[]} [pathParts]
-	 * @returns {Promise.<{ sessionId: string, status: number, value: any }>}
 	 */
 	private _delegateToServer(method: string, path: string, requestData: any, pathParts?: string[]): Promise<any> {
 		path = 'session/' + this._sessionId + (path ? ('/' + path) : '');
@@ -470,23 +445,23 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 		});
 	}
 
-	/* private */ _get(path: string, requestData?: any, pathParts?: string[]): Promise<any> {
+	private _get(path: string, requestData?: any, pathParts?: string[]): Promise<any> {
 		return this._delegateToServer('_get', path, requestData, pathParts);
 	}
 
-	/* private */ _post(path: string, requestData?: any, pathParts?: string[]): Promise<any> {
+	private _post(path: string, requestData?: any, pathParts?: string[]): Promise<any> {
 		return this._delegateToServer('_post', path, requestData, pathParts);
 	}
 
-	/* private */ _delete(path: string, requestData?: any, pathParts?: string[]): Promise<any> {
+	private _delete(path: string, requestData?: any, pathParts?: string[]): Promise<any> {
 		return this._delegateToServer('_delete', path, requestData, pathParts);
 	}
 
 	/**
 	 * Gets the current value of a timeout for the session.
 	 *
-	 * @param {string} type The type of timeout to retrieve. One of 'script', 'implicit', or 'page load'.
-	 * @returns {Promise.<number>} The timeout, in milliseconds.
+	 * @param type The type of timeout to retrieve. One of 'script', 'implicit', or 'page load'.
+	 * @returns The timeout, in milliseconds.
 	 */
 	getTimeout(type: string): Promise<number> {
 		return this._timeouts[type];
@@ -495,14 +470,12 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Sets the value of a timeout for the session.
 	 *
-	 * @param {string} type
+	 * @param type
 	 * The type of timeout to set. One of 'script', 'implicit', or 'page load'.
 	 *
-	 * @param {number} ms
+	 * @param ms
 	 * The length of time to use for the timeout, in milliseconds. A value of 0 will cause operations to time out
 	 * immediately.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	setTimeout(type: string, ms: number): Promise<void> {
 		// Infinity cannot be serialised by JSON
@@ -545,7 +518,7 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Gets the identifier for the window that is currently focused.
 	 *
-	 * @returns {Promise.<string>} A window handle identifier that can be used with other window handling functions.
+	 * @returns A window handle identifier that can be used with other window handling functions.
 	 */
 	getCurrentWindowHandle(): Promise<string> {
 		return this._get('window_handle').then(handle => {
@@ -563,8 +536,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Gets a list of identifiers for all currently open windows.
-	 *
-	 * @returns {Promise.<string[]>}
 	 */
 	getAllWindowHandles(): Promise<string[]> {
 		return this._get('window_handles').then((handles: string[]) => {
@@ -578,8 +549,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Gets the URL that is loaded in the focused window/frame.
-	 *
-	 * @returns {Promise.<string>}
 	 */
 	getCurrentUrl(): Promise<string> {
 		return this._get('url');
@@ -587,9 +556,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Navigates the focused window/frame to a new URL.
-	 *
-	 * @param {string} url
-	 * @returns {Promise.<void>}
 	 */
 	get(url: string): Promise<void> {
 		this._movedToElement = false;
@@ -605,8 +571,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Navigates the focused window/frame forward one page using the browser’s navigation history.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	goForward(): Promise<void> {
 		// TODO: SPEC: Seems like this and `back` should return the newly navigated URL.
@@ -615,8 +579,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Navigates the focused window/frame back one page using the browser’s navigation history.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	goBack(): Promise<void> {
 		return this._post('back').then(noop);
@@ -624,8 +586,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Reloads the current browser window/frame.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	refresh(): Promise<void> {
 		if (this.capabilities.brokenRefresh) {
@@ -638,19 +598,19 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Executes JavaScript code within the focused window/frame. The code should return a value synchronously.
 	 *
-	 * @see {@link module:leadfoot/Session#executeAsync} to execute code that returns values asynchronously.
+	 * @see [[Session.executeAsync]] to execute code that returns values asynchronously.
 	 *
-	 * @param {Function|string} script
+	 * @param script
 	 * The code to execute. This function will always be converted to a string, sent to the remote environment, and
 	 * reassembled as a new anonymous function on the remote end. This means that you cannot access any variables
 	 * through closure. If your code needs to get data from variables on the local end, they should be passed using
 	 * `args`.
 	 *
-	 * @param {any[]} args
+	 * @param args
 	 * An array of arguments that will be passed to the executed code. Only values that can be serialised to JSON, plus
-	 * {@link module:leadfoot/Element} objects, can be specified as arguments.
+	 * [[Element]] objects, can be specified as arguments.
 	 *
-	 * @returns {Promise.<any>}
+	 * @returns
 	 * The value returned by the remote code. Only values that can be serialised to JSON, plus DOM elements, can be
 	 * returned.
 	 */
@@ -683,24 +643,24 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	 * Executes JavaScript code within the focused window/frame. The code must invoke the provided callback in
 	 * order to signal that it has completed execution.
 	 *
-	 * @see {@link module:leadfoot/Session#execute} to execute code that returns values synchronously.
-	 * @see {@link module:leadfoot/Session#setExecuteAsyncTimeout} to set the time until an asynchronous script is
+	 * @see [[Session.execute]] to execute code that returns values synchronously.
+	 * @see [[Session.setExecuteAsyncTimeout]] to set the time until an asynchronous script is
 	 * considered timed out.
 	 *
-	 * @param {Function|string} script
+	 * @param script
 	 * The code to execute. This function will always be converted to a string, sent to the remote environment, and
 	 * reassembled as a new anonymous function on the remote end. This means that you cannot access any variables
 	 * through closure. If your code needs to get data from variables on the local end, they should be passed using
 	 * `args`.
 	 *
-	 * @param {any[]} args
+	 * @param args
 	 * An array of arguments that will be passed to the executed code. Only values that can be serialised to JSON, plus
-	 * {@link module:leadfoot/Element} objects, can be specified as arguments. In addition to these arguments, a
+	 * [[Element]] objects, can be specified as arguments. In addition to these arguments, a
 	 * callback function will always be passed as the final argument to the function specified in `script`. This
 	 * callback function must be invoked in order to signal that execution has completed. The return value of the
 	 * execution, if any, should be passed to this callback function.
 	 *
-	 * @returns {Promise.<any>}
+	 * @returns
 	 * The value returned by the remote code. Only values that can be serialised to JSON, plus DOM elements, can be
 	 * returned.
 	 */
@@ -720,7 +680,7 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Gets a screenshot of the focused window and returns it in PNG format.
 	 *
-	 * @returns {Promise.<Buffer>} A buffer containing a PNG image.
+	 * @returns A buffer containing a PNG image.
 	 */
 	takeScreenshot(): Promise<Buffer> {
 		return this._get('screenshot').then(function (data) {
@@ -732,8 +692,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Gets a list of input method editor engines available to the remote environment.
 	 * As of April 2014, no known remote environments support IME functions.
-	 *
-	 * @returns {Promise.<string[]>}
 	 */
 	getAvailableImeEngines(): Promise<string[]> {
 		return this._get('ime/available_engines');
@@ -742,8 +700,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Gets the currently active input method editor for the remote environment.
 	 * As of April 2014, no known remote environments support IME functions.
-	 *
-	 * @returns {Promise.<string>}
 	 */
 	getActiveImeEngine(): Promise<string> {
 		return this._get('ime/active_engine');
@@ -752,8 +708,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Returns whether or not an input method editor is currently active in the remote environment.
 	 * As of April 2014, no known remote environments support IME functions.
-	 *
-	 * @returns {Promise.<boolean>}
 	 */
 	isImeActivated(): Promise<boolean> {
 		return this._get('ime/activated');
@@ -762,8 +716,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Deactivates any active input method editor in the remote environment.
 	 * As of April 2014, no known remote environments support IME functions.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	deactivateIme(): Promise<void> {
 		return this._post('ime/deactivate');
@@ -773,8 +725,7 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	 * Activates an input method editor in the remote environment.
 	 * As of April 2014, no known remote environments support IME functions.
 	 *
-	 * @param {string} engine The type of IME to activate.
-	 * @returns {Promise.<void>}
+	 * @param engine The type of IME to activate.
 	 */
 	activateIme(engine: string): Promise<void> {
 		return this._post('ime/activate', {
@@ -785,12 +736,10 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Switches the currently focused frame to a new frame.
 	 *
-	 * @param {string|number|null|Element} id
+	 * @param id
 	 * The frame to switch to. In most environments, a number or string value corresponds to a key in the
 	 * `window.frames` object of the currently active frame. If `null`, the topmost (default) frame will be used.
 	 * If an Element is provided, it must correspond to a `<frame>` or `<iframe>` element.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	switchToFrame(id: string|number|Element): Promise<void> {
 		return this._post('frame', {
@@ -801,13 +750,11 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Switches the currently focused window to a new window.
 	 *
-	 * @param {string} handle
+	 * @param handle
 	 * The handle of the window to switch to. In mobile environments and environments based on the W3C WebDriver
-	 * standard, this should be a handle as returned by {@link module:leadfoot/Session#getAllWindowHandles}.
+	 * standard, this should be a handle as returned by [[Session.getAllWindowHandles]].
 	 *
 	 * In environments using the JsonWireProtocol, this value corresponds to the `window.name` property of a window.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	switchToWindow(handle: string): Promise<void> {
 		return this._post('window', {
@@ -818,8 +765,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Switches the currently focused frame to the parent of the currently focused frame.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	switchToParentFrame(): Promise<void> {
 		return this._post('frame/parent').catch(error => {
@@ -852,8 +797,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Closes the currently focused window. In most environments, after the window has been closed, it is necessary
 	 * to explicitly switch to whatever window is now focused.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	closeCurrentWindow(): Promise<void> {
 		const self = this;
@@ -883,17 +826,15 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Sets the dimensions of a window.
 	 *
-	 * @param {string=} windowHandle
-	 * The name of the window to resize. See {@link module:leadfoot/Session#switchToWindow} to learn about valid
+	 * @param windowHandle
+	 * The name of the window to resize. See [[Session.switchToWindow]] to learn about valid
 	 * window names. Omit this argument to resize the currently focused window.
 	 *
-	 * @param {number} width
+	 * @param width
 	 * The new width of the window, in CSS pixels.
 	 *
-	 * @param {number} height
+	 * @param height
 	 * The new height of the window, in CSS pixels.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	setWindowSize(width: number, height: number): Promise<void>;
 	setWindowSize(windowHandle: string, width: number, height: number): Promise<void>;
@@ -948,11 +889,11 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Gets the dimensions of a window.
 	 *
-	 * @param {string=} windowHandle
-	 * The name of the window to query. See {@link module:leadfoot/Session#switchToWindow} to learn about valid
+	 * @param windowHandle
+	 * The name of the window to query. See [[Session.switchToWindow]] to learn about valid
 	 * window names. Omit this argument to query the currently focused window.
 	 *
-	 * @returns {Promise.<{ width: number, height: number }>}
+	 * @returns
 	 * An object describing the width and height of the window, in CSS pixels.
 	 */
 	getWindowSize(windowHandle?: string): Promise<{ width: number, height: number }> {
@@ -996,17 +937,15 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	 *
 	 * Note that this method is not part of the W3C WebDriver standard.
 	 *
-	 * @param {string=} windowHandle
-	 * The name of the window to move. See {@link module:leadfoot/Session#switchToWindow} to learn about valid
+	 * @param windowHandle
+	 * The name of the window to move. See [[Session.switchToWindow]] to learn about valid
 	 * window names. Omit this argument to move the currently focused window.
 	 *
-	 * @param {number} x
+	 * @param x
 	 * The screen x-coordinate to move to, in CSS pixels, relative to the left edge of the primary monitor.
 	 *
-	 * @param {number} y
+	 * @param y
 	 * The screen y-coordinate to move to, in CSS pixels, relative to the top edge of the primary monitor.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	setWindowPosition(x: number, y: number): Promise<void>;
 	setWindowPosition(windowHandle: string, x: number, y: number): Promise<void>;
@@ -1030,11 +969,11 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	 *
 	 * Note that this method is not part of the W3C WebDriver standard.
 	 *
-	 * @param {string=} windowHandle
-	 * The name of the window to query. See {@link module:leadfoot/Session#switchToWindow} to learn about valid
+	 * @param windowHandle
+	 * The name of the window to query. See [[Session.switchToWindow]] to learn about valid
 	 * window names. Omit this argument to query the currently focused window.
 	 *
-	 * @returns {Promise.<{ x: number, y: number }>}
+	 * @returns
 	 * An object describing the position of the window, in CSS pixels, relative to the top-left corner of the
 	 * primary monitor. If a secondary monitor exists above or to the left of the primary monitor, these values
 	 * will be negative.
@@ -1053,11 +992,9 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Maximises a window according to the platform’s window system behaviour.
 	 *
-	 * @param {string=} windowHandle
-	 * The name of the window to resize. See {@link module:leadfoot/Session#switchToWindow} to learn about valid
+	 * @param windowHandle
+	 * The name of the window to resize. See [[Session.switchToWindow]] to learn about valid
 	 * window names. Omit this argument to resize the currently focused window.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	maximizeWindow(windowHandle?: string): Promise<void> {
 		if (typeof windowHandle === 'undefined') {
@@ -1069,8 +1006,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Gets all cookies set on the current page.
-	 *
-	 * @returns {Promise.<WebDriverCookie[]>}
 	 */
 	getCookies(): Promise<WebDriverCookie[]> {
 		return this._get('cookie').then(function (cookies: WebDriverCookie[]) {
@@ -1097,9 +1032,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Sets a cookie on the current page.
-	 *
-	 * @param {WebDriverCookie} cookie
-	 * @returns {Promise.<void>}
 	 */
 	setCookie(cookie: WebDriverCookie): Promise<void> {
 		if (typeof cookie.expiry === 'string') {
@@ -1149,8 +1081,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Clears all cookies for the current page.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	clearCookies(): Promise<void> {
 		return this._delete('cookie').then(noop);
@@ -1159,8 +1089,7 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Deletes a cookie on the current page.
 	 *
-	 * @param {string} name The name of the cookie to delete.
-	 * @returns {Promise.<void>}
+	 * @param name The name of the cookie to delete.
 	 */
 	deleteCookie(name: string): Promise<void> {
 		if (this.capabilities.brokenDeleteCookie) {
@@ -1192,8 +1121,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Gets the HTML loaded in the focused window/frame. This markup is serialised by the remote environment so
 	 * may not exactly match the HTML provided by the Web server.
-	 *
-	 * @returns {Promise.<string>}
 	 */
 	getPageSource(): Promise<string> {
 		if (this.capabilities.brokenPageSource) {
@@ -1208,8 +1135,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Gets the title of the top-level browsing context of the current window or tab.
-	 *
-	 * @returns {Promise.<string>}
 	 */
 	getPageTitle(): Promise<string> {
 		return this._get('title');
@@ -1218,19 +1143,17 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Gets the first element from the focused window/frame that matches the given query.
 	 *
-	 * @see {@link module:leadfoot/Session#setFindTimeout} to set the amount of time it the remote environment
+	 * @see [[Session.setFindTimeout]] to set the amount of time it the remote environment
 	 * should spend waiting for an element that does not exist at the time of the `find` call before timing
 	 * out.
 	 *
-	 * @param {string} using
+	 * @param using
 	 * The element retrieval strategy to use. One of 'class name', 'css selector', 'id', 'name', 'link text',
 	 * 'partial link text', 'tag name', 'xpath'.
 	 *
-	 * @param {string} value
+	 * @param value
 	 * The strategy-specific value to search for. For example, if `using` is 'id', `value` should be the ID of the
 	 * element to retrieve.
-	 *
-	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
 	find(using: string, value: string): Promise<Element> {
 		if (using.indexOf('link text') !== -1 && this.capabilities.brokenWhitespaceNormalization) {
@@ -1256,13 +1179,11 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Gets an array of elements from the focused window/frame that match the given query.
 	 *
-	 * @param {string} using
-	 * The element retrieval strategy to use. See {@link module:leadfoot/Session#find} for options.
+	 * @param using
+	 * The element retrieval strategy to use. See [[Session.find]] for options.
 	 *
 	 * @param {string} value
-	 * The strategy-specific value to search for. See {@link module:leadfoot/Session#find} for details.
-	 *
-	 * @returns {Promise.<module:leadfoot/Element[]>}
+	 * The strategy-specific value to search for. See [[Session.find]] for details.
 	 */
 	findAll(using: string, value: string): Promise<Element[]> {
 		if (using.indexOf('link text') !== -1 && this.capabilities.brokenWhitespaceNormalization) {
@@ -1286,9 +1207,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Gets the currently focused element from the focused window/frame.
-	 *
-	 * @method
-	 * @returns {Promise.<module:leadfoot/Element>}
 	 */
 	@forCommand({ createsContext: true })
 	getActiveElement(): Promise<Element> {
@@ -1316,15 +1234,13 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Types into the focused window/frame/element.
 	 *
-	 * @param {string|string[]} keys
+	 * @param keys
 	 * The text to type in the remote environment. It is possible to type keys that do not have normal character
 	 * representations (modifier keys, function keys, etc.) as well as keys that have two different representations
-	 * on a typical US-ASCII keyboard (numpad keys); use the values from {@link module:leadfoot/keys} to type these
+	 * on a typical US-ASCII keyboard (numpad keys); use the values from [[keys]] to type these
 	 * special characters. Any modifier keys that are activated by this call will persist until they are
 	 * deactivated. To deactivate a modifier key, type the same modifier key a second time, or send `\uE000`
 	 * ('NULL') to deactivate all currently active modifier keys.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	pressKeys(keys: string|string[]): Promise<void> {
 		if (!Array.isArray(keys)) {
@@ -1343,7 +1259,7 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Gets the current screen orientation.
 	 *
-	 * @returns {Promise.<string>} Either 'portrait' or 'landscape'.
+	 * @returns Either 'portrait' or 'landscape'.
 	 */
 	getOrientation(): Promise<'portrait'|'landscape'> {
 		return this._get('orientation').then(function (orientation) {
@@ -1354,8 +1270,7 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Sets the screen orientation.
 	 *
-	 * @param {string} orientation Either 'portrait' or 'landscape'.
-	 * @returns {Promise.<void>}
+	 * @param orientation Either 'portrait' or 'landscape'.
 	 */
 	setOrientation(orientation: string): Promise<void> {
 		orientation = orientation.toUpperCase();
@@ -1367,8 +1282,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Gets the text displayed in the currently active alert pop-up.
-	 *
-	 * @returns {Promise.<string>}
 	 */
 	getAlertText(): Promise<string> {
 		return this._get('alert_text');
@@ -1377,8 +1290,7 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Types into the currently active prompt pop-up.
 	 *
-	 * @param {string|string[]} text The text to type into the pop-up’s input box.
-	 * @returns {Promise.<void>}
+	 * @param text The text to type into the pop-up’s input box.
 	 */
 	typeInPrompt(text: string|string[]): Promise<void> {
 		if (Array.isArray(text)) {
@@ -1392,8 +1304,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Accepts an alert, prompt, or confirmation pop-up. Equivalent to clicking the 'OK' button.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	acceptAlert(): Promise<void> {
 		return this._post('accept_alert').then(noop);
@@ -1402,8 +1312,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Dismisses an alert, prompt, or confirmation pop-up. Equivalent to clicking the 'OK' button of an alert pop-up
 	 * or the 'Cancel' button of a prompt or confirmation pop-up.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	dismissAlert(): Promise<void> {
 		return this._post('dismiss_alert').then(noop);
@@ -1413,22 +1321,19 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	 * Moves the remote environment’s mouse cursor to the specified element or relative position. If the element is
 	 * outside of the viewport, the remote driver will attempt to scroll it into view automatically.
 	 *
-	 * @method
-	 * @param {Element=} element
+	 * @param element
 	 * The element to move the mouse to. If x-offset and y-offset are not specified, the mouse will be moved to the
 	 * centre of the element.
 	 *
-	 * @param {number=} xOffset
+	 * @param xOffset
 	 * The x-offset of the cursor, maybe in CSS pixels, relative to the left edge of the specified element’s
 	 * bounding client rectangle. If no element is specified, the offset is relative to the previous position of the
 	 * mouse, or to the left edge of the page’s root element if the mouse was never moved before.
 	 *
-	 * @param {number=} yOffset
+	 * @param yOffset
 	 * The y-offset of the cursor, maybe in CSS pixels, relative to the top edge of the specified element’s bounding
 	 * client rectangle. If no element is specified, the offset is relative to the previous position of the mouse,
 	 * or to the top edge of the page’s root element if the mouse was never moved before.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	moveMouseTo(): Promise<void>;
 	moveMouseTo(xOffset?: number, yOffset?: number): Promise<void>;
@@ -1490,11 +1395,9 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	 * Clicks a mouse button at the point where the mouse cursor is currently positioned. This method may fail to
 	 * execute with an error if the mouse has not been moved anywhere since the page was loaded.
 	 *
-	 * @param {number=} button
+	 * @param button
 	 * The button to click. 0 corresponds to the primary mouse button, 1 to the middle mouse button, 2 to the
 	 * secondary mouse button. Numbers above 2 correspond to any additional buttons a mouse might provide.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	clickMouseButton(button?: number): Promise<void> {
 		if (this.capabilities.brokenMouseEvents) {
@@ -1519,8 +1422,7 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Depresses a mouse button without releasing it.
 	 *
-	 * @param {number=} button The button to press. See {@link module:leadfoot/Session#click} for available options.
-	 * @returns {Promise.<void>}
+	 * @param button The button to press. See [[Session.click]] for available options.
 	 */
 	pressMouseButton(button?: number): Promise<void> {
 		if (this.capabilities.brokenMouseEvents) {
@@ -1539,8 +1441,7 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Releases a previously depressed mouse button.
 	 *
-	 * @param {number=} button The button to press. See {@link module:leadfoot/Session#click} for available options.
-	 * @returns {Promise.<void>}
+	 * @param button The button to press. See [[Session.click]] for available options.
 	 */
 	releaseMouseButton(button?: number): Promise<void> {
 		if (this.capabilities.brokenMouseEvents) {
@@ -1558,8 +1459,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Double-clicks the primary mouse button.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	doubleClick(): Promise<void> {
 		if (this.capabilities.brokenMouseEvents) {
@@ -1584,9 +1483,7 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	 * Taps an element on a touch screen device. If the element is outside of the viewport, the remote driver will
 	 * attempt to scroll it into view automatically.
 	 *
-	 * @method
-	 * @param {module:leadfoot/Element} element The element to tap.
-	 * @returns {Promise.<void>}
+	 * @param element The element to tap.
 	 */
 	@forCommand({ usesElement: true })
 	tap(element: Element): Promise<void> {
@@ -1602,9 +1499,8 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Depresses a new finger at the given point on a touch screen device without releasing it.
 	 *
-	 * @param {number} x The screen x-coordinate to press, maybe in device pixels.
-	 * @param {number} y The screen y-coordinate to press, maybe in device pixels.
-	 * @returns {Promise.<void>}
+	 * @param x The screen x-coordinate to press, maybe in device pixels.
+	 * @param y The screen y-coordinate to press, maybe in device pixels.
 	 */
 	pressFinger(x: number, y: number): Promise<void> {
 		// TODO: If someone specifies the same coordinates as as an existing finger, will it switch the active finger
@@ -1618,9 +1514,8 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Releases whatever finger exists at the given point on a touch screen device.
 	 *
-	 * @param {number} x The screen x-coordinate where a finger is pressed, maybe in device pixels.
-	 * @param {number} y The screen y-coordinate where a finger is pressed, maybe in device pixels.
-	 * @returns {Promise.<void>}
+	 * @param x The screen x-coordinate where a finger is pressed, maybe in device pixels.
+	 * @param y The screen y-coordinate where a finger is pressed, maybe in device pixels.
 	 */
 	releaseFinger(x: number, y: number): Promise<void> {
 		return this._post('touch/up', {
@@ -1632,9 +1527,8 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Moves the last depressed finger to a new point on the touch screen.
 	 *
-	 * @param {number} x The screen x-coordinate to move to, maybe in device pixels.
-	 * @param {number} y The screen y-coordinate to move to, maybe in device pixels.
-	 * @returns {Promise.<void>}
+	 * @param x The screen x-coordinate to move to, maybe in device pixels.
+	 * @param y The screen y-coordinate to move to, maybe in device pixels.
 	 */
 	moveFinger(x: number, y: number): Promise<void> {
 		return this._post('touch/move', {
@@ -1646,20 +1540,17 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Scrolls the currently focused window on a touch screen device.
 	 *
-	 * @method
-	 * @param {Element=} element
+	 * @param element
 	 * An element to scroll to. The window will be scrolled so the element is as close to the top-left corner of the
 	 * window as possible.
 	 *
-	 * @param {number=} xOffset
+	 * @param xOffset
 	 * An optional x-offset, relative to the left edge of the element, in CSS pixels. If no element is specified,
 	 * the offset is relative to the previous scroll position of the window.
 	 *
-	 * @param {number=} yOffset
+	 * @param yOffset
 	 * An optional y-offset, relative to the top edge of the element, in CSS pixels. If no element is specified,
 	 * the offset is relative to the previous scroll position of the window.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	touchScroll(xOffset: number, yOffset: number): Promise<void>;
 	touchScroll(element?: Element, xOffset?: number, yOffset?: number): Promise<void>;
@@ -1700,9 +1591,7 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Performs a double-tap gesture on an element.
 	 *
-	 * @method
-	 * @param {module:leadfoot/Element} element The element to double-tap.
-	 * @returns {Promise.<void>}
+	 * @param element The element to double-tap.
 	 */
 	@forCommand({ usesElement: true })
 	doubleTap(element?: Element): Promise<void> {
@@ -1716,9 +1605,7 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Performs a long-tap gesture on an element.
 	 *
-	 * @method
-	 * @param {module:leadfoot/Element} element The element to long-tap.
-	 * @returns {Promise.<void>}
+	 * @param element The element to long-tap.
 	 */
 	@forCommand({ usesElement: true })
 	longTap(element?: Element): Promise<void> {
@@ -1732,13 +1619,11 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	 * Flicks a finger. Note that this method is currently badly specified and highly dysfunctional and is only
 	 * provided for the sake of completeness.
 	 *
-	 * @method
-	 * @param {module:leadfoot/Element} element The element where the flick should start.
-	 * @param {number} xOffset The x-offset in pixels to flick by.
-	 * @param {number} yOffset The x-offset in pixels to flick by.
-	 * @param {number} speed The speed of the flick, in pixels per *second*. Most human flicks are 100–200ms, so
+	 * @param element The element where the flick should start.
+	 * @param xOffset The x-offset in pixels to flick by.
+	 * @param yOffset The x-offset in pixels to flick by.
+	 * @param speed The speed of the flick, in pixels per *second*. Most human flicks are 100–200ms, so
 	 * this value will be higher than expected.
-	 * @returns {Promise.<void>}
 	 */
 	flickFinger(element: Element, xOffset: number, yOffset: number, speed?: number): Promise<void>;
 	flickFinger(xOffset: number, yOffset: number, speed?: number): Promise<void>;
@@ -1767,7 +1652,7 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Gets the current geographical location of the remote environment.
 	 *
-	 * @returns {Promise.<Geolocation>}
+	 * @returns
 	 * Latitude and longitude are specified using standard WGS84 decimal latitude/longitude. Altitude is specified
 	 * as meters above the WGS84 ellipsoid. Not all environments support altitude.
 	 */
@@ -1787,11 +1672,9 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Sets the geographical location of the remote environment.
 	 *
-	 * @param {Geolocation} location
+	 * @param location
 	 * Latitude and longitude are specified using standard WGS84 decimal latitude/longitude. Altitude is specified
 	 * as meters above the WGS84 ellipsoid. Not all environments support altitude.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	setGeolocation(location: Geolocation): Promise<void> {
 		// TODO: Is it weird that this accepts an object argument? `setCookie` does too, but nothing else does.
@@ -1808,12 +1691,12 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	 * Gets all logs from the remote environment of the given type. The logs in the remote environment are cleared
 	 * once they have been retrieved.
 	 *
-	 * @param {string} type
+	 * @param type
 	 * The type of log entries to retrieve. Available log types differ between remote environments. Use
-	 * {@link module:leadfoot/Session#getAvailableLogTypes} to learn what log types are currently available. Not all
+	 * [[Session.getAvailableLogTypes]] to learn what log types are currently available. Not all
 	 * environments support all possible log types.
 	 *
-	 * @returns {Promise.<LogEntry[]>}
+	 * @returns
 	 * An array of log entry objects. Timestamps in log entries are Unix timestamps, in seconds.
 	 */
 	getLogsFor(type: string): Promise<LogEntry[]> {
@@ -1847,8 +1730,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Gets the types of logs that are currently available for retrieval from the remote environment.
-	 *
-	 * @returns {Promise.<string[]>}
 	 */
 	getAvailableLogTypes(): Promise<string[]> {
 		if (this.capabilities.fixedLogTypes) {
@@ -1861,7 +1742,7 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Gets the current state of the HTML5 application cache for the current page.
 	 *
-	 * @returns {Promise.<number>}
+	 * @returns
 	 * The cache status. One of 0 (uncached), 1 (cached/idle), 2 (checking), 3 (downloading), 4 (update ready), 5
 	 * (obsolete).
 	 */
@@ -1871,8 +1752,6 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 
 	/**
 	 * Terminates the session. No more commands will be accepted by the remote after this point.
-	 *
-	 * @returns {Promise.<void>}
 	 */
 	quit(): Promise<void> {
 		return this._server.deleteSession(this._sessionId).then(noop);
@@ -1884,13 +1763,13 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	 *
 	 * Note that this method should be passed to an `execute` call, not called directly.
 	 *
-	 * @param {string} using The strategy in use ('link text' or 'partial link text')
-	 * @param {string} value The link text to search for
-	 * @param {boolean} multiple If true, return all matching links
-	 * @param {Element?} element A context element
-	 * @returns {Element|Element[]} The found element or elements
+	 * @param using The strategy in use ('link text' or 'partial link text')
+	 * @param value The link text to search for
+	 * @param multiple If true, return all matching links
+	 * @param element A context element
+	 * @returns The found element or elements
 	 */
-	_manualFindByLinkText(using: string, value: string, multiple: boolean, element?: HTMLElement): HTMLElement|HTMLElement[] {
+	private _manualFindByLinkText(using: string, value: string, multiple: boolean, element?: HTMLElement): HTMLElement|HTMLElement[] {
 		const check = using === 'link text' ? function (linkText: string, text: string): boolean {
 			return linkText === text;
 		} : function (linkText: string, text: string): boolean {
@@ -1925,552 +1804,176 @@ export default class Session extends Strategies<Promise<Element>, Promise<Elemen
 	}
 
 	/**
-	 * Normalize whitespace in the same way that most browsers generate innerText.
-	 *
-	 * @param {string} text 
-	 * @returns {string} Text with leading and trailing whitespace removed, with inner runs of spaces changed to a
-	 * single space, and with "\r\n" pairs converted to "\n".
-	 */
-	_normalizeWhitespace(text: string): string {
-		if (text) {
-			text = text
-				.replace(/^\s+/, '')
-				.replace(/\s+$/, '')
-				.replace(/\s*\r\n\s*/g, '\n')
-				.replace(/ +/g, ' ');
-		}
-
-		return text;
-	}
-
-	/**
-	 * Uploads a file to a remote Selenium server for use when testing file uploads. This API is not part of the
-	 * WebDriver specification and should not be used directly. To send a file to a server that supports file uploads,
-	 * use {@link module:leadfoot/Element#type} to type the name of the local file into a file input field and the file
-	 * will be transparently transmitted and used by the server.
-	 *
-	 * @private
-	 * @returns {Promise.<string>}
-	 */
-	_uploadFile(filename: string): Promise<string> {
-		return new Promise(resolve => {
-			const content = fs.readFileSync(filename);
-
-			let zip = new JSZip();
-			zip.file(path.basename(filename), content);
-			const data = zip.generate({ type: 'base64' });
-			zip = null;
-
-			resolve(this._post('file', { file: data }));
-		});
-	}
-
-	/**
 	 * Gets the list of keys set in local storage for the focused window/frame.
-	 *
-	 * @method getLocalStorageKeys
-	 * @memberOf module:leadfoot/Session#
-	 * @returns {Promise.<string[]>}
 	 */
-	getLocalStorageKeys: () => Promise<string[]>;
+	getLocalStorageKeys(): Promise<string[]> {
+		return this._get('local_storage');
+	}
 
 	/**
 	 * Sets a value in local storage for the focused window/frame.
 	 *
-	 * @method setLocalStorageItem
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} key The key to set.
-	 * @param {string} value The value to set.
-	 * @returns {Promise.<void>}
+	 * @param key The key to set.
+	 * @param value The value to set.
 	 */
-	setLocalStorageItem: (key: string, value: string) => Promise<void>;
+	setLocalStorageItem(key: string, value: string): Promise<void> {
+		return this._post('local_storage', { key, value });
+	}
 
 	/**
 	 * Clears all data in local storage for the focused window/frame.
-	 *
-	 * @method clearLocalStorage
-	 * @memberOf module:leadfoot/Session#
-	 * @returns {Promise.<void>}
 	 */
-	clearLocalStorage: () => Promise<void>;
+	clearLocalStorage(): Promise<void> {
+		return this._delete('local_storage');
+	}
 
 	/**
 	 * Gets a value from local storage for the focused window/frame.
 	 *
-	 * @method getLocalStorageItem
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} key The key of the data to get.
-	 * @returns {Promise.<string>}
+	 * @param key The key of the data to get.
 	 */
-	getLocalStorageItem: (key: string) => Promise<string>;
+	getLocalStorageItem(key: string): Promise<string> {
+		return this._get('local_storage/key/$0', null, [ key ]);
+	}
 
 	/**
 	 * Deletes a value from local storage for the focused window/frame.
 	 *
-	 * @method deleteLocalStorageItem
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} key The key of the data to delete.
-	 * @returns {Promise.<void>}
+	 * @param key The key of the data to delete.
 	 */
-	deleteLocalStorageItem: (key: string) => Promise<void>;
+	deleteLocalStorageItem(key: string): Promise<void> {
+		return this._get('local_storage/key/$0', null, [ key ]);
+	}
 
 	/**
 	 * Gets the number of keys set in local storage for the focused window/frame.
-	 *
-	 * @method getLocalStorageLength
-	 * @memberOf module:leadfoot/Session#
-	 * @returns {Promise.<number>}
 	 */
-	getLocalStorageLength: () => Promise<number>;
+	getLocalStorageLength(): Promise<number> {
+		return this._get('local_storage/size');
+	}
 
 	/**
 	 * Gets the list of keys set in session storage for the focused window/frame.
-	 *
-	 * @method getSessionStorageKeys
-	 * @memberOf module:leadfoot/Session#
-	 * @returns {Promise.<string[]>}
 	 */
-	getSessionStorageKeys: () => Promise<string[]>;
+	getSessionStorageKeys(): Promise<string[]> {
+		return this._get('session_storage');
+	}
 
 	/**
 	 * Sets a value in session storage for the focused window/frame.
 	 *
-	 * @method setSessionStorageItem
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} key The key to set.
-	 * @param {string} value The value to set.
-	 * @returns {Promise.<void>}
+	 * @param key The key to set.
+	 * @param value The value to set.
 	 */
-	setSessionStorageItem: (key: string, value: string) => Promise<void>;
+	setSessionStorageItem(key: string, value: string): Promise<void> {
+		return this._post('session_storage', { key, value });
+	}
 
 	/**
 	 * Clears all data in session storage for the focused window/frame.
-	 *
-	 * @method clearSessionStorage
-	 * @memberOf module:leadfoot/Session#
-	 * @returns {Promise.<void>}
 	 */
-	clearSessionStorage: () => Promise<void>;
+	clearSessionStorage(): Promise<void> {
+		return this._delete('session_storage');
+	}
 
 	/**
 	 * Gets a value from session storage for the focused window/frame.
 	 *
-	 * @method getSessionStorageItem
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} key The key of the data to get.
-	 * @returns {Promise.<string>}
+	 * @param key The key of the data to get.
 	 */
-	getSessionStorageItem: (key: string) => Promise<string>;
+	getSessionStorageItem(key: string): Promise<string> {
+		return this._get('session_storage/key/$0', null, [ key ]);
+	}
 
 	/**
 	 * Deletes a value from session storage for the focused window/frame.
 	 *
-	 * @method deleteSessionStorageItem
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} key The key of the data to delete.
-	 * @returns {Promise.<void>}
+	 * @param key The key of the data to delete.
 	 */
-	deleteSessionStorageItem: (key: string) => Promise<void>;
+	deleteSessionStorageItem(key: string): Promise<void> {
+		return this._get('session_storage/key/$0', null, [ key ]);
+	}
 
 	/**
 	 * Gets the number of keys set in session storage for the focused window/frame.
-	 *
-	 * @method getSessionStorageLength
-	 * @memberOf module:leadfoot/Session#
-	 * @returns {Promise.<number>}
 	 */
-	getSessionStorageLength: () => Promise<number>;
+	getSessionStorageLength(): Promise<number> {
+		return this._get('session_storage/size');
+	}
 
-	// TODO: The rest of this file are "extra" interfaces; decide where they go more permanently
 	/**
-	 * Gets the first element in the currently active window/frame matching the given CSS class name.
-	 *
-	 * @method findByClassName
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} className The CSS class name to search for.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first element in the currently active window/frame matching the given CSS selector.
-	 *
-	 * @method findByCssSelector
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} selector The CSS selector to search for.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first element in the currently active window/frame matching the given ID.
-	 *
-	 * @method findById
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} id The ID of the element.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first element in the currently active window/frame matching the given name attribute.
-	 *
-	 * @method findByName
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} name The name of the element.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first element in the currently active window/frame matching the given case-insensitive link text.
-	 *
-	 * @method findByLinkText
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} text The link text of the element.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first element in the currently active window/frame partially matching the given case-insensitive
-	 * link text.
-	 *
-	 * @method findByPartialLinkText
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} text The partial link text of the element.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first element in the currently active window/frame matching the given HTML tag name.
-	 *
-	 * @method findByTagName
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} tagName The tag name of the element.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first element in the currently active window/frame matching the given XPath selector.
-	 *
-	 * @method findByXpath
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} path The XPath selector to search for.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets all elements in the currently active window/frame matching the given CSS class name.
-	 *
-	 * @method findAllByClassName
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} className The CSS class name to search for.
-	 * @returns {Promise.<module:leadfoot/Element[]>}
-	 */
-	/**
-	 * Gets all elements in the currently active window/frame matching the given CSS selector.
-	 *
-	 * @method findAllByCssSelector
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} selector The CSS selector to search for.
-	 * @returns {Promise.<module:leadfoot/Element[]>}
-	 */
-	/**
-	 * Gets all elements in the currently active window/frame matching the given name attribute.
-	 *
-	 * @method findAllByName
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} name The name of the element.
-	 * @returns {Promise.<module:leadfoot/Element[]>}
-	 */
-	/**
-	 * Gets all elements in the currently active window/frame matching the given case-insensitive link text.
-	 *
-	 * @method findAllByLinkText
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} text The link text of the element.
-	 * @returns {Promise.<module:leadfoot/Element[]>}
-	 */
-	/**
-	 * Gets all elements in the currently active window/frame partially matching the given case-insensitive
-	 * link text.
-	 *
-	 * @method findAllByPartialLinkText
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} text The partial link text of the element.
-	 * @returns {Promise.<module:leadfoot/Element[]>}
-	 */
-	/**
-	 * Gets all elements in the currently active window/frame matching the given HTML tag name.
-	 *
-	 * @method findAllByTagName
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} tagName The tag name of the element.
-	 * @returns {Promise.<module:leadfoot/Element[]>}
-	 */
-	/**
-	 * Gets all elements in the currently active window/frame matching the given XPath selector.
-	 *
-	 * @method findAllByXpath
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} path The XPath selector to search for.
-	 * @returns {Promise.<module:leadfoot/Element[]>}
-	 */
-	/**
-	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
-	 * matching the given query. This is inherently slower than {@link module:leadfoot/Session#find}, so should only be
+	 * Gets the first [[Element.isDisplayed displayed]] element in the currently active window/frame
+	 * matching the given query. This is inherently slower than [[Session.find]], so should only be
 	 * used in cases where the visibility of an element cannot be ensured in advance.
 	 *
-	 * @method findDisplayed
-	 * @memberOf module:leadfoot/Session#
 	 * @since 1.6
 	 *
-	 * @param {string} using
-	 * The element retrieval strategy to use. See {@link module:leadfoot/Session#find} for options.
+	 * @param using
+	 * The element retrieval strategy to use. See [[Session.find]] for options.
 	 *
-	 * @param {string} value
-	 * The strategy-specific value to search for. See {@link module:leadfoot/Session#find} for details.
-	 *
-	 * @returns {Promise.<module:leadfoot/Element>}
+	 * @param value
+	 * The strategy-specific value to search for. See [[Session.find]] for details.
 	 */
 	findDisplayed(using: string, value: string): Promise<Element> { return null; }
 
 	/**
-	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
-	 * matching the given CSS class name. This is inherently slower than {@link module:leadfoot/Session#find}, so should
-	 * only be used in cases where the visibility of an element cannot be ensured in advance.
-	 *
-	 * @method findDisplayedByClassName
-	 * @memberOf module:leadfoot/Session#
-	 * @since 1.6
-	 * @param {string} className The CSS class name to search for.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
-	 * matching the given CSS selector. This is inherently slower than {@link module:leadfoot/Session#find}, so should only
-	 * be used in cases where the visibility of an element cannot be ensured in advance.
-	 *
-	 * @method findDisplayedByCssSelector
-	 * @memberOf module:leadfoot/Session#
-	 * @since 1.6
-	 * @param {string} selector The CSS selector to search for.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
-	 * matching the given ID. This is inherently slower than {@link module:leadfoot/Session#find}, so should only be
-	 * used in cases where the visibility of an element cannot be ensured in advance.
-	 *
-	 * @method findDisplayedById
-	 * @memberOf module:leadfoot/Session#
-	 * @since 1.6
-	 * @param {string} id The ID of the element.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
-	 * matching the given name attribute. This is inherently slower than {@link module:leadfoot/Session#find}, so should
-	 * only be used in cases where the visibility of an element cannot be ensured in advance.
-	 *
-	 * @method findDisplayedByName
-	 * @memberOf module:leadfoot/Session#
-	 * @since 1.6
-	 * @param {string} name The name of the element.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
-	 * matching the given case-insensitive link text. This is inherently slower than {@link module:leadfoot/Session#find},
-	 * so should only be used in cases where the visibility of an element cannot be ensured in advance.
-	 *
-	 * @method findDisplayedByLinkText
-	 * @memberOf module:leadfoot/Session#
-	 * @since 1.6
-	 * @param {string} text The link text of the element.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
-	 * partially matching the given case-insensitive link text. This is inherently slower than
-	 * {@link module:leadfoot/Session#find}, so should only be used in cases where the visibility of an element cannot be
-	 * ensured in advance.
-	 *
-	 * @method findDisplayedByPartialLinkText
-	 * @memberOf module:leadfoot/Session#
-	 * @since 1.6
-	 * @param {string} text The partial link text of the element.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
-	 * matching the given HTML tag name. This is inherently slower than {@link module:leadfoot/Session#find}, so should
-	 * only be used in cases where the visibility of an element cannot be ensured in advance.
-	 *
-	 * @method findDisplayedByTagName
-	 * @memberOf module:leadfoot/Session#
-	 * @since 1.6
-	 * @param {string} tagName The tag name of the element.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
-	 * Gets the first {@link module:leadfoot/Element#isDisplayed displayed} element in the currently active window/frame
-	 * matching the given XPath selector. This is inherently slower than {@link module:leadfoot/Session#find}, so should
-	 * only be used in cases where the visibility of an element cannot be ensured in advance.
-	 *
-	 * @method findDisplayedByXpath
-	 * @memberOf module:leadfoot/Session#
-	 * @since 1.6
-	 * @param {string} path The XPath selector to search for.
-	 * @returns {Promise.<module:leadfoot/Element>}
-	 */
-	/**
 	 * Waits for all elements in the currently active window/frame to be destroyed.
 	 *
-	 * @method waitForDeleted
-	 * @memberOf module:leadfoot/Session#
+	 * @param using
+	 * The element retrieval strategy to use. See [[Session.find]] for options.
 	 *
-	 * @param {string} using
-	 * The element retrieval strategy to use. See {@link module:leadfoot/Session#find} for options.
-	 *
-	 * @param {string} value
-	 * The strategy-specific value to search for. See {@link module:leadfoot/Session#find} for details.
-	 *
-	 * @returns {Promise.<void>}
+	 * @param value
+	 * The strategy-specific value to search for. See [[Session.find]] for details.
 	 */
 	waitForDeleted(strategy: string, value: string): Promise<void> { return null; }
 
 	/**
-	 * Waits for all elements in the currently active window/frame matching the given CSS class name to be
-	 * destroyed.
-	 *
-	 * @method waitForDeletedByClassName
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} className The CSS class name to search for.
-	 * @returns {Promise.<void>}
+	 * Gets the timeout for [[Session.executeAsync]] calls.
 	 */
-	/**
-	 * Waits for all elements in the currently active window/frame matching the given CSS selector to be destroyed.
-	 *
-	 * @method waitForDeletedByCssSelector
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} selector The CSS selector to search for.
-	 * @returns {Promise.<void>}
-	 */
-	/**
-	 * Waits for all elements in the currently active window/frame matching the given ID to be destroyed.
-	 *
-	 * @method waitForDeletedById
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} id The ID of the element.
-	 * @returns {Promise.<void>}
-	 */
-	/**
-	 * Waits for all elements in the currently active window/frame matching the given name attribute to be
-	 * destroyed.
-	 *
-	 * @method waitForDeletedByName
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} name The name of the element.
-	 * @returns {Promise.<void>}
-	 */
-	/**
-	 * Waits for all elements in the currently active window/frame matching the given case-insensitive link text
-	 * to be destroyed.
-	 *
-	 * @method waitForDeletedByLinkText
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} text The link text of the element.
-	 * @returns {Promise.<void>}
-	 */
-	/**
-	 * Waits for all elements in the currently active window/frame partially matching the given case-insensitive
-	 * link text to be destroyed.
-	 *
-	 * @method waitForDeletedByPartialLinkText
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} text The partial link text of the element.
-	 * @returns {Promise.<void>}
-	 */
-	/**
-	 * Waits for all elements in the currently active window/frame matching the given HTML tag name to be destroyed.
-	 *
-	 * @method waitForDeletedByTagName
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} tagName The tag name of the element.
-	 * @returns {Promise.<void>}
-	 */
-	/**
-	 * Waits for all elements in the currently active window/frame matching the given XPath selector to be
-	 * destroyed.
-	 *
-	 * @method waitForDeletedByXpath
-	 * @memberOf module:leadfoot/Session#
-	 * @param {string} path The XPath selector to search for.
-	 * @returns {Promise.<void>}
-	 */
-	/**
-	 * Gets the timeout for {@link module:leadfoot/Session#executeAsync} calls.
-	 *
-	 * @method getExecuteAsyncTimeout
-	 * @memberOf module:leadfoot/Session#
-	 * @returns {Promise.<number>}
-	 */
-	getExecuteAsyncTimeout: () => Promise<number>;
+	getExecuteAsyncTimeout(): Promise<number> {
+		return this.getTimeout('script');
+	}
 
 	/**
-	 * Sets the timeout for {@link module:leadfoot/Session#executeAsync} calls.
+	 * Sets the timeout for [[Session.executeAsync]] calls.
 	 *
-	 * @method setExecuteAsyncTimeout
-	 * @memberOf module:leadfoot/Session#
-	 * @param {number} ms The length of the timeout, in milliseconds.
-	 * @returns {Promise.<void>}
+	 * @param ms The length of the timeout, in milliseconds.
 	 */
-	setExecuteAsyncTimeout: (ms: number) => Promise<void>;
+	setExecuteAsyncTimeout(ms: number): Promise<void> {
+		return this.setTimeout('script', ms);
+	}
 
 	/**
-	 * Gets the timeout for {@link module:leadfoot/Session#find} calls.
-	 *
-	 * @method getFindTimeout
-	 * @memberOf module:leadfoot/Session#
-	 * @returns {Promise.<number>}
+	 * Gets the timeout for [[Session.find]] calls.
 	 */
-	getFindTimeout: () => Promise<number>;
+	getFindTimeout(): Promise<number> {
+		return this.getTimeout('implicit');
+	}
 
 	/**
-	 * Sets the timeout for {@link module:leadfoot/Session#find} calls.
+	 * Sets the timeout for [[Session.find]] calls.
 	 *
-	 * @method setFindTimeout
-	 * @memberOf module:leadfoot/Session#
-	 * @param {number} ms The length of the timeout, in milliseconds.
-	 * @returns {Promise.<void>}
+	 * @param ms The length of the timeout, in milliseconds.
 	 */
-	setFindTimeout: (ms: number) => Promise<void>;
+	setFindTimeout(ms: number): Promise<void> {
+		return this.setTimeout('implicit', ms);
+	}
 
 	/**
-	 * Gets the timeout for {@link module:leadfoot/Session#get} calls.
-	 *
-	 * @method getPageLoadTimeout
-	 * @memberOf module:leadfoot/Session#
-	 * @returns {Promise.<number>}
+	 * Gets the timeout for [[Session.get]] calls.
 	 */
-	getPageLoadTimeout: () => Promise<number>;
+	getPageLoadTimeout(): Promise<number> {
+		return this.getTimeout('page load');
+	}
 
 	/**
-	 * Sets the timeout for {@link module:leadfoot/Session#get} calls.
+	 * Sets the timeout for [[Session.get]] calls.
 	 *
-	 * @method setPageLoadTimeout
-	 * @memberOf module:leadfoot/Session#
-	 * @param {number} ms The length of the timeout, in milliseconds.
-	 * @returns {Promise.<void>}
+	 * @param ms The length of the timeout, in milliseconds.
 	 */
-	setPageLoadTimeout: (ms: string) => Promise<void>;
+	setPageLoadTimeout(ms: number): Promise<void> {
+		return this.setTimeout('page load', ms);
+	}
 }
 
-util.applyMixins(Session, [ WaitForDeleted, FindDisplayed, SessionStorage, LocalStorage ]);
-
-(function (prototype: any) {
-	const timeouts: any = {
-		script: 'ExecuteAsync',
-		implicit: 'Find',
-		'page load': 'PageLoad'
-	};
-
-	for (let type in timeouts) {
-		prototype['get' + timeouts[type] + 'Timeout'] = lang.partial(function (this: Session, type: string) {
-			return this.getTimeout(type);
-		}, type);
-
-		prototype['set' + timeouts[type] + 'Timeout'] = lang.partial(function (this: Session, type: string, ms: number) {
-			return this.setTimeout(type, ms);
-		}, type);
-	}
-})(Session.prototype);
+util.applyMixins(Session, [ WaitForDeleted, FindDisplayed ]);

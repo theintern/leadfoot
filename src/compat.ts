@@ -16,10 +16,9 @@ import * as topic from 'dojo/topic';
  * Warns a user once that the method given by `name` is deprecated.
  *
  * @private
- * @method
- * @param {string} name The name of the old method.
- * @param {string=} replacement Replacement instructions, if a direct replacement for the old method exists.
- * @param {string=} extra Extra information about the deprecation.
+ * @param name The name of the old method.
+ * @param replacement Replacement instructions, if a direct replacement for the old method exists.
+ * @param extra Extra information about the deprecation.
  */
 const warn = (function () {
 	const warned: { [key: string]: boolean; } = {};
@@ -37,9 +36,8 @@ const warn = (function () {
  * Deprecates `fromMethod` for `toMethod` and returns the correct call to `toMethod`.
  *
  * @private
- * @param {string} fromMethod
- * @param {string} toMethod
- * @returns {Function}
+ * @param fromMethod
+ * @param toMethod
  */
 function deprecate(fromMethod: string, toMethod: string): Function {
 	return function (this: any) {
@@ -53,18 +51,16 @@ function deprecate(fromMethod: string, toMethod: string): Function {
  * `toMethod` on the element.
  *
  * @private
- * @param {string} fromMethod
+ * @param fromMethod
  * The name of the old method.
  *
- * @param {string=} toMethod
+ * @param toMethod
  * The name of the replacement method on the element, if it is different than the name of the old method. If
  * omitted, it is assumed that the method name
  *
- * @param {Function=} fn
+ * @param fn
  * An optional function that will be invoked in lieu of a call to the original method if a non-element signature
  * is used.
- *
- * @returns {Function}
  */
 function deprecateElementSig(fromMethod: string, toMethod?: string, fn?: Function): Function {
 	return function (this: any, element?: Element, ...args: any[]) {
@@ -84,11 +80,6 @@ function deprecateElementSig(fromMethod: string, toMethod?: string, fn?: Functio
 
 /**
  * Deprecates the element context signature of a method as well as its non-element signature to go to `toMethod`.
- *
- * @private
- * @param {string} fromMethod
- * @param {string} toMethod
- * @returns {Function}
  */
 function deprecateElementAndStandardSig(fromMethod: string, toMethod: string): Function {
 	return deprecateElementSig(fromMethod, toMethod, deprecate(fromMethod, toMethod));
@@ -572,9 +563,9 @@ suffixes.forEach(function (suffix, index) {
 });
 
 /**
- * Applies the methods from compat to a {@link module:leadfoot/Command} prototype or instance.
+ * Applies the methods from compat to a [[Command]] prototype or instance.
  *
- * @param {module:leadfoot/Command} prototype A {@link module:leadfoot/Command} prototype or instance.
+ * @param prototype A [[Command]] prototype or instance.
  */
 export function applyTo(prototype: Command<any>) {
 	for (let key in methods) {

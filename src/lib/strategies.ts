@@ -166,7 +166,6 @@ abstract class Strategies<E, L, V> {
 	 * matching the given CSS class name. This is inherently slower than [[Element.find]], so should
 	 * only be used in cases where the visibility of an element cannot be ensured in advance.
 	 *
-	 * @method findDisplayedByClassName
 	 * @since 1.6
 	 * @param className The CSS class name to search for.
 	 */
