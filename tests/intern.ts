@@ -18,46 +18,43 @@ export const tunnel = 'BrowserStackTunnel';
 
 export const loaderOptions = {
 	packages: [
-		{ name: 'leadfoot', location: '_build' },
 		{ name: 'src', location: '_build/src' },
+		{ name: 'tests', location: '_build/tests' },
 		{ name: 'dojo', location: 'node_modules/dojo'}
 	],
 	map: {
-		'leadfoot/tests/unit/lib': {
-			'src': 'dojo/node!../../../src'
+		'tests': {
+			// map the absolute module `src` so that it uses
+			// the srcLoader to get a relative commonjs library
+			'src': 'tests/srcLoader!../src',
+			// ensure the `dojo` being used in the tests is the
+			// same `dojo` being used by the commonjs library
+			// with the exception of `dojo/node`
+			'dojo': 'dojo/node!dojo',
+			'dojo/node': 'dojo/node'
 		},
-		'leadfoot/tests/functional/helpers': {
-			'src': 'dojo/node!../../../src'
-		},
-		'leadfoot/tests/functional/support': {
-			'src': 'dojo/node!../../../src'
-		},
-		'leadfoot/tests/unit': {
-			'src': 'dojo/node!../../src'
-		},
-		'leadfoot/tests/functional': {
-			'src': 'dojo/node!../../src'
+		'tests/srcLoader': {
+			'src': 'src'
 		}
 	}
 };
 
 export const loaders = {
-	'host-browser': 'node_modules/dojo-loader/loader.js',
 	'host-node': 'dojo-loader'
 };
 
 export const suites = [
-	'dojo/has!host-node?leadfoot/tests/unit/lib/util',
-	'dojo/has!host-node?leadfoot/tests/unit/compat'
+	'dojo/has!host-node?tests/unit/lib/util',
+	'dojo/has!host-node?tests/unit/compat'
 ];
 
 export const functionalSuites = [
-	'leadfoot/tests/functional/helpers/pollUntil',
-	'leadfoot/tests/functional/Server',
-	'leadfoot/tests/functional/Session',
-	'leadfoot/tests/functional/Element',
-	'leadfoot/tests/functional/Command',
-	'leadfoot/tests/functional/compat'
+	'tests/functional/helpers/pollUntil',
+	'tests/functional/Server',
+	'tests/functional/Session',
+	'tests/functional/Element',
+	'tests/functional/Command',
+	'tests/functional/compat'
 ];
 
 export const excludeInstrumentation = /^(?:tests|node_modules)\//;

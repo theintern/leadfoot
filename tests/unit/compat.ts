@@ -6,7 +6,7 @@ import Command from 'src/Command';
 import * as compat from 'src/compat';
 import { strategies, suffixes } from 'src/lib/strategies';
 import * as topic from 'dojo/topic';
-import { Capabilities } from '../../src/interfaces';
+import { Capabilities } from 'src/interfaces';
 
 function assertWarn(...args: any[]) {
 	assert.isNotNull(lastWarning);

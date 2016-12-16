@@ -133,7 +133,7 @@ declare module 'istanbul/lib/report/common/defaults' {
 }
 
 declare module 'istanbul/lib/report/cobertura' {
-	import Report from 'istanbul/lib/report';
+	import Report = require('istanbul/lib/report');
 	import { Configuration, Collector } from 'istanbul';
 	class CoberturaReport extends Report {
 		constructor(config?: any);
@@ -149,7 +149,7 @@ declare module 'istanbul/lib/report/cobertura' {
 
 declare module 'istanbul/lib/report/text' {
 	// static TYPE: string;
-	import Report from 'istanbul/lib/report';
+	import Report = require('istanbul/lib/report');
 	import { Watermarks } from 'istanbul';
 	class TextReport extends Report {
 		constructor(opts?: any);
@@ -164,7 +164,7 @@ declare module 'istanbul/lib/report/text' {
 }
 
 declare module 'istanbul/lib/report/text-summary' {
-	import Report from 'istanbul/lib/report';
+	import Report = require('istanbul/lib/report');
 	class TextSummaryReport extends Report {
 		constructor(opts?: any);
 	}
@@ -173,7 +173,7 @@ declare module 'istanbul/lib/report/text-summary' {
 }
 
 declare module 'istanbul/lib/report/json' {
-	import Report from 'istanbul/lib/report';
+	import Report = require('istanbul/lib/report');
 
 	class JsonReport extends Report {}
 
@@ -181,7 +181,7 @@ declare module 'istanbul/lib/report/json' {
 }
 
 declare module 'istanbul/lib/report/html' {
-	import Report from 'istanbul/lib/report';
+	import Report = require('istanbul/lib/report');
 	import { FileWriter } from 'istanbul';
 	import { Collector, FileCoverage } from 'istanbul';
 
@@ -216,7 +216,7 @@ declare module 'istanbul/lib/report/html' {
 }
 
 declare module 'istanbul/lib/report/lcovonly' {
-	import Report from 'istanbul/lib/report';
+	import Report = require('istanbul/lib/report');
 	import { FileWriter } from 'istanbul';
 	import { FileCoverage } from 'istanbul';
 

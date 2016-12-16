@@ -5,8 +5,8 @@ import Promise = require('dojo/Promise');
 import Server from 'src/Server';
 import Session from 'src/Session';
 import * as urlUtil from 'url';
+import { Capabilities } from 'src/interfaces';
 import Test = require('intern/lib/Test');
-import { Capabilities } from '../../src/interfaces';
 
 registerSuite(function () {
 	let server: Server;

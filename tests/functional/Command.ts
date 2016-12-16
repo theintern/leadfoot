@@ -1,10 +1,10 @@
 import registerSuite = require('intern!object');
 import * as assert from 'intern/chai!assert';
-import Promise = require('dojo/Promise');
 import * as util from './support/util';
 import Command, { Context } from 'src/Command';
 import Session from 'src/Session';
 import { IRequire } from 'dojo/loader';
+import Promise = require('dojo/Promise');
 import Test = require('intern/lib/Test');
 
 declare const require: IRequire;

@@ -1,27 +1,26 @@
 {
-	"compilerOptions": {
-		"allowSyntheticDefaultImports": true,
-		"declaration": true,
-		"experimentalDecorators": true,
-		"module": "commonjs",
-		"moduleResolution": "node",
-		"noImplicitAny": true,
-		"noImplicitThis": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": false,
-		"outDir": "./_build",
-		"preserveConstEnums": true,
-		"removeComments": false,
-		"rootDir": ".",
-		"sourceMap": true,
-		"target": "ES5"
-	},
-	"files": [
-		"./types/dojo2/dojo.d.ts",
-		"./types/jszip/jszip.d.ts",
-		"./types/istanbul/istanbul.d.ts"
-	],
-	"include": [
-		"./src/**/*.ts"
-	]
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "experimentalDecorators": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
+    "outDir": "./_build",
+    "preserveConstEnums": true,
+    "removeComments": false,
+    "rootDir": ".",
+    "sourceMap": true,
+    "target": "ES5"
+  },
+  "files": [
+    "./types/dojo2/dojo.d.ts",
+    "./types/jszip/jszip.d.ts"
+  ],
+  "include": [
+    "./src/**/*.ts"
+  ]
 }
