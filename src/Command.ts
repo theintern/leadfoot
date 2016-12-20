@@ -249,8 +249,6 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	/**
 	 * The parent Command of the Command, if one exists.
 	 *
-	 * @member {module:leadfoot/Command=} parent
-	 * @memberOf module:leadfoot/Command#
 	 * @readonly
 	 */
 	get parent() {
@@ -260,8 +258,6 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	/**
 	 * The parent Session of the Command.
 	 *
-	 * @member {module:leadfoot/Session} session
-	 * @memberOf module:leadfoot/Command#
 	 * @readonly
 	 */
 	get session() {
@@ -276,10 +272,8 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 *   between methods that should still return scalar values (`find`) and methods that should return arrays of
 	 *   values even if there is only one element in the context (`findAll`).
 	 * - depth (number): The depth of the context within the command chain. This is used to prevent traversal into
-	 *   higher filtering levels by {@link module:leadfoot/Command#end}.
+	 *   higher filtering levels by [[Command.end]].
 	 *
-	 * @member {module:leadfoot/Element[]} context
-	 * @memberOf module:leadfoot/Command#
 	 * @readonly
 	 */
 	get context() {
@@ -289,8 +283,6 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	/**
 	 * The underlying Promise for the Command.
 	 *
-	 * @member {Promise.<any>} promise
-	 * @memberOf module:leadfoot/Command#
 	 * @readonly
 	 */
 	get promise() {
@@ -300,8 +292,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	/**
 	 * Pauses execution of the next command in the chain for `ms` milliseconds.
 	 *
-	 * @param {number} ms Time to delay, in milliseconds.
-	 * @returns {module:leadfoot/Command.<void>}
+	 * @param ms Time to delay, in milliseconds.
 	 */
 	sleep(ms: number) {
 		return new (this.constructor as typeof Command)(this, function () {
@@ -314,6 +305,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * to the previous state. This is equivalent to the `jQuery#end` method.
 	 *
 	 * @example
+	 * ```js
 	 * command
 	 *   .findById('parent') // sets filter to #parent
 	 *     .findByClassName('child') // sets filter to all .child inside #parent
@@ -323,9 +315,9 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 *       })
 	 *       .end() // resets filter to #parent
 	 *     .end(); // resets filter to nothing (the whole document)
+	 *  ```
 	 *
-	 * @param {number=} numCommandsToPop The number of element contexts to pop. Defaults to 1.
-	 * @returns {module:leadfoot/Command.<void>}
+	 * @param numCommandsToPop The number of element contexts to pop. Defaults to 1.
 	 */
 	end(numCommandsToPop: number = 1): Command<T> {
 		return new (this.constructor as typeof Command)<void>(this, function (this: Command<T>, setContext: Function) {
@@ -352,13 +344,9 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 *    promise helpers to be created that can retrieve the appropriate session and element contexts for execution.
 	 * 2. A second non-standard `setContext` argument is passed to the callback. This `setContext` function can be
 	 *    called at any time before the callback fulfills its return value and expects either a single
-	 *    {@link module:leadfoot/Element} or an array of Elements to be provided as its only argument. The provided
+	 *    [[Element]] or an array of Elements to be provided as its only argument. The provided
 	 *    element(s) will be used as the context for subsequent element method invocations (`click`, etc.). If
 	 *    the `setContext` method is not called, the element context from the parent will be passed through unmodified.
-	 *
-	 * @param {Function=} callback
-	 * @param {Function=} errback
-	 * @returns {module:leadfoot/Command.<any>}
 	 */
 	then(callback: Function, errback?: Function): Command<T> {
 		function runCallback(command: Command<T>, callback: Function, value: T, setContext: SetContextMethod<T>): T {
@@ -387,9 +375,6 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 
 	/**
 	 * Adds a callback to be invoked when any of the previously chained operations have failed.
-	 *
-	 * @param {Function} errback
-	 * @returns {module:leadfoot/Command.<any>}
 	 */
 	catch(errback: Function): Command<T> {
 		return this.then(null, errback);
@@ -397,9 +382,6 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 
 	/**
 	 * Adds a callback to be invoked once the previously chained operations have resolved.
-	 *
-	 * @param {Function} callback
-	 * @returns {module:leadfoot/Command.<any>}
 	 */
 	finally(callback: Function): Command<T> {
 		return this.then(callback, callback);
@@ -408,8 +390,6 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	/**
 	 * Cancels all outstanding chained operations of the Command. Calling this method will cause this command and all
 	 * subsequent chained commands to fail with a CancelError.
-	 *
-	 * @returns {module:leadfoot/Command.<void>}
 	 */
 	cancel(): this {
 		this._promise.cancel.apply(this._promise, arguments);
@@ -428,7 +408,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 		return this._callElementMethod<Element>('findDisplayed', strategy, value);
 	}
 
-	private _callElementMethod<U>(key: string, ...args: any[]): Command<U> {
+	private _callElementMethod<U>(key: keyof Element, ...args: any[]): Command<U> {
 		return new (this.constructor as typeof Command)<U>(this, function (this: Command<T>, setContext: Function) {
 			const parentContext = this._context;
 			let promise: Promise<any>;
@@ -454,7 +434,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 		});
 	}
 
-	private _callSessionMethod<U>(key: string, ...args: any[]): Command<U> {
+	private _callSessionMethod<U>(key: keyof Session, ...args: any[]): Command<U> {
 		return new (this.constructor as typeof Command)<U>(this, function (this: Command<T>, setContext: Function) {
 			const parentContext = this._context;
 			const session = this._session;
@@ -464,7 +444,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 			// the original source object. The original source object may still be used, however, if the
 			// function is being added like a mixin and does not exist on the actual session object for this
 			// session
-			const fn = (<any> session)[key] || (<any> Element.prototype)[key];
+			const fn = (<any> session)[key] || (<any> Session.prototype)[key];
 
 			if (fn.usesElement && parentContext.length && (!args[0] || !args[0].elementId)) {
 				if (parentContext.isSingle) {
