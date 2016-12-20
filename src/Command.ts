@@ -397,15 +397,49 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	}
 
 	find(strategy: string, value: string): Command<Element> {
-		return this._callElementMethod<Element>('find', strategy, value);
+		return this._callFindElementMethod<Element>('find', strategy, value);
 	}
 
 	findAll(strategy: string, value: string): Command<Element[]> {
-		return this._callElementMethod<Element[]>('findAll', strategy, value);
+		return this._callFindElementMethod<Element[]>('findAll', strategy, value);
 	}
 
 	findDisplayed(strategy: string, value: string): Command<Element> {
-		return this._callElementMethod<Element>('findDisplayed', strategy, value);
+		return this._callFindElementMethod<Element>('findDisplayed', strategy, value);
+	}
+
+	/**
+	 * a function that, when called, creates a new Command that retrieves elements from the parent context and
+	 * uses them as the context for the newly created Command.
+	 */
+	private _callFindElementMethod<U>(key: keyof Element, ...args: any[]): Command<U> {
+		return new (this.constructor as typeof Command)<U>(this, function (this: Command<U>, setContext: SetContextMethod<U>) {
+			const parentContext = this._context;
+			let promise: Promise<U>;
+
+			if (parentContext.length && parentContext.isSingle) {
+				promise = (<any> parentContext)[0][key].apply(parentContext[0], args);
+			}
+			else if (parentContext.length) {
+				promise = Promise.all(parentContext.map(function (element: Element) {
+					return (<any> element)[key].apply(element, args);
+				})).then(function (elements) {
+					// findAll against an array context will result in arrays of arrays; flatten into a single array of
+					// elments. It would also be possible to resort in document order but other parallel operations
+					// could not be sorted so we just don't do it anywhere and say not to rely on a particular order for
+					// results
+					return Array.prototype.concat.apply([], elements);
+				});
+			}
+			else {
+				promise = (<any> this.session)[key].apply(this.session, args);
+			}
+
+			return promise.then(function (newContext) {
+				setContext(newContext);
+				return newContext;
+			});
+		});
 	}
 
 	private _callElementMethod<U>(key: keyof Element, ...args: any[]): Command<U> {
