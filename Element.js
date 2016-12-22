@@ -130,6 +130,8 @@ Element.prototype = {
 				newError.name = 'NoSuchElement';
 				newError.message = error.message;
 				throw newError;
+			} else {
+				throw error;
 			}
 		});
 	},
