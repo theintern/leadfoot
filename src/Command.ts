@@ -1,10 +1,6 @@
-/**
- * @module leadfoot/Command
- */
-
 import * as util from './lib/util';
 import Element from './Element';
-import Promise = require('dojo/Promise');
+import CancelablePromise from './lib/CancelablePromise';
 import Session from './Session';
 import Strategies from './lib/strategies';
 import { LogEntry, Geolocation, WebDriverCookie } from './interfaces';
@@ -157,7 +153,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	private _parent: Command<any>|Session;
 	private _session: Session;
 	private _context: Context;
-	private _promise: Promise<T|void>;
+	private _promise: CancelablePromise<any>;
 
 	/**
 	 * @param parent
@@ -174,7 +170,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * a new context for the current command by calling the passed `setContext` function any time prior to resolving the
 	 * Promise that it returns. If no context is explicitly provided, the context from the parent command will be used.
 	 */
-	constructor(parent: Session|Command<any>, initialiser?: (setContext: Function, value: any) => Promise<any>|any, errback?: (setContext: Function, error: Error) => Promise<any>|any) {
+	constructor(parent: Session|Command<any>, initialiser?: (setContext: Function, value: any) => CancelablePromise<any>|any, errback?: (setContext: Function, error: Error) => CancelablePromise<any>|any) {
 		super();
 
 		const self = this;
@@ -226,7 +222,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 		Error.captureStackTrace(trace, Command);
 
 		let parentCommand = <Command<T>> parent;
-		this._promise = (parentCommand ? parentCommand.promise : Promise.resolve(undefined)).then(function (returnValue) {
+		this._promise = (parentCommand ? parentCommand.promise : CancelablePromise.resolve(undefined)).then(function (returnValue) {
 			self._context = parentCommand ? parentCommand.context : TOP_CONTEXT;
 			return returnValue;
 		}, function (error) {
@@ -234,12 +230,12 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 			throw error;
 		}).then(
 			initialiser && function (returnValue) {
-				return Promise.resolve(returnValue)
+				return CancelablePromise.resolve(returnValue)
 					.then(initialiser.bind(self, setContext))
 					.catch(fixStack);
 			},
 			errback && function (error) {
-				return Promise.reject(error)
+				return CancelablePromise.reject(error)
 					.catch(errback.bind(self, setContext))
 					.catch(fixStack);
 			}
@@ -391,9 +387,11 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * Cancels all outstanding chained operations of the Command. Calling this method will cause this command and all
 	 * subsequent chained commands to fail with a CancelError.
 	 */
-	cancel(): this {
-		this._promise.cancel.apply(this._promise, arguments);
-		return this;
+	cancel() {
+		return this._promise.cancel();
+		// return new (this.constructor as typeof Command)<void>(this, () => {
+		// 	return CancelablePromise.reject(new Error('CancelError'));
+		// });
 	}
 
 	find(strategy: string, value: string): Command<Element> {
@@ -415,13 +413,13 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	private _callFindElementMethod<U>(key: keyof Element, ...args: any[]): Command<U> {
 		return new (this.constructor as typeof Command)<U>(this, function (this: Command<U>, setContext: SetContextMethod<U>) {
 			const parentContext = this._context;
-			let promise: Promise<U>;
+			let promise: CancelablePromise<U>;
 
 			if (parentContext.length && parentContext.isSingle) {
 				promise = (<any> parentContext)[0][key].apply(parentContext[0], args);
 			}
 			else if (parentContext.length) {
-				promise = Promise.all(parentContext.map(function (element: Element) {
+				promise = CancelablePromise.all(parentContext.map(function (element: Element) {
 					return (<any> element)[key].apply(element, args);
 				})).then(function (elements) {
 					// findAll against an array context will result in arrays of arrays; flatten into a single array of
@@ -445,14 +443,14 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	private _callElementMethod<U>(key: keyof Element, ...args: any[]): Command<U> {
 		return new (this.constructor as typeof Command)<U>(this, function (this: Command<T>, setContext: Function) {
 			const parentContext = this._context;
-			let promise: Promise<any>;
+			let promise: CancelablePromise<any>;
 			let fn = (<any> parentContext)[0] && (<any> parentContext)[0][key];
 
 			if (parentContext.isSingle) {
 				promise = fn.apply(parentContext[0], args);
 			}
 			else {
-				promise = Promise.all(parentContext.map(function (element: any) {
+				promise = CancelablePromise.all(parentContext.map(function (element: any) {
 					return element[key].apply(element, args);
 				}));
 			}
@@ -464,7 +462,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 				});
 			}
 
-			return <Promise<U>> promise;
+			return <CancelablePromise<U>> promise;
 		});
 	}
 
@@ -472,7 +470,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 		return new (this.constructor as typeof Command)<U>(this, function (this: Command<T>, setContext: Function) {
 			const parentContext = this._context;
 			const session = this._session;
-			let promise: Promise<any>;
+			let promise: CancelablePromise<any>;
 			// The function may have come from a session object prototype but have been overridden on the actual
 			// session instance; in such a case, the overridden function should be used instead of the one from
 			// the original source object. The original source object may still be used, however, if the
@@ -485,7 +483,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 					promise = fn.apply(session, [ parentContext[0] ].concat(args));
 				}
 				else {
-					promise = Promise.all(parentContext.map(function (element: Element) {
+					promise = CancelablePromise.all(parentContext.map(function (element: Element) {
 						return fn.apply(session, [ element ].concat(args));
 					}));
 				}
@@ -501,7 +499,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 				});
 			}
 
-			return <Promise<U>> promise;
+			return <CancelablePromise<U>> promise;
 		});
 	}
 
@@ -531,7 +529,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 				return new (this.constructor as typeof Command)<U>(this, function (this: Command<U>, setContext: Function) {
 					const parentContext = this._context;
 					const session = this._session;
-					let promise: Promise<any>;
+					let promise: CancelablePromise<any>;
 					// The function may have come from a session object prototype but have been overridden on the actual
 					// session instance; in such a case, the overridden function should be used instead of the one from
 					// the original source object. The original source object may still be used, however, if the
@@ -547,7 +545,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 							promise = fn.apply(session, [ parentContext[0] ].concat(args));
 						}
 						else {
-							promise = Promise.all(parentContext.map(function (element: Element) {
+							promise = CancelablePromise.all(parentContext.map(function (element: Element) {
 								return fn.apply(session, [ element ].concat(args));
 							}));
 						}
@@ -563,7 +561,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 						});
 					}
 
-					return <Promise<U>> promise;
+					return <CancelablePromise<U>> promise;
 				});
 			};
 		}
@@ -593,14 +591,14 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 			anyTarget[targetKey] = function (this: Command<T>, ...args: any[]): Command<T> {
 				return new (this.constructor as typeof Command)(this, function (this: Command<T>, setContext: Function) {
 					const parentContext = this._context;
-					let promise: Promise<any>;
+					let promise: CancelablePromise<any>;
 					let fn = (<any> parentContext)[0] && (<any> parentContext)[0][key];
 
 					if (parentContext.isSingle) {
 						promise = fn.apply(parentContext[0], args);
 					}
 					else {
-						promise = Promise.all(parentContext.map(function (element: any) {
+						promise = CancelablePromise.all(parentContext.map(function (element: any) {
 							return element[key].apply(element, args);
 						}));
 					}
@@ -612,7 +610,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 						});
 					}
 
-					return <Promise<T>> promise;
+					return <CancelablePromise<T>> promise;
 				});
 			};
 		}

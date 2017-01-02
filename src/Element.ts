@@ -1,18 +1,12 @@
-/* global window:false */
-
-/**
- * @module leadfoot/Element
- */
-
 import FindDisplayed from './lib/findDisplayed';
 import * as fs from 'fs';
 import  Strategies from './lib/strategies';
 import WaitForDeleted from './lib/waitForDeleted';
 import * as util from './lib/util';
-import Promise = require('dojo/Promise');
+import CancelablePromise from './lib/CancelablePromise';
 import Session from './Session';
 import JSZip = require('jszip');
-import * as path from 'path';
+import { basename } from 'path';
 
 function noop() {
 	// At least ios-driver 0.6.6 returns an empty object for methods that are supposed to return no value at all,
@@ -24,9 +18,9 @@ export type ElementOrElementId = { ELEMENT: string; } | Element | string;
 /**
  * An Element represents a DOM or UI element within the remote environment.
  */
-export default class Element extends Strategies<Promise<Element>, Promise<Element[]>, Promise<void>>
-							implements WaitForDeleted<Promise<Element>, Promise<void>>,
-									FindDisplayed<Promise<Element>> {
+export default class Element extends Strategies<CancelablePromise<Element>, CancelablePromise<Element[]>, CancelablePromise<void>>
+							implements WaitForDeleted<CancelablePromise<Element>, CancelablePromise<void>>,
+									FindDisplayed<CancelablePromise<Element>> {
 	private _elementId: string;
 	private _session: Session;
 
@@ -64,12 +58,12 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 		return this._session;
 	}
 
-	private _get(path: string, requestData?: any, pathParts?: any): Promise<any> {
+	private _get(path: string, requestData?: any, pathParts?: any): CancelablePromise<any> {
 		path = 'element/' + encodeURIComponent(this._elementId) + '/' + path;
 		return this._session['_get'](path, requestData, pathParts);
 	}
 
-	private _post(path: string, requestData?: any, pathParts?: any): Promise<any> {
+	private _post(path: string, requestData?: any, pathParts?: any): CancelablePromise<any> {
 		path = 'element/' + encodeURIComponent(this._elementId) + '/' + path;
 		return this._session['_post'](path, requestData, pathParts);
 	}
@@ -103,16 +97,16 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	 * use [[Element.type]] to type the name of the local file into a file input field and the file
 	 * will be transparently transmitted and used by the server.
 	 */
-	private _uploadFile(filename: string): Promise<string> {
-		return new Promise(resolve => {
+	private _uploadFile(filename: string): CancelablePromise<string> {
+		return new CancelablePromise(resolve => {
 			const content = fs.readFileSync(filename);
 
 			let zip = new JSZip();
-			zip.file(path.basename(filename), content);
+			zip.file(basename(filename), content);
 			const data = zip.generate({ type: 'base64' });
 			zip = null;
 
-			resolve(this._post('file', { file: data }));
+			resolve(this.session['_post']('file', { file: data }));
 		});
 	}
 
@@ -129,7 +123,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	 * @param value
 	 * The strategy-specific value to search for. See [[Session.find]] for details.
 	 */
-	find(using: string, value: string): Promise<Element> {
+	find(using: string, value: string): CancelablePromise<Element> {
 		const session = this._session;
 
 		if (session.capabilities.isWebDriver) {
@@ -164,6 +158,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 				newError.message = error.message;
 				throw newError;
 			}
+			throw error;
 		});
 	}
 
@@ -176,7 +171,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	 * @param value
 	 * The strategy-specific value to search for. See [[Session.find]] for details.
 	 */
-	findAll(using: string, value: string): Promise<Element[]> {
+	findAll(using: string, value: string): CancelablePromise<Element[]> {
 		const session = this._session;
 
 		if (session.capabilities.isWebDriver) {
@@ -208,7 +203,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Clicks the element. This method works on both mouse and touch platforms.
 	 */
-	click(): Promise<void> {
+	click(): CancelablePromise<void> {
 		if (this.session.capabilities.brokenClick) {
 			return this.session.execute(function (element: HTMLElement) {
 				element.click();
@@ -227,7 +222,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Submits the element, if it is a form, or the form belonging to the element, if it is a form element.
 	 */
-	submit(): Promise<void> {
+	submit(): CancelablePromise<void> {
 		if (this.session.capabilities.brokenSubmitElement) {
 			return this.session.execute(/* istanbul ignore next */ function (element: any) {
 				if (element.submit) {
@@ -246,7 +241,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	 * Gets the visible text within the element. `<br>` elements are converted to line breaks in the returned
 	 * text, and whitespace is normalised per the usual XML/HTML whitespace normalisation rules.
 	 */
-	getVisibleText(): Promise<string> {
+	getVisibleText(): CancelablePromise<string> {
 		const result = this._get('text');
 
 		if (this.session.capabilities.brokenWhitespaceNormalization) {
@@ -268,7 +263,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	 * @param value
 	 * The text to type in the remote environment. See [[Session.pressKeys]] for more information.
 	 */
-	type(value: string|string[]): Promise<void> {
+	type(value: string|string[]): CancelablePromise<void> {
 		const getPostData = (value: string[]): { value: string[] } => {
 			if (this.session.capabilities.isWebDriver) {
 				return { value: value.join('').split('') };
@@ -304,7 +299,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Gets the tag name of the element. For HTML documents, the value is always lowercase.
 	 */
-	getTagName(): Promise<string> {
+	getTagName(): CancelablePromise<string> {
 		return this._get('name').then((name: string) => {
 			if (this.session.capabilities.brokenHtmlTagName) {
 				return this.session.execute(
@@ -321,7 +316,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Clears the value of a form element.
 	 */
-	clearValue(): Promise<void> {
+	clearValue(): CancelablePromise<void> {
 		return this._post('clear').then(noop);
 	}
 
@@ -329,14 +324,14 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	 * Returns whether or not a form element is currently selected (for drop-down options and radio buttons), or
 	 * whether or not the element is currently checked (for checkboxes).
 	 */
-	isSelected(): Promise<boolean> {
+	isSelected(): CancelablePromise<boolean> {
 		return this._get('selected');
 	}
 
 	/**
 	 * Returns whether or not a form element can be interacted with.
 	 */
-	isEnabled(): Promise<boolean> {
+	isEnabled(): CancelablePromise<boolean> {
 		return this._get('enabled');
 	}
 
@@ -366,7 +361,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	 * @returns The value of the attribute as a string, or `null` if no such property or
 	 * attribute exists.
 	 */
-	getSpecAttribute(name: string): Promise<string> {
+	getSpecAttribute(name: string): CancelablePromise<string> {
 		return this._get('attribute/$0', null, [ name ]).then((value) => {
 			if (this.session.capabilities.brokenNullGetSpecAttribute && (value === '' || value === undefined)) {
 				return this.session.execute(/* istanbul ignore next */ function (element: HTMLElement, name: string) {
@@ -395,7 +390,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	 * @param name The name of the attribute.
 	 * @returns The value of the attribute, or `null` if no such attribute exists.
 	 */
-	getAttribute(name: string): Promise<string> {
+	getAttribute(name: string): CancelablePromise<string> {
 		return this.session.execute('return arguments[0].getAttribute(arguments[1]);', [ this, name ]);
 	}
 
@@ -406,14 +401,14 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	 * @param name The name of the property.
 	 * @returns The value of the property.
 	 */
-	getProperty(name: string): Promise<any> {
+	getProperty(name: string): CancelablePromise<any> {
 		return this.session.execute('return arguments[0][arguments[1]];', [ this, name ]);
 	}
 
 	/**
 	 * Determines if this element is equal to another element.
 	 */
-	equals(other: Element): Promise<boolean> {
+	equals(other: Element): CancelablePromise<boolean> {
 		const elementId = other.elementId || other;
 		return this._get('equals/$0', null, [ elementId ]).catch((error) => {
 			// At least Selendroid 0.9.0 does not support this command;
@@ -438,7 +433,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	 * 4. Elements with `opacity: 0`
 	 * 5. Elements with no `offsetWidth` or `offsetHeight`
 	 */
-	isDisplayed(): Promise<boolean> {
+	isDisplayed(): CancelablePromise<boolean> {
 		return this._get('displayed').then((isDisplayed: boolean) => {
 
 			if (isDisplayed && (
@@ -471,7 +466,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	 * Gets the position of the element relative to the top-left corner of the document, taking into account
 	 * scrolling and CSS transformations (if they are supported).
 	 */
-	getPosition(): Promise<{ x: number, y: number }> {
+	getPosition(): CancelablePromise<{ x: number, y: number }> {
 		if (this.session.capabilities.brokenElementPosition) {
 			/* jshint browser:true */
 			return this.session.execute(/* istanbul ignore next */ function (element: HTMLElement) {
@@ -493,7 +488,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	/**
 	 * Gets the size of the element, taking into account CSS transformations (if they are supported).
 	 */
-	getSize(): Promise<{ width: number, height: number }> {
+	getSize(): CancelablePromise<{ width: number, height: number }> {
 		const getUsingExecute = () => {
 			return this.session.execute(/* istanbul ignore next */ function (element: HTMLElement) {
 				const bbox = element.getBoundingClientRect();
@@ -524,14 +519,14 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	 * @param propertyName
 	 * The CSS property to retrieve. This argument must be hyphenated, *not* camel-case.
 	 */
-	getComputedStyle(propertyName: string): Promise<string> {
+	getComputedStyle(propertyName: string): CancelablePromise<string> {
 		const manualGetStyle = () => {
 			return this.session.execute(/* istanbul ignore next */ function (element: any, propertyName: string) {
 				return (<any> window.getComputedStyle(element, null))[propertyName];
 			}, [ this, propertyName ]);
 		};
 
-		let promise: Promise<string>;
+		let promise: CancelablePromise<string>;
 
 		if (this.session.capabilities.brokenComputedStyles) {
 			promise = manualGetStyle();
@@ -578,7 +573,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	 * @param value
 	 * The strategy-specific value to search for. See [[Session.find]] for details.
 	 */
-	findDisplayed(using: string, value: string): Promise<Element> { return null; }
+	findDisplayed(using: string, value: string): CancelablePromise<Element> { return null; }
 
 	/**
 	 * Waits for all elements inside this element that match the given query to be destroyed.
@@ -592,7 +587,7 @@ export default class Element extends Strategies<Promise<Element>, Promise<Elemen
 	 * @param value
 	 * The strategy-specific value to search for. See [[Session.find]] for details.
 	 */
-	waitForDeleted(strategy: string, value: string): Promise<void> { return null; }
+	waitForDeleted(strategy: string, value: string): CancelablePromise<void> { return null; }
 }
 
 util.applyMixins(Element, [ FindDisplayed, WaitForDeleted ]);

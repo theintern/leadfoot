@@ -1,4 +1,4 @@
-import Promise = require('dojo/Promise');
+import CancelablePromise from './CancelablePromise';
 import statusCodes from './statusCodes';
 import Session from '../Session';
 import Element from '../Element';
@@ -18,37 +18,38 @@ abstract class WaitForDeleted<E extends Thenable<Element>, V extends Thenable<vo
 			originalTimeout = value;
 			session.setTimeout('implicit', 0);
 		}).then(function () {
-			const dfd = new Promise.Deferred<void>();
-			const startTime = Date.now();
+			return new CancelablePromise((resolve, reject) => {
+				const startTime = Date.now();
 
-			(function poll() {
-				if (Date.now() - startTime > originalTimeout) {
-					const always = function () {
-						const error: any = new Error();
-						error.status = 21;
-						error.name = (<any> statusCodes)[error.status][0];
-						error.message = (<any> statusCodes)[error.status][1];
-						dfd.reject(error);
-					};
-					session.setTimeout('implicit', originalTimeout).then(always, always);
-					return;
-				}
+				(function poll() {
+					if (Date.now() - startTime > originalTimeout) {
+						const always = function () {
+							const error: any = new Error();
+							error.status = 21;
+							const [ name, message ] = (<any> statusCodes)[error.status];
+							error.name = name;
+							error.message = message;
+							reject(error);
+						};
+						session.setTimeout('implicit', originalTimeout).then(always, always);
+						return;
+					}
 
-				self.find(strategy, value).then(poll, function (error) {
-					const always = function () {
-						/* istanbul ignore else: other errors should never occur during normal operation */
-						if (error.name === 'NoSuchElement') {
-							dfd.resolve();
-						}
-						else {
-							dfd.reject(error);
-						}
-					};
-					session.setTimeout('implicit', originalTimeout).then(always, always);
-				});
-			})();
+					self.find(strategy, value).then(poll, function (error) {
+						const always = function () {
+							/* istanbul ignore else: other errors should never occur during normal operation */
+							if (error.name === 'NoSuchElement') {
+								resolve();
+							}
+							else {
+								reject(error);
+							}
+						};
+						session.setTimeout('implicit', originalTimeout).then(always, always);
+					});
+				})();
 
-			return dfd.promise;
+			});
 		});
 	}
 }

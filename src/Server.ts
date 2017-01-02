@@ -1,28 +1,15 @@
 import keys from './keys';
-import * as lang from 'dojo/lang';
-import Promise = require('dojo/Promise');
-import request = require('dojo/request');
+import CancelablePromise from './lib/CancelablePromise';
+import request, { RequestOptions, Response } from 'dojo-core/request';
 import Session from './Session';
-import statusCodes from './lib/statusCodes';
 import Element from './Element';
+import statusCodes from './lib/statusCodes';
 import * as urlUtil from 'url';
 import * as util from './lib/util';
-import { Capabilities, LeadfootURL } from './interfaces';
+import { create } from 'dojo-core/lang';
+import { Capabilities, LeadfootURL, LeadfootError } from './interfaces';
 
-function isMacSafari(capabilities: Capabilities): boolean {
-	return capabilities.browserName === 'safari' &&
-		capabilities.platform === 'MAC' &&
-		capabilities.platformName !== 'ios';
-}
-
-function isGeckoDriver(capabilities: Capabilities): boolean {
-	return capabilities.browserName === 'firefox' &&
-		parseFloat(capabilities.version) >= 49;
-}
-
-function isMacGeckoDriver(capabilities: Capabilities): boolean {
-	return isGeckoDriver(capabilities) && capabilities.platform === 'MAC';
-}
+type Url = urlUtil.Url;
 
 function isMsEdge(capabilities: Capabilities, minVersion?: number, maxVersion?: number): boolean {
 	if (capabilities.browserName !== 'MicrosoftEdge') {
@@ -37,213 +24,25 @@ function isMsEdge(capabilities: Capabilities, minVersion?: number, maxVersion?: 
 			return false;
 		}
 	}
-
 	return true;
 }
 
-/**
- * A function that performs an HTTP request to a JsonWireProtocol endpoint and normalises response status and
- * data.
- *
- * @param path
- * The path-part of the JsonWireProtocol URL. May contain placeholders in the form `/\$\d/` that will be
- * replaced by entries in the `pathParts` argument.
- *
- * @param requestData
- * The payload for the request.
- *
- * @param pathParts Optional placeholder values to inject into the path of the URL.
- */
-function sendRequest(this: Server, method: string, path: string, requestData?: Object, pathParts?: string[]): Promise<any> {
-	const url = this.url + path.replace(/\$(\d)/, function (_, index) {
-		return encodeURIComponent(pathParts[index]);
-	});
-
-	const defaultRequestHeaders = {
-		// At least FirefoxDriver on Selenium 2.40.0 will throw a NullPointerException when retrieving
-		// session capabilities if an Accept header is not provided. (It is a good idea to provide one
-		// anyway)
-		'Accept': 'application/json,text/plain;q=0.9'
-	};
-
-	const kwArgs = lang.delegate(this.requestOptions, {
-		followRedirects: false,
-		handleAs: 'text',
-		headers: lang.mixin({}, defaultRequestHeaders),
-		method: method
-	});
-
-	if (requestData) {
-		kwArgs.data = JSON.stringify(requestData);
-		kwArgs.headers['Content-Type'] = 'application/json;charset=UTF-8';
-		// At least ChromeDriver 2.9.248307 will not process request data if the length of the data is not
-		// provided. (It is a good idea to provide one anyway)
-		kwArgs.headers['Content-Length'] = Buffer.byteLength(kwArgs.data, 'utf8');
-	}
-	else {
-		// At least Selenium 2.41.0 - 2.42.2 running as a grid hub will throw an exception and drop the current
-		// session if a Content-Length header is not provided with a DELETE or POST request, regardless of whether
-		// the request actually contains any request data.
-		kwArgs.headers['Content-Length'] = 0;
-	}
-
-	const trace: any = {};
-	Error.captureStackTrace(trace, sendRequest);
-
-	return request(url, kwArgs).then(function handleResponse(response): Object|Promise<Object> {
-		/*jshint maxcomplexity:24 */
-		// The JsonWireProtocol specification prior to June 2013 stated that creating a new session should
-		// perform a 3xx redirect to the session capabilities URL, instead of simply returning the returning
-		// data about the session; as a result, we need to follow all redirects to get consistent data
-		if (response.statusCode >= 300 && response.statusCode < 400 && response.getHeader('Location')) {
-			let redirectUrl = response.getHeader('Location');
-
-			// If redirectUrl isn't an absolute URL, resolve it based on the orignal URL used to create the session
-			if (!/^\w+:/.test(redirectUrl)) {
-				redirectUrl = urlUtil.resolve(url, redirectUrl);
-			}
-
-			return request(redirectUrl, {
-				method: 'GET',
-				headers: defaultRequestHeaders
-			}).then(handleResponse);
-		}
-
-		let responseType = response.getHeader('Content-Type');
-		let data: any;
-
-		if (responseType && responseType.indexOf('application/json') === 0 && response.data) {
-			data = JSON.parse(response.data);
-		}
-
-		// Some drivers will respond to a DELETE request with 204; in this case, we know the operation
-		// completed successfully, so just create an expected response data structure for a successful
-		// operation to avoid any special conditions elsewhere in the code caused by different HTTP return
-		// values
-		if (response.statusCode === 204) {
-			data = {
-				status: 0,
-				sessionId: null,
-				value: null
-			};
-		}
-		else if (response.statusCode >= 400 || (data && data.status > 0)) {
-			const error = <any> new Error();
-
-			// "The client should interpret a 404 Not Found response from the server as an "Unknown command"
-			// response. All other 4xx and 5xx responses from the server that do not define a status field
-			// should be interpreted as "Unknown error" responses."
-			// - http://code.google.com/p/selenium/wiki/JsonWireProtocol#Response_Status_Codes
-			if (!data) {
-				data = {
-					status: response.statusCode === 404 || response.statusCode === 501 ? 9 : 13,
-					value: {
-						message: (<any> response).text
-					}
-				};
-			}
-			// ios-driver 0.6.6-SNAPSHOT April 2014 incorrectly implements the specification: does not return
-			// error data on the `value` key, and does not return the correct HTTP status for unknown commands
-			else if (!data.value && ('message' in data)) {
-				data = {
-					status: response.statusCode === 404 || response.statusCode === 501 ||
-						data.message.indexOf('cannot find command') > -1 ? 9 : 13,
-					value: data
-				};
-			}
-
-			// At least Appium April 2014 responds with the HTTP status Not Implemented but a Selenium
-			// status UnknownError for commands that are not implemented; these errors are more properly
-			// represented to end-users using the Selenium status UnknownCommand, so we make the appropriate
-			// coercion here
-			if (response.statusCode === 501 && data.status === 13) {
-				data.status = 9;
-			}
-
-			// At least BrowserStack in May 2016 responds with HTTP 500 and a message value of "Invalid Command" for
-			// at least some unknown commands. These errors are more properly represented to end-users using the
-			// Selenium status UnknownCommand, so we make the appropriate coercion here
-			if (response.statusCode === 500 && data.value && data.value.message === 'Invalid Command') {
-				data.status = 9;
-			}
-
-			// At least FirefoxDriver 2.40.0 responds with HTTP status codes other than Not Implemented and a
-			// Selenium status UnknownError for commands that are not implemented; however, it provides a
-			// reliable indicator that the operation was unsupported by the type of the exception that was
-			// thrown, so also coerce this back into an UnknownCommand response for end-user code
-			if (data.status === 13 && data.value && data.value.class &&
-				(data.value.class.indexOf('UnsupportedOperationException') > -1 ||
-				data.value.class.indexOf('UnsupportedCommandException') > -1)
-			) {
-				data.status = 9;
-			}
-
-			// At least InternetExplorerDriver 2.41.0 & SafariDriver 2.41.0 respond with HTTP status codes
-			// other than Not Implemented and a Selenium status UnknownError for commands that are not
-			// implemented; like FirefoxDriver they provide a reliable indicator of unsupported commands
-			if (response.statusCode === 500 && data.value && data.value.message &&
-				(
-					data.value.message.indexOf('Command not found') > -1 ||
-					data.value.message.indexOf('Unknown command') > -1
-				)
-			) {
-				data.status = 9;
-			}
-
-			// At least GhostDriver 1.1.0 incorrectly responds with HTTP 405 instead of HTTP 501 for
-			// unimplemented commands
-			if (response.statusCode === 405 && data.value && data.value.message &&
-				data.value.message.indexOf('Invalid Command Method') > -1
-			) {
-				data.status = 9;
-			}
-
-			const statusText = <string> (<any> statusCodes)[data.status];
-			if (statusText) {
-				error.name = statusText[0];
-				error.message = statusText[1];
-			}
-
-			if (data.value && data.value.message) {
-				error.message = data.value.message;
-			}
-
-			if (data.value && data.value.screen) {
-				data.value.screen = new Buffer(data.value.screen, 'base64');
-			}
-
-			error.status = data.status;
-			error.detail = data.value;
-			error.request = {
-				url: url,
-				method: method,
-				data: requestData
-			};
-			error.response = response;
-
-			const sanitizedUrl = (function () {
-				const parsedUrl = urlUtil.parse(url);
-				if (parsedUrl.auth) {
-					parsedUrl.auth = '(redacted)';
-				}
-
-				return urlUtil.format(parsedUrl);
-			})();
-
-			error.message = '[' + method + ' ' + sanitizedUrl +
-				(requestData ? ' / ' + JSON.stringify(requestData) : '') +
-				'] ' + error.message;
-			error.stack = error.message + util.trimStack(trace.stack);
-
-			throw error;
-		}
-
-		return data;
-	}).catch(function (error) {
-		error.stack = error.message + util.trimStack(trace.stack);
-		throw error;
-	});
+function isMacSafari(capabilities: Capabilities): boolean {
+	return capabilities.browserName === 'safari' &&
+		capabilities.platform === 'MAC' &&
+		capabilities.platformName !== 'ios';
 }
+
+function isGeckodriver(capabilities: Capabilities): boolean {
+	return capabilities.browserName === 'firefox' &&
+		parseFloat(capabilities.version) >= 49;
+}
+
+function isMacGeckodriver(capabilities: Capabilities): boolean {
+	return isGeckodriver(capabilities) && capabilities.platform === 'MAC';
+}
+
+function noop() { }
 
 /**
  * Returns the actual response value from the remote environment.
@@ -251,44 +50,38 @@ function sendRequest(this: Server, method: string, path: string, requestData?: O
  * @param response JsonWireProtocol response object.
  * @returns The actual response value.
  */
-function returnValue(response: { value: any }): any {
+function returnValue(response: any): any {
 	return response.value;
 }
 
-/**
- * The Server class represents a remote HTTP server implementing the WebDriver wire protocol that can be used to
- * generate new remote control sessions.
- *
- */
 export default class Server {
 	url: string;
 
-	requestOptions: any;
+	requestOptions: RequestOptions;
 
 	/**
 	 * An alternative session constructor. Defaults to the standard [[Session]] constructor if
 	 * one is not provided.
-	 *
-	 * @default Session
 	 */
 	sessionConstructor = Session;
 
 	/**
 	 * Whether or not to perform capabilities testing and correction when creating a new Server.
-	 * @default true
 	 */
-	fixSessionCapabilities: boolean = true;
+	fixSessionCapabilities = true;
 
 	/**
+	 * The Server class represents a remote HTTP server implementing the WebDriver wire protocol that can be used to
+	 * generate new remote control sessions.
+	 *
 	 * @param url
 	 * The fully qualified URL to the JsonWireProtocol endpoint on the server. The default endpoint for a
 	 * JsonWireProtocol HTTP server is http://localhost:4444/wd/hub. You may also pass a parsed URL object which will
 	 * be converted to a string.
-	 *
 	 * @param options
 	 * Additional request options to be used for requests to the server.
 	 */
-	constructor(url: LeadfootURL|string, options: { proxy?: string } = {}) {
+	constructor(url: string|LeadfootURL, options?: RequestOptions) {
 		if (typeof url === 'object') {
 			url = Object.create(url);
 			if (url.username || url.password || url.accessKey) {
@@ -296,20 +89,229 @@ export default class Server {
 			}
 		}
 
-		this.url = <any> urlUtil.format(<any> url).replace(/\/*$/, '/');
-		this.requestOptions = options;
+		this.url = urlUtil.format(<Url> url).replace(/\/*$/, '/');
+		this.requestOptions = options || {};
 	}
 
-	private _get(path: string, requestData?: Object, pathParts?: string[]): Promise<any> {
-		return sendRequest.call(this, 'GET', path, requestData, pathParts);
+	/**
+	 * A function that performs an HTTP request to a JsonWireProtocol endpoint and normalises response status and
+	 * data.
+	 *
+	 * @param method
+	 * The HTTP method to fix
+	 *
+	 * @param path
+	 * The path-part of the JsonWireProtocol URL. May contain placeholders in the form `/\$\d/` that will be
+	 * replaced by entries in the `pathParts` argument.
+	 *
+	 * @param requestData
+	 * The payload for the request.
+	 *
+	 * @param pathParts Optional placeholder values to inject into the path of the URL.
+	 */
+	private _sendRequest(method: string, path: string, requestData: any, pathParts?: string[]): CancelablePromise<Object> {
+		const url = this.url + path.replace(/\$(\d)/, function (_, index) {
+			return encodeURIComponent(pathParts[index]);
+		});
+
+		const defaultRequestHeaders = {
+			// At least FirefoxDriver on Selenium 2.40.0 will throw a NullPointerException when retrieving
+			// session capabilities if an Accept header is not provided. (It is a good idea to provide one
+			// anyway)
+			'Accept': 'application/json,text/plain;q=0.9'
+		};
+
+		const kwArgs = create(this.requestOptions, {
+			followRedirects: false,
+			handleAs: 'text',
+			headers: { ...defaultRequestHeaders },
+			method: method
+		});
+
+		if (requestData) {
+			kwArgs.data = JSON.stringify(requestData);
+			kwArgs.headers['Content-Type'] = 'application/json;charset=UTF-8';
+			// At least ChromeDriver 2.9.248307 will not process request data if the length of the data is not
+			// provided. (It is a good idea to provide one anyway)
+			kwArgs.headers['Content-Length'] = String(Buffer.byteLength(kwArgs.data, 'utf8'));
+		}
+		else {
+			// At least Selenium 2.41.0 - 2.42.2 running as a grid hub will throw an exception and drop the current
+			// session if a Content-Length header is not provided with a DELETE or POST request, regardless of whether
+			// the request actually contains any request data.
+			kwArgs.headers['Content-Length'] = '0';
+		}
+
+		const trace: any = {};
+		Error.captureStackTrace(trace, this._sendRequest);
+
+		return new CancelablePromise((resolve, reject) => {
+			request(url, kwArgs).then(resolve, reject);
+		}).then(function handleResponse(response: Response<any>): Object|CancelablePromise<Object> {
+			/*jshint maxcomplexity:24 */
+			// The JsonWireProtocol specification prior to June 2013 stated that creating a new session should
+			// perform a 3xx redirect to the session capabilities URL, instead of simply returning the returning
+			// data about the session; as a result, we need to follow all redirects to get consistent data
+			if (response.statusCode >= 300 && response.statusCode < 400 && response.getHeader('Location')) {
+				let redirectUrl = response.getHeader('Location');
+
+				// If redirectUrl isn't an absolute URL, resolve it based on the orignal URL used to create the session
+				if (!/^\w+:/.test(redirectUrl)) {
+					redirectUrl = urlUtil.resolve(url, redirectUrl);
+				}
+
+				return request(redirectUrl, {
+					method: 'GET',
+					headers: defaultRequestHeaders
+				}).then(handleResponse);
+			}
+
+			const responseType = response.getHeader('Content-Type');
+			let data: any;
+
+			if (responseType && responseType.indexOf('application/json') === 0 && response.data) {
+				data = JSON.parse(response.data.toString());
+			}
+
+			// Some drivers will respond to a DELETE request with 204; in this case, we know the operation
+			// completed successfully, so just create an expected response data structure for a successful
+			// operation to avoid any special conditions elsewhere in the code caused by different HTTP return
+			// values
+			if (response.statusCode === 204) {
+				data = {
+					status: 0,
+					sessionId: null,
+					value: null
+				};
+			}
+			else if (response.statusCode >= 400 || (data && data.status > 0)) {
+				const error: any = new Error();
+
+				// "The client should interpret a 404 Not Found response from the server as an "Unknown command"
+				// response. All other 4xx and 5xx responses from the server that do not define a status field
+				// should be interpreted as "Unknown error" responses."
+				// - http://code.google.com/p/selenium/wiki/JsonWireProtocol#Response_Status_Codes
+				if (!data) {
+					data = {
+						status: response.statusCode === 404 || response.statusCode === 501 ? 9 : 13,
+						value: {
+							message: response.data
+						}
+					};
+				}
+				// ios-driver 0.6.6-SNAPSHOT April 2014 incorrectly implements the specification: does not return
+				// error data on the `value` key, and does not return the correct HTTP status for unknown commands
+				else if (!data.value && ('message' in data)) {
+					data = {
+						status: response.statusCode === 404 || response.statusCode === 501 ||
+							data.message.indexOf('cannot find command') > -1 ? 9 : 13,
+						value: data
+					};
+				}
+
+				// At least Appium April 2014 responds with the HTTP status Not Implemented but a Selenium
+				// status UnknownError for commands that are not implemented; these errors are more properly
+				// represented to end-users using the Selenium status UnknownCommand, so we make the appropriate
+				// coercion here
+				if (response.statusCode === 501 && data.status === 13) {
+					data.status = 9;
+				}
+
+				// At least BrowserStack in May 2016 responds with HTTP 500 and a message value of "Invalid Command" for
+				// at least some unknown commands. These errors are more properly represented to end-users using the
+				// Selenium status UnknownCommand, so we make the appropriate coercion here
+				if (response.statusCode === 500 && data.value && data.value.message === 'Invalid Command') {
+					data.status = 9;
+				}
+
+				// At least FirefoxDriver 2.40.0 responds with HTTP status codes other than Not Implemented and a
+				// Selenium status UnknownError for commands that are not implemented; however, it provides a
+				// reliable indicator that the operation was unsupported by the type of the exception that was
+				// thrown, so also coerce this back into an UnknownCommand response for end-user code
+				if (data.status === 13 && data.value && data.value.class &&
+					(data.value.class.indexOf('UnsupportedOperationException') > -1 ||
+					data.value.class.indexOf('UnsupportedCommandException') > -1)
+				) {
+					data.status = 9;
+				}
+
+				// At least InternetExplorerDriver 2.41.0 & SafariDriver 2.41.0 respond with HTTP status codes
+				// other than Not Implemented and a Selenium status UnknownError for commands that are not
+				// implemented; like FirefoxDriver they provide a reliable indicator of unsupported commands
+				if (response.statusCode === 500 && data.value && data.value.message &&
+					(
+						data.value.message.indexOf('Command not found') > -1 ||
+						data.value.message.indexOf('Unknown command') > -1
+					)
+				) {
+					data.status = 9;
+				}
+
+				// At least GhostDriver 1.1.0 incorrectly responds with HTTP 405 instead of HTTP 501 for
+				// unimplemented commands
+				if (response.statusCode === 405 && data.value && data.value.message &&
+					data.value.message.indexOf('Invalid Command Method') > -1
+				) {
+					data.status = 9;
+				}
+
+				const [ name, message ] = (<any> statusCodes)[data.status];
+				if (name && message) {
+					error.name = name;
+					error.message = message;
+				}
+
+				if (data.value && data.value.message) {
+					error.message = data.value.message;
+				}
+
+				if (data.value && data.value.screen) {
+					data.value.screen = new Buffer(data.value.screen, 'base64');
+				}
+
+				error.status = data.status;
+				error.detail = data.value;
+				error.request = {
+					url: url,
+					method: method,
+					data: requestData
+				};
+				error.response = response;
+
+				const sanitizedUrl = (function () {
+					const parsedUrl = urlUtil.parse(url);
+					if (parsedUrl.auth) {
+						parsedUrl.auth = '(redacted)';
+					}
+
+					return urlUtil.format(parsedUrl);
+				})();
+
+				error.message = '[' + method + ' ' + sanitizedUrl +
+					(requestData ? ' / ' + JSON.stringify(requestData) : '') +
+					'] ' + error.message;
+				error.stack = error.message + util.trimStack(trace.stack);
+
+				throw error;
+			}
+
+			return data;
+		}).catch(function (error) {
+			error.stack = error.message + util.trimStack(trace.stack);
+			throw error;
+		});
 	}
 
-	private _post(path: string, requestData?: Object, pathParts?: string[]): Promise<any> {
-		return sendRequest.call(this, 'POST', path, requestData, pathParts);
+	private _get(path: string, requestData?: Object, pathParts?: string[]): CancelablePromise<any> {
+		return this._sendRequest('GET', path, requestData, pathParts);
 	}
 
-	private _delete(path: string, requestData?: Object, pathParts?: string[]): Promise<any> {
-		return sendRequest.call(this, 'DELETE', path, requestData, pathParts);
+	private _post(path: string, requestData?: Object, pathParts?: string[]): CancelablePromise<any> {
+		return this._sendRequest('POST', path, requestData, pathParts);
+	}
+
+	private _delete(path: string, requestData?: Object, pathParts?: string[]): CancelablePromise<any> {
+		return this._sendRequest('DELETE', path, requestData, pathParts);
 	}
 
 	/**
@@ -318,7 +320,7 @@ export default class Server {
 	 * @returns An object containing arbitrary properties describing the status of the remote
 	 * server.
 	 */
-	getStatus(): Promise<Object> {
+	getStatus() {
 		return this._get('status').then(returnValue);
 	}
 
@@ -333,24 +335,24 @@ export default class Server {
 	 * A hash map of required capabilities of the remote environment. The server will not return an environment that
 	 * does not match all the required capabilities if one is not available.
 	 */
-	createSession(desiredCapabilities: Capabilities, requiredCapabilities: Capabilities): Promise<Session|void> {
+	createSession(desiredCapabilities: Capabilities, requiredCapabilities: Capabilities): CancelablePromise<Session|void> {
 		const fixSessionCapabilities = desiredCapabilities.fixSessionCapabilities !== false &&
 			this.fixSessionCapabilities;
 
 		// Don’t send `fixSessionCapabilities` to the server
 		if ('fixSessionCapabilities' in desiredCapabilities) {
-			desiredCapabilities = lang.mixin({}, desiredCapabilities);
+			desiredCapabilities = { ...desiredCapabilities };
 			desiredCapabilities.fixSessionCapabilities = undefined;
 		}
 
 		return this._post('session', {
-			desiredCapabilities: desiredCapabilities,
-			requiredCapabilities: requiredCapabilities
-		}).then(response => {
-			const session = new (<typeof Session> this.sessionConstructor)(response.sessionId, this, response.value);
+			desiredCapabilities,
+			requiredCapabilities
+		}).then((response): Session | CancelablePromise<Session|void> => {
+			const session = new this.sessionConstructor(response.sessionId, this, response.value);
 			if (fixSessionCapabilities) {
-				return <any> this._fillCapabilities(session).catch(error => {
-					// The session was started on the server, but we did not resolve the Promise yet. If a failure
+				return this._fillCapabilities(session).catch(function (error) {
+					// The session was started on the server, but we did not resolve the CancelablePromise yet. If a failure
 					// occurs during capabilities filling, we should quit the session on the server too since the
 					// caller will not be aware that it ever got that far and will have no access to the session to
 					// quit itself.
@@ -365,51 +367,50 @@ export default class Server {
 		});
 	}
 
-	private _fillCapabilities(session: Session): Promise<Session> {
-		/*jshint maxlen:140 */
+	private _fillCapabilities(session: Session): CancelablePromise<void|Session> {
 		const capabilities = session.capabilities;
 
-		function supported(): boolean { return true; }
-		function unsupported(): boolean { return false; }
+		function supported() { return true; }
+		function unsupported() { return false; }
 		function maybeSupported(error: Error) { return error.name !== 'UnknownCommand'; }
-		const broken = supported;
-		const works = unsupported;
+		let broken = supported;
+		let works = unsupported;
 
 		/**
 		 * Adds the capabilities listed in the `testedCapabilities` object to the hash of capabilities for
 		 * the current session. If a tested capability value is a function, it is assumed that it still needs to
 		 * be executed serially in order to resolve the correct value of that particular capability.
 		 */
-		function addCapabilities(testedCapabilities: Capabilities) {
-			return new Promise(function (resolve, reject) {
+		function addCapabilities(testedCapabilities: Capabilities): CancelablePromise<void> {
+			return new CancelablePromise<void>(function (resolve, reject) {
 				const keys = Object.keys(testedCapabilities);
 				let i = 0;
 
 				(function next() {
-					const key = keys[i++];
+					const key = <keyof Capabilities> keys[i++];
 
 					if (!key) {
 						resolve();
 						return;
 					}
 
-					const value = (<any> testedCapabilities)[key];
+					const value = testedCapabilities[key];
 
 					if (typeof value === 'function') {
 						value().then(function (value: any) {
-							(<any> capabilities)[key] = value;
+							capabilities[key] = value;
 							next();
 						}, reject);
 					}
 					else {
-						(<any> capabilities)[key] = value;
+						capabilities[key] = value;
 						next();
 					}
 				})();
 			});
 		}
 
-		function get(page: string): Promise<any> {
+		function get(page: string): CancelablePromise<any> {
 			if (capabilities.supportsNavigationDataUris !== false) {
 				return session.get('data:text/html;charset=utf-8,' + encodeURIComponent(page));
 			}
@@ -441,9 +442,7 @@ export default class Server {
 			});
 		}
 
-		function discoverFeatures(): any {
-			// jshint maxcomplexity:15
-
+		function discoverFeatures(): Capabilities|CancelablePromise<Capabilities> {
 			const testedCapabilities: any = {};
 
 			// At least SafariDriver 2.41.0 fails to allow stand-alone feature testing because it does not inject user
@@ -465,6 +464,11 @@ export default class Server {
 				};
 			}
 
+			// Firefox 49+ (via geckodriver) only supports W3C locator strategies
+			if (isGeckodriver(capabilities)) {
+				testedCapabilities.isWebDriver = true;
+			}
+
 			// At least MS Edge 14316 supports alerts but does not specify the capability
 			if (isMsEdge(capabilities, 37.14316) && !('handlesAlerts' in capabilities)) {
 				testedCapabilities.handlesAlerts = true;
@@ -479,7 +483,7 @@ export default class Server {
 			// capabilities map, when they do not
 			if (capabilities.locationContextEnabled) {
 				testedCapabilities.locationContextEnabled = session.getGeolocation()
-					.then(supported, function (error: Error) {
+					.then(supported, function (error) {
 						return error.name !== 'UnknownCommand' &&
 							error.message.indexOf('not mapped : GET_LOCATION') === -1;
 					});
@@ -500,7 +504,8 @@ export default class Server {
 			}
 
 			// IE11 will take screenshots, but it's very slow
-			if (capabilities.browserName === 'internet explorer' && capabilities.version === '11') {
+			// tslint:disable-next-line:triple-equals
+			if (capabilities.browserName === 'internet explorer' && capabilities.version == '11') {
 				testedCapabilities.takesScreenshot = true;
 			}
 			// At least Selendroid 0.9.0 will fail to take screenshots in certain device configurations, usually
@@ -516,7 +521,7 @@ export default class Server {
 			// features of a given platform
 			if (!('mouseEnabled' in capabilities)) {
 				// Using mouse services such as doubleclick will hang Firefox 49+ session on the Mac.
-				if (isMacGeckoDriver(capabilities)) {
+				if (isMacGeckodriver(capabilities)) {
 					testedCapabilities.mouseEnabled = true;
 				}
 				else {
@@ -525,19 +530,6 @@ export default class Server {
 							.then(supported, maybeSupported);
 					};
 				}
-			}
-			else if (isMsEdge(capabilities)) {
-				testedCapabilities.brokenDeleteCookie = true;
-			}
-
-			// At least firefox 49 + geckodriver can't POST empty data
-			if (isGeckoDriver(capabilities)) {
-				testedCapabilities.brokenEmptyPost = true;
-			}
-
-			// At least MS Edge may return an 'element is obscured' error when trying to click on visible elements.
-			if (isMsEdge(capabilities)) {
-				testedCapabilities.brokenClick = true;
 			}
 
 			// Don't check for touch support if the environment reports that no touchscreen is available
@@ -555,7 +547,7 @@ export default class Server {
 			}
 
 			if (!('dynamicViewport' in capabilities)) {
-				testedCapabilities.dynamicViewport = session.getWindowSize().then(function (originalSize: { width: number, height: number }) {
+				testedCapabilities.dynamicViewport = session.getWindowSize().then(function (originalSize) {
 					return session.setWindowSize(originalSize.width, originalSize.height);
 				}).then(supported, unsupported);
 			}
@@ -572,7 +564,7 @@ export default class Server {
 				// It is not possible to test this since the feature tests runs in quirks-mode on IE<10, but we
 				// know that IE9 supports CSS transforms
 				if (capabilities.browserName === 'internet explorer' && parseFloat(capabilities.version) === 9) {
-					return Promise.resolve(true);
+					return CancelablePromise.resolve(true);
 				}
 
 				/*jshint maxlen:240 */
@@ -598,16 +590,16 @@ export default class Server {
 				return keys.CONTROL;
 			})();
 
-			return Promise.all(testedCapabilities);
+			return CancelablePromise.all(testedCapabilities);
 		}
 
-		function discoverDefects(): any {
+		function discoverDefects(): Capabilities | CancelablePromise<Capabilities> {
 			const testedCapabilities: any = {};
 
 			// At least SafariDriver 2.41.0 fails to allow stand-alone feature testing because it does not inject user
 			// scripts for URLs that are not http/https
 			if (isMacSafari(capabilities)) {
-				return <Capabilities> {
+				return {
 					brokenDeleteCookie: false,
 					brokenExecuteElementReturn: false,
 					brokenExecuteUndefinedReturn: false,
@@ -640,11 +632,11 @@ export default class Server {
 				capabilities.browserName === 'internet explorer' && parseFloat(capabilities.version) < 9;
 
 			// At least ChromeDriver 2.9 and MS Edge 10240 does not implement /element/active
-			testedCapabilities.brokenActiveElement = session.getActiveElement().then(works, function (error: Error) {
+			testedCapabilities.brokenActiveElement = session.getActiveElement().then(works, function (error) {
 				return error.name === 'UnknownCommand';
 			});
 
-			// At least Selendroid 0.9.0 and MS Edge have broken cookie deletion
+			// At least Selendroid 0.9.0 and MS Edge have broken cookie deletion.
 			if (capabilities.browserName === 'selendroid') {
 				// This test is very hard to get working properly in other environments so only test when Selendroid is
 				// the browser
@@ -657,31 +649,42 @@ export default class Server {
 						return session.deleteCookie('foo');
 					}).then(function () {
 						return session.getCookies();
-					}).then(function (cookies: any[]) {
+					}).then(function (cookies) {
 						return cookies.length > 0;
 					}).catch(function () {
 						return true;
 					}).then(function (isBroken) {
-						return session.clearCookies().finally(function () {
-							return isBroken;
-						});
+						return session.clearCookies().then(() => isBroken, () => isBroken);
 					});
 				};
+			}
+			else if (isMsEdge(capabilities)) {
+				testedCapabilities.brokenDeleteCookie = true;
+			}
+
+			// At least Firefox 49 + geckodriver can't POST empty data
+			if (isGeckodriver(capabilities)) {
+				testedCapabilities.brokenEmptyPost = true;
+			}
+
+			// At least MS Edge may return an 'element is obscured' error when trying to click on visible elements.
+			if (isMsEdge(capabilities)) {
+				testedCapabilities.brokenClick = true;
 			}
 
 			// At least Selendroid 0.9.0 incorrectly returns HTML tag names in uppercase, which is a violation
 			// of the JsonWireProtocol spec
-			testedCapabilities.brokenHtmlTagName = session.findByTagName('html').then(function (element: any) {
+			testedCapabilities.brokenHtmlTagName = session.findByTagName('html').then(function (element) {
 				return element.getTagName();
-			}).then(function (tagName: string) {
+			}).then(function (tagName) {
 				return tagName !== 'html';
 			}).catch(broken);
 
 			// At least ios-driver 0.6.6-SNAPSHOT incorrectly returns empty string instead of null for attributes
 			// that do not exist
-			testedCapabilities.brokenNullGetSpecAttribute = session.findByTagName('html').then(function (element: any) {
+			testedCapabilities.brokenNullGetSpecAttribute = session.findByTagName('html').then(function (element) {
 				return element.getSpecAttribute('nonexisting');
-			}).then(function (value: any) {
+			}).then(function (value) {
 				return value !== null;
 			}).catch(broken);
 
@@ -690,7 +693,7 @@ export default class Server {
 				return get('<!DOCTYPE html><div id="a"></div>').then(function () {
 					return session.findById('a');
 				}).then(function (element) {
-					return session.execute(function (element: any) {
+					return session.execute(function (element: Element) {
 						return element.getAttribute('id');
 					}, [ element ]);
 				}).then(function (attribute) {
@@ -702,7 +705,7 @@ export default class Server {
 			// value is returned by an `execute` call
 			testedCapabilities.brokenExecuteUndefinedReturn = session.execute(
 				'return undefined;'
-			).then(function (value: any) {
+			).then(function (value) {
 				return value !== null;
 			}, broken);
 
@@ -729,7 +732,7 @@ export default class Server {
 							.then(function () {
 								return session.findById('a');
 							})
-							.then(function (element: Element) {
+							.then(function (element) {
 								return element.isDisplayed();
 							});
 					}
@@ -777,9 +780,9 @@ export default class Server {
 			testedCapabilities.brokenWhitespaceNormalization = function () {
 				return get('<!DOCTYPE html><div id="d">This is\n<br>a test\n</div>').then(function () {
 					return session.findById('d')
-						.then(function (element: Element) {
+						.then(function (element) {
 							return element.getVisibleText();
-						}).then(function (text: string) {
+						}).then(function (text) {
 							if (/\r\n/.test(text) || /\s+$/.test(text)) {
 								throw new Error('invalid whitespace');
 							}
@@ -861,19 +864,19 @@ export default class Server {
 
 			// At least Selendroid 0.9.0 has a bug where it catastrophically fails to retrieve available types;
 			// they have tried to hardcode the available log types in this version so we can just return the
-			// same hardcoded list ourselves;
-			// At least InternetExplorerDriver 2.41.0 also fails to provide log types
+			// same hardcoded list ourselves.
+			// At least InternetExplorerDriver 2.41.0 also fails to provide log types.
 			// Firefox 49+ (via geckodriver) doesn't support retrieving logs or log types, and may hang the session.
-			if (isMacGeckoDriver(capabilities)) {
+			if (isMacGeckodriver(capabilities)) {
 				testedCapabilities.fixedLogTypes = [];
 			}
 			else {
-				(<any> testedCapabilities).fixedLogTypes = session.getAvailableLogTypes().then(<any> unsupported, function (error?: any) {
+				testedCapabilities.fixedLogTypes = session.getAvailableLogTypes().then(unsupported, function (error: LeadfootError) {
 					if (capabilities.browserName === 'selendroid' && !error.response.text.length) {
 						return [ 'logcat' ];
 					}
 
-					return <string[]> [];
+					return [];
 				});
 			}
 
@@ -886,7 +889,7 @@ export default class Server {
 				testedCapabilities.brokenWindowSwitch = true;
 			}
 			else {
-				testedCapabilities.brokenWindowSwitch = session.getCurrentWindowHandle().then(function (handle: any) {
+				testedCapabilities.brokenWindowSwitch = session.getCurrentWindowHandle().then(function (handle) {
 					return session.switchToWindow(handle);
 				}).then(works, broken);
 			}
@@ -916,15 +919,15 @@ export default class Server {
 			// At least ios-driver 0.6.6-SNAPSHOT April 2014 will never complete a refresh call
 			testedCapabilities.brokenRefresh = function () {
 				return session.get('about:blank?1').then(function () {
-					return new Promise(function (resolve, reject, progress, setCanceler) {
-						function cleanup() {
-							clearTimeout(timer);
-							refresh.cancel();
-						}
+					let timer: any;
+					let refresh: CancelablePromise<any>;
 
-						setCanceler(cleanup);
-
-						const refresh = session.refresh().then(function () {
+					function cleanup() {
+						clearTimeout(timer);
+						refresh.cancel();
+					}
+					return new CancelablePromise(function (resolve, reject) {
+						refresh = session.refresh().then(function () {
 							cleanup();
 							resolve(false);
 						}, function () {
@@ -932,14 +935,14 @@ export default class Server {
 							resolve(true);
 						});
 
-						const timer = setTimeout(function () {
+						timer = setTimeout(function () {
 							cleanup();
 						}, 2000);
-					});
+					}, () => cleanup());
 				}).catch(broken);
 			};
 
-			if (isGeckoDriver(capabilities)) {
+			if (isGeckodriver(capabilities)) {
 				// At least geckodriver 0.11 and Firefox 49 don't implement mouse control, so everything will need to be
 				// simulated.
 				testedCapabilities.brokenMouseEvents = true;
@@ -958,7 +961,7 @@ export default class Server {
 					}).then(function () {
 						return util.sleep(100);
 					}).then(function () {
-						return session.execute('return counter;');
+						return session.execute('return window.counter;');
 					}).then(
 						function (counter) {
 							return counter > 0 ? works() : broken();
@@ -971,7 +974,7 @@ export default class Server {
 				// element is attempted
 				testedCapabilities.brokenHtmlMouseMove = function () {
 					return get('<!DOCTYPE html><html></html>').then(function () {
-						return session.findByTagName('html').then(function (element: Element) {
+						return session.findByTagName('html').then(function (element) {
 							return session.moveMouseTo(element, 0, 0);
 						});
 					}).then(works, broken);
@@ -979,14 +982,12 @@ export default class Server {
 
 				// At least ChromeDriver 2.9.248307 does not correctly emit the entire sequence of events that would
 				// normally occur during a double-click
-				testedCapabilities.brokenDoubleClick = function retry(): any {
-					/*jshint maxlen:200 */
-
+				testedCapabilities.brokenDoubleClick = function retry(): CancelablePromise<any> {
 					// InternetExplorerDriver is not buggy, but IE9 in quirks-mode is; since we cannot do feature
 					// tests in standards-mode in IE<10, force the value to false since it is not broken in this
 					// browser
 					if (capabilities.browserName === 'internet explorer' && capabilities.version === '9') {
-						return Promise.resolve(false);
+						return CancelablePromise.resolve(false);
 					}
 
 					return get('<!DOCTYPE html><script>window.counter = 0; var d = document; d.onclick = d.onmousedown = d.onmouseup = function () { window.counter++; };</script>').then(function () {
@@ -1013,13 +1014,13 @@ export default class Server {
 
 			if (capabilities.touchEnabled) {
 				// At least Selendroid 0.9.0 fails to perform a long tap due to an INJECT_EVENTS permission failure
-				testedCapabilities.brokenLongTap = session.findByTagName('body').then(function (element: Element) {
+				testedCapabilities.brokenLongTap = session.findByTagName('body').then(function (element) {
 					return session.longTap(element);
 				}).then(works, broken);
 
 				// At least ios-driver 0.6.6-SNAPSHOT April 2014 claims to support touch press/move/release but
 				// actually fails when you try to use the commands
-				testedCapabilities.brokenMoveFinger = session.pressFinger(0, 0).then(works, function (error: Error) {
+				testedCapabilities.brokenMoveFinger = session.pressFinger(0, 0).then(works, function (error) {
 					return error.name === 'UnknownCommand' || error.message.indexOf('need to specify the JS') > -1;
 				});
 
@@ -1035,7 +1036,7 @@ export default class Server {
 							return true;
 						}
 
-						return session.findById('a').then(function (element: Element) {
+						return session.findById('a').then(function (element) {
 							return session.touchScroll(element, 0, 0);
 						}).then(function () {
 							return session.execute('return window.scrollY !== 3000;');
@@ -1060,28 +1061,27 @@ export default class Server {
 				testedCapabilities.brokenCssTransformedSize = function () {
 					/*jshint maxlen:240 */
 					return get('<!DOCTYPE html><style>#a{width:8px;height:8px;-ms-transform:scale(0.5);-moz-transform:scale(0.5);-webkit-transform:scale(0.5);transform:scale(0.5);}</style><div id="a"></div>').then(function () {
-						return session.execute('return document.getElementById("a");').then(function (element: Element) {
+						return session.execute('return document.getElementById("a");').then(function (element) {
 							return element.getSize();
-						}).then(function (dimensions: { width: number, height: number }) {
+						}).then(function (dimensions) {
 							return dimensions.width !== 4 || dimensions.height !== 4;
 						});
 					}).catch(broken);
 				};
 			}
 
-			return Promise.all(testedCapabilities);
+			return CancelablePromise.all(testedCapabilities);
 		}
 
 		function discoverServerFeatures() {
 			const testedCapabilities: any = {};
 
-			/* jshint maxlen:300 */
 			// Check that the remote server will accept file uploads. There is a secondary test in discoverDefects that
 			// checks whether the server allows typing into file inputs.
 			testedCapabilities.remoteFiles = function () {
 				return session['_post']('file', {
 					file: 'UEsDBAoAAAAAAD0etkYAAAAAAAAAAAAAAAAIABwAdGVzdC50eHRVVAkAA2WnXlVlp15VdXgLAAEE8gMAAATyAwAAUEsBAh4DCgAAAAAAPR62RgAAAAAAAAAAAAAAAAgAGAAAAAAAAAAAAKSBAAAAAHRlc3QudHh0VVQFAANlp15VdXgLAAEE8gMAAATyAwAAUEsFBgAAAAABAAEATgAAAEIAAAAAAA=='
-				}).then(function (filename: string) {
+				}).then(function (filename) {
 					return filename && filename.indexOf('test.txt') > -1;
 				}).catch(unsupported);
 			};
@@ -1089,7 +1089,7 @@ export default class Server {
 			// The window sizing commands in the W3C standard don't use window handles, but they do under the
 			// JsonWireProtocol. By default, Session assumes handles are used. When the result of this check is added to
 			// capabilities, Session will take it into account.
-			testedCapabilities.implicitWindowHandles = session.getWindowSize().then(unsupported, function (error: Error) {
+			testedCapabilities.implicitWindowHandles = session.getWindowSize().then(unsupported, function (error) {
 				return error.name === 'UnknownCommand';
 			});
 
@@ -1135,7 +1135,7 @@ export default class Server {
 			}
 
 			// The W3C WebDriver standard does not support the session-level /keys command, but JsonWireProtocol does.
-			if (isGeckoDriver(capabilities)) {
+			if (isGeckodriver(capabilities)) {
 				testedCapabilities.supportsKeysCommand = false;
 			}
 			else {
@@ -1143,15 +1143,15 @@ export default class Server {
 					unsupported);
 			}
 
-			return Promise.all(testedCapabilities);
+			return CancelablePromise.all(testedCapabilities);
 		}
 
 		if (capabilities._filled) {
-			return Promise.resolve(session);
+			return CancelablePromise.resolve(session);
 		}
 
 		// At least geckodriver 0.11 and Firefox 49+ may hang when getting 'about:blank' in the first request
-		const promise: Promise<Session|void> = isGeckoDriver(capabilities) ? Promise.resolve(session) : session.get('about:blank');
+		const promise: CancelablePromise<Session|void> = isGeckodriver(capabilities) ? CancelablePromise.resolve(session) : session.get('about:blank');
 
 		return promise
 			.then(discoverServerFeatures)
@@ -1168,17 +1168,15 @@ export default class Server {
 					value: true,
 					configurable: true
 				});
-				return session.get('about:blank').finally(function () {
-					return session;
-				});
+				return session.get('about:blank').then(() => session, () => session);
 			});
 	}
 
 	/**
 	 * Gets a list of all currently active remote control sessions on this server.
 	 */
-	getSessions(): Promise<any[]> {
-		return this._get('sessions').then(function (sessions: any[]) {
+	getSessions(): CancelablePromise<Session[]> {
+		return this._get('sessions').then(function (sessions: any) {
 			// At least BrowserStack is now returning an array for the sessions response
 			if (sessions && !Array.isArray(sessions)) {
 				sessions = returnValue(sessions);
@@ -1201,14 +1199,14 @@ export default class Server {
 	 * by this command will not include any of the extra session capabilities detected by Leadfoot and may be
 	 * inaccurate.
 	 */
-	getSessionCapabilities(sessionId: string): Promise<any> {
+	getSessionCapabilities(sessionId: string): CancelablePromise<Capabilities> {
 		return this._get('session/$0', null, [ sessionId ]).then(returnValue);
 	}
 
 	/**
 	 * Terminates a session on the server.
 	 */
-	deleteSession(sessionId: string): Promise<void> {
-		return this._delete('session/$0', null, [ sessionId ]).then(returnValue);
+	deleteSession(sessionId: string): CancelablePromise<void> {
+		return this._delete('session/$0', null, [ sessionId ]).then(noop);
 	}
 }

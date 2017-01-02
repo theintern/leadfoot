@@ -9,15 +9,20 @@
   "license": "BSD-3-Clause",
   "dependencies": {
     "dojo": "2.0.0-alpha.7",
+    "dojo-core": "^2.0.0-alpha.18",
+    "dojo-has": "^2.0.0-alpha.6",
+    "dojo-interfaces": "^2.0.0-alpha.9",
+    "dojo-shim": "^2.0.0-beta.7",
+    "dojo-streams": "^2.0.0-alpha.1",
     "jszip": "2.5.0"
   },
   "devDependencies": {
-    "@types/node": "6.0.48",
+    "@types/node": "^6.0.54",
     "dojo-loader": "~2.0.0-beta.7",
     "intern": "~3.4.2",
+    "intern-dev": "https://github.com/theintern/intern-dev/releases/download/0.1.0/intern-dev-0.1.0.tgz",
     "tslint": "~4.0.2",
-    "typescript": "~2.1.4",
-    "intern-dev": "https://github.com/theintern/intern-dev/releases/download/0.1.0/intern-dev-0.1.0.tgz"
+    "typescript": "~2.1.4"
   },
   "scripts": {
     "clean": "intern-dev-clean",
@@ -37,5 +42,12 @@
     "browserstack",
     "testingbot"
   ],
+  "internDev": {
+    "resources": {
+      ".": [
+        "tests/**/*.txt"
+      ]
+    }
+  },
   "homepage": "http://github.com/theintern/leadfoot"
 }

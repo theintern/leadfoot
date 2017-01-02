@@ -1,4 +1,4 @@
-import Promise = require('dojo/Promise');
+import CancelablePromise from './CancelablePromise';
 import statusCodes from './statusCodes';
 import Element from '../Element';
 import Session from '../Session';
@@ -33,7 +33,7 @@ abstract class FindDisplayed<E> {
 						}
 					}
 
-					return Promise.resolve(checkElement()).then(function (element) {
+					return CancelablePromise.resolve(checkElement()).then(function (element) {
 						if (element) {
 							return element;
 						}

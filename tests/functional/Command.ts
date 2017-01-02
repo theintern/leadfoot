@@ -4,7 +4,7 @@ import * as util from './support/util';
 import Command, { Context } from 'src/Command';
 import Session from 'src/Session';
 import { IRequire } from 'dojo/loader';
-import Promise = require('dojo/Promise');
+import CancelablePromise from 'src/lib/CancelablePromise';
 import Test = require('intern/lib/Test');
 
 declare const require: IRequire;
@@ -49,7 +49,7 @@ registerSuite(function () {
 			'invalid async command': function () {
 				const command: any = new Command(session).sleep(100);
 				Command.addSessionMethod(command, 'invalid', function () {
-					return new Promise(function (resolve, reject) {
+					return new CancelablePromise(function (resolve, reject) {
 						setTimeout(function () {
 							reject(new Error('Invalid call'));
 						}, 0);
@@ -91,7 +91,7 @@ registerSuite(function () {
 			const dfd = this.async();
 			const parent = new Command(session, function (setContext) {
 				setContext('foo');
-				return Promise.resolve('bar');
+				return CancelablePromise.resolve('bar');
 			});
 
 			const expectedContext: Context = [ 'foo' ];
@@ -273,9 +273,9 @@ registerSuite(function () {
 			let callback: Function;
 			let errback: Function;
 			const expected = function () {};
-			command.then = <any> function () {
-				callback = arguments[0];
-				errback = arguments[1];
+			command.then = <any> function (cb: Function, eb: Function) {
+				callback = cb;
+				errback = eb;
 				return 'thenCalled';
 			};
 			const result = command.finally(expected);
@@ -305,7 +305,7 @@ registerSuite(function () {
 			});
 
 			Command.addSessionMethod(command, 'newContext', util.forCommand(function () {
-				return Promise.resolve('b');
+				return CancelablePromise.resolve('b');
 			}, { createsContext: true }));
 
 			return command.newContext().then(function (this: Command<any>) {
@@ -323,7 +323,7 @@ registerSuite(function () {
 				setContext({
 					elementId: 'farts',
 					newContext: util.forCommand(function () {
-						return Promise.resolve('b');
+						return CancelablePromise.resolve('b');
 					}, { createsContext: true })
 				});
 			});

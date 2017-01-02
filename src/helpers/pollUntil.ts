@@ -1,6 +1,6 @@
 import * as util from '../lib/util';
 import Command from '../Command';
-import Promise = require('dojo/Promise');
+import CancelablePromise from '../lib/CancelablePromise';
 
 /**
  * A [[Command]] helper that polls for a value within the client environment until the value exists
@@ -12,7 +12,7 @@ import Promise = require('dojo/Promise');
  *
  * @param args
  * An array of arguments to pass to the poller function when it is invoked. Only values that can be serialised to JSON,
- * plus {@link module:leadfoot/Element} objects, can be specified as arguments.
+ * plus [[Element]] objects, can be specified as arguments.
  *
  * @param timeout
  * The maximum amount of time to wait for a successful result, in milliseconds. If not specified, the current
@@ -60,9 +60,9 @@ import Promise = require('dojo/Promise');
  *     });
  * ```
  */
-export default function pollUntil(poller: Function|string, args?: any[], timeout?: number, pollInterval?: number): () => Promise<any>;
-export default function pollUntil(poller: Function|string, timeout?: number, pollInterval?: number): () => Promise<any>;
-export default function pollUntil(...allArgs: any[]): () => Promise<any> {
+export default function pollUntil(poller: Function|string, args?: any[], timeout?: number, pollInterval?: number): () => CancelablePromise<any>;
+export default function pollUntil(poller: Function|string, timeout?: number, pollInterval?: number): () => CancelablePromise<any>;
+export default function pollUntil(...allArgs: any[]): () => CancelablePromise<any> {
 	let [ poller, args, timeout, pollInterval ] = allArgs;
 	if (typeof args === 'number') {
 		pollInterval = timeout;

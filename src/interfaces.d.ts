@@ -1,10 +1,9 @@
-import Promise = require('dojo/Promise');
+import CancelablePromise from './lib/CancelablePromise';
 import { Url } from 'url';
 
 export interface Capabilities {
 	_filled?: boolean;
 	applicationCacheEnabled?: boolean;
-	brokenEmptyPost?: boolean;
 	brokenActiveElement?: boolean;
 	brokenClick?: boolean;
 	brokenComputedStyles?: boolean;
@@ -17,7 +16,9 @@ export interface Capabilities {
 	brokenElementDisplayedOpacity?: boolean;
 	brokenElementPosition?: boolean;
 	brokenElementSerialization?: boolean;
+	brokenEmptyPost?: boolean;
 	brokenExecuteElementReturn?: boolean;
+	brokenExecuteForNonHttpUrl?: boolean;
 	brokenExecuteUndefinedReturn?: boolean;
 	brokenFileSendKeys?: boolean;
 	brokenFlickFinger?: boolean;
@@ -46,7 +47,7 @@ export interface Capabilities {
 	deviceName?: string;
 	dynamicViewport?: boolean;
 	fixSessionCapabilities?: string|boolean;
-	fixedLogTypes?: false|string[]|Promise<string[]>;
+	fixedLogTypes?: false|string[]|CancelablePromise<string[]>;
 	handleAlerts?: boolean;
 	handlesAlerts?: boolean;
 	hasTouchScreen?: boolean;
@@ -55,6 +56,7 @@ export interface Capabilities {
 	isWebDriver?: boolean;
 	locationContextEnabled?: boolean;
 	mouseEnabled?: boolean;
+	nativeEvents?: boolean;
 	platform?: string;
 	platformName?: string;
 	platformVersion?: string;
@@ -62,6 +64,7 @@ export interface Capabilities {
 	returnsFromClickImmediately?: boolean;
 	rotatable?: boolean;
 	scriptedParentFrameCrashesBrowser?: boolean;
+	shortcutKey?: any;
 	supportsCssTransforms?: boolean;
 	supportsExecuteAsync?: boolean;
 	supportsKeysCommand?: boolean;
@@ -101,4 +104,8 @@ export interface LeadfootURL extends Url {
 	username?: string;
 	password?: string;
 	accessKey?: string;
+}
+
+export interface LeadfootError extends Error {
+	response?: { text: string };
 }

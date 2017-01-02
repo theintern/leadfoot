@@ -1,47 +1,30 @@
-/**
- * Common utility methods.
- * @module leadfoot/util
- */
-
-import * as lang from 'dojo/lang';
-import Promise = require('dojo/Promise');
+import CancelablePromise from './CancelablePromise';
+import { mixin } from 'dojo-core/lang';
 
 /**
  * Creates a promise that resolves itself after `ms` milliseconds.
  *
- * @param {number} ms Time until resolution in milliseconds.
- * @returns {Promise.<void>}
+ * @param ms Time until resolution in milliseconds.
  */
-export function sleep(ms: number): Promise<void> {
-	return new Promise<void>(function (resolve, reject, progress, setCanceller) {
-		setCanceller(function (reason) {
-			clearTimeout(timer);
-			throw reason;
-		});
-
-		const timer = setTimeout(() => {
+export function sleep(ms: number): CancelablePromise<void> {
+	let timer: any;
+	return new CancelablePromise<void>(function (resolve) {
+		timer = setTimeout(() => {
 			resolve();
 		}, ms);
-	});
+	}, () => clearTimeout(timer));
 }
 
 /**
- * Annotates the method with additional properties that provide guidance to {@link module:leadfoot/Command} about
+ * Annotates the method with additional properties that provide guidance to [[Command]] about
  * how the method interacts with stored context elements.
- *
- * @param {Function} fn
- * @param {{ usesElement: boolean=, createsContext: boolean= }} properties
- * @returns {Function}
  */
 export function forCommand(fn: Function, properties: { usesElement?: boolean, createsContext?: boolean }): Function {
-	return lang.mixin(fn, properties);
+	return mixin(fn, properties);
 }
 
 /**
  * Converts a function to a string representation suitable for use with the `execute` API endpoint.
- *
- * @param {Function|string} fn
- * @returns {string}
  */
 export function toExecuteString(fn: Function|string): string {
 	if (typeof fn === 'function') {

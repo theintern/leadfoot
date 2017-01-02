@@ -4,11 +4,12 @@ import * as util from './support/util';
 import { strategies, suffixes } from 'src/lib/strategies';
 import Element from 'src/Element';
 import Session from 'src/Session';
-import { IRequire } from 'dojo/loader';
-import Promise = require('dojo/Promise');
+import CancelablePromise from 'src/lib/CancelablePromise';
 import Test = require('intern/lib/Test');
 
-declare const require: IRequire;
+function toUrl(url: string): string {
+	return (<any> require).toUrl(url);
+}
 
 function createStubbedSuite(stubbedMethodName: string, testMethodName: string, placeholders: string[], firstArguments: any[]) {
 	let originalMethod: Function;
@@ -88,7 +89,7 @@ registerSuite(function () {
 			return {
 				setup: function () {
 					resetBrowserState = false;
-					return session.get(require.toUrl('tests/functional/data/elements.html')).then(function () {
+					return session.get(toUrl('tests/functional/data/elements.html')).then(function () {
 						return session.find('id', 'h');
 					}).then(function (_element) {
 						element = _element;
@@ -172,6 +173,7 @@ registerSuite(function () {
 				},
 
 				'non-existent': function () {
+					debugger;
 					return element.find('id', 'does-not-exist').then(
 						function () {
 							throw new Error('Requesting non-existing element should throw error');
@@ -187,7 +189,7 @@ registerSuite(function () {
 		'#find (with implicit timeout)': (function () {
 			let startTime: number;
 			return function () {
-				return session.get(require.toUrl('tests/functional/data/elements.html')).then(function () {
+				return session.get(toUrl('tests/functional/data/elements.html')).then(function () {
 					return session.setTimeout('implicit', 2000);
 				}).then(function () {
 					return session.find('id', 'h');
@@ -225,7 +227,7 @@ registerSuite(function () {
 						' should look like an element object');
 				});
 
-				return Promise.all(elements.map(function (element) {
+				return CancelablePromise.all(elements.map(function (element) {
 					return element.getAttribute('id');
 				}));
 			}
@@ -235,7 +237,7 @@ registerSuite(function () {
 			return {
 				setup: function () {
 					resetBrowserState = false;
-					return session.get(require.toUrl('tests/functional/data/elements.html')).then(function () {
+					return session.get(toUrl('tests/functional/data/elements.html')).then(function () {
 						return session.find('id', 'h');
 					}).then(function (_element) {
 						element = _element;
@@ -371,7 +373,7 @@ registerSuite(function () {
 				this.skip('mouse not enabled');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/pointer.html')).then(function () {
+			return session.get(toUrl('tests/functional/data/pointer.html')).then(function () {
 				return session.findById('a');
 			}).then(function (element) {
 				return element.click();
@@ -388,7 +390,7 @@ registerSuite(function () {
 		},
 
 		'#submit (submit button)': function () {
-			return session.get(require.toUrl('tests/functional/data/form.html')).then(function () {
+			return session.get(toUrl('tests/functional/data/form.html')).then(function () {
 				return session.getCurrentUrl();
 			}).then(function (expectedUrl) {
 				return session.findById('input').then(function (element) {
@@ -407,7 +409,7 @@ registerSuite(function () {
 		},
 
 		'#submit (form)': function () {
-			return session.get(require.toUrl('tests/functional/data/form.html')).then(function () {
+			return session.get(toUrl('tests/functional/data/form.html')).then(function () {
 				return session.getCurrentUrl();
 			}).then(function (expectedUrl) {
 				return session.findById('input').then(function (element) {
@@ -426,7 +428,7 @@ registerSuite(function () {
 		},
 
 		'#getVisibleText': function () {
-			return session.get(require.toUrl('tests/functional/data/elements.html')).then(function () {
+			return session.get(toUrl('tests/functional/data/elements.html')).then(function () {
 				return session.findById('c3');
 			}).then(function (element) {
 				return element.getVisibleText();
@@ -436,7 +438,7 @@ registerSuite(function () {
 		},
 
 		'#getVisibleText (multi-line)': function () {
-			return session.get(require.toUrl('tests/functional/data/elements.html')).then(function () {
+			return session.get(toUrl('tests/functional/data/elements.html')).then(function () {
 				return session.findById('i4');
 			}).then(function (element) {
 				return element.getVisibleText();
@@ -456,7 +458,7 @@ registerSuite(function () {
 
 		'#type': function () {
 			// TODO: Complex characters, tabs and arrows, copy and paste
-			return session.get(require.toUrl('tests/functional/data/form.html')).then(function () {
+			return session.get(toUrl('tests/functional/data/form.html')).then(function () {
 				return session.findById('input');
 			}).then(function (element) {
 				return element.type('hello, world').then(function () {
@@ -472,12 +474,11 @@ registerSuite(function () {
 				this.skip('Remote file uploads not supported by server');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/upload.html')).then(function () {
+			return session.get(toUrl('./data/upload.html')).then(function () {
 				return session.findById('file');
 			}).then(function (element) {
-				return element.type(require.toUrl('tests/functional/data/upload.txt'));
+				return element.type(toUrl('./data/upload.txt'));
 			}).then(function () {
-				/* global document:false */
 				return session.execute(function () {
 					const file = (<any> document.getElementById('file')).files[0];
 					return { name: file.name, size: file.size };
@@ -491,7 +492,7 @@ registerSuite(function () {
 		},
 
 		'#getTagName': function () {
-			return session.get(require.toUrl('tests/functional/data/default.html')).then(function () {
+			return session.get(toUrl('tests/functional/data/default.html')).then(function () {
 				return session.findByTagName('body');
 			}).then(function (element) {
 				return element.getTagName();
@@ -501,7 +502,7 @@ registerSuite(function () {
 		},
 
 		'#clearValue': function () {
-			return session.get(require.toUrl('tests/functional/data/form.html')).then(function () {
+			return session.get(toUrl('tests/functional/data/form.html')).then(function () {
 				return session.findById('input2');
 			}).then(function (element) {
 				return element.getProperty('value').then(function (value) {
@@ -516,7 +517,7 @@ registerSuite(function () {
 		},
 
 		'#isSelected (radio button)': function () {
-			return session.get(require.toUrl('tests/functional/data/form.html')).then(function () {
+			return session.get(toUrl('tests/functional/data/form.html')).then(function () {
 				return session.findById('radio1');
 			}).then(function (element) {
 				return element.isSelected().then(function (isSelected) {
@@ -541,7 +542,7 @@ registerSuite(function () {
 		'#isSelected (checkbox)': {
 			setup: function () {
 				resetBrowserState = false;
-				return session.get(require.toUrl('tests/functional/data/form.html'));
+				return session.get(toUrl('tests/functional/data/form.html'));
 			},
 
 			teardown: function () {
@@ -575,7 +576,7 @@ registerSuite(function () {
 		'#isSelected (drop-down)': {
 			setup: function () {
 				resetBrowserState = false;
-				return session.get(require.toUrl('tests/functional/data/form.html'));
+				return session.get(toUrl('tests/functional/data/form.html'));
 			},
 
 			teardown: function () {
@@ -623,7 +624,7 @@ registerSuite(function () {
 		},
 
 		'#isEnabled': function () {
-			return session.get(require.toUrl('tests/functional/data/form.html')).then(function () {
+			return session.get(toUrl('tests/functional/data/form.html')).then(function () {
 				return session.findById('input');
 			}).then(function (element) {
 				return element.isEnabled();
@@ -639,7 +640,7 @@ registerSuite(function () {
 
 		'#getSpecAttribute': function () {
 			/*jshint maxlen:140 */
-			return session.get(require.toUrl('tests/functional/data/form.html')).then(function () {
+			return session.get(toUrl('tests/functional/data/form.html')).then(function () {
 				return session.findById('input2');
 			}).then(function (element) {
 				return element.getSpecAttribute('value').then(function (value) {
@@ -670,7 +671,7 @@ registerSuite(function () {
 				return element.getSpecAttribute('disabled');
 			}).then(function (isDisabled) {
 				assert.strictEqual(isDisabled, 'true', 'True boolean attributes must return string value per the spec');
-				return session.get(require.toUrl('tests/functional/data/elements.html'));
+				return session.get(toUrl('tests/functional/data/elements.html'));
 			}).then(function () {
 				return session.findById('c');
 			}).then(function (element) {
@@ -689,7 +690,7 @@ registerSuite(function () {
 		},
 
 		'#getAttribute': function () {
-			return session.get(require.toUrl('tests/functional/data/form.html')).then(function () {
+			return session.get(toUrl('tests/functional/data/form.html')).then(function () {
 				return session.findById('form');
 			}).then(function (element) {
 				return element.getAttribute('action');
@@ -697,7 +698,7 @@ registerSuite(function () {
 				assert.strictEqual(action, 'form.html');
 				return session.findById('disabled');
 			}).then(function (element) {
-				return Promise.all({
+				return CancelablePromise.all({
 					'non-existing': element.getAttribute('non-existing'),
 					disabled: element.getAttribute('disabled')
 				});
@@ -708,7 +709,7 @@ registerSuite(function () {
 		},
 
 		'#getProperty': function () {
-			return session.get(require.toUrl('tests/functional/data/form.html')).then(function () {
+			return session.get(toUrl('tests/functional/data/form.html')).then(function () {
 				return session.findById('form');
 			}).then(function (element) {
 				return element.getProperty('action');
@@ -716,7 +717,7 @@ registerSuite(function () {
 				assert.operator(action.indexOf('http'), '===', 0);
 				return session.findById('disabled');
 			}).then(function (element) {
-				return Promise.all({
+				return CancelablePromise.all({
 					'non-existing': element.getProperty('non-existing'),
 					disabled: element.getProperty('disabled')
 				});
@@ -727,7 +728,7 @@ registerSuite(function () {
 		},
 
 		'#equals': function () {
-			return session.get(require.toUrl('tests/functional/data/elements.html')).then(function () {
+			return session.get(toUrl('tests/functional/data/elements.html')).then(function () {
 				return session.findById('a');
 			}).then(function (element) {
 				return session.findById('z').then(function (element2) {
@@ -765,7 +766,7 @@ registerSuite(function () {
 			const suite = {
 				setup: function () {
 					resetBrowserState = false;
-					return session.get(require.toUrl('tests/functional/data/visibility.html'));
+					return session.get(toUrl('tests/functional/data/visibility.html'));
 				},
 				teardown: function () {
 					resetBrowserState = true;
@@ -802,7 +803,7 @@ registerSuite(function () {
 			const suite = {
 				setup: function () {
 					resetBrowserState = false;
-					return session.get(require.toUrl('tests/functional/data/dimensions.html'));
+					return session.get(toUrl('tests/functional/data/dimensions.html'));
 				},
 				teardown: function () {
 					resetBrowserState = true;
@@ -837,7 +838,7 @@ registerSuite(function () {
 			const suite = {
 				setup: function () {
 					resetBrowserState = false;
-					return session.get(require.toUrl('tests/functional/data/dimensions.html')).then(function () {
+					return session.get(toUrl('tests/functional/data/dimensions.html')).then(function () {
 						return session.execute('return document.body.offsetWidth;');
 					}).then(function (width) {
 						documentWidth = width;
@@ -874,7 +875,7 @@ registerSuite(function () {
 			/*jshint maxlen:140 */
 
 			// TODO: Spec: pseudo-elements?
-			return session.get(require.toUrl('tests/functional/data/dimensions.html')).then(function () {
+			return session.get(toUrl('tests/functional/data/dimensions.html')).then(function () {
 				return session.findById('a');
 			}).then(function (element) {
 				return element.getComputedStyle('background-color').then(function (style) {

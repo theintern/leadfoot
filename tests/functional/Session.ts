@@ -2,16 +2,18 @@ import registerSuite = require('intern!object');
 import * as assert from 'intern/chai!assert';
 import * as util from './support/util';
 import { strategies, suffixes } from 'src/lib/strategies';
-import { IRequire } from 'dojo/loader';
 import Element from 'src/Element';
 import { WebDriverCookie, Geolocation } from 'src/interfaces';
-import Promise = require('dojo/Promise');
+import CancelablePromise from 'src/lib/CancelablePromise';
 import Test = require('intern/lib/Test');
 
-declare const require: IRequire;
 declare let interns: any;
 
 type Position = { x: number, y: number };
+
+function toUrl(url: string) {
+	return (<any> require).toUrl(url);
+}
 
 registerSuite(function () {
 	let session: any;
@@ -69,7 +71,7 @@ registerSuite(function () {
 				this.skip('web storage not enabled');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/default.html')).then(function () {
+			return session.get(toUrl('./data/default.html')).then(function () {
 				return session[set]('foo', 'foo');
 			}).then(function () {
 				return session[clear]();
@@ -211,15 +213,15 @@ registerSuite(function () {
 		},
 
 		'#get'() {
-			return session.get(require.toUrl('tests/functional/data/default.html'));
+			return session.get(toUrl('./data/default.html'));
 		},
 
 		'#get 404'() {
-			return session.get(require.toUrl('tests/functional/data/404.html'));
+			return session.get(toUrl('./data/404.html'));
 		},
 
 		'#getCurrentUrl'(this: Test) {
-			const expectedUrl = util.convertPathToUrl(this.remote, require.toUrl('tests/functional/data/default.html'));
+			const expectedUrl = util.convertPathToUrl(this.remote, toUrl('./data/default.html'));
 
 			return session.get(expectedUrl).then(function () {
 				return session.getCurrentUrl();
@@ -233,8 +235,8 @@ registerSuite(function () {
 				this.skip('navigation is broken');
 			}
 
-			const expectedUrl = util.convertPathToUrl(this.remote, require.toUrl('tests/functional/data/default.html?second'));
-			const expectedBackUrl = util.convertPathToUrl(this.remote, require.toUrl('tests/functional/data/default.html?first'));
+			const expectedUrl = util.convertPathToUrl(this.remote, toUrl('./data/default.html?second'));
+			const expectedBackUrl = util.convertPathToUrl(this.remote, toUrl('./data/default.html?first'));
 
 			return session.get(expectedBackUrl).then(function () {
 				return session.get(expectedUrl);
@@ -258,7 +260,7 @@ registerSuite(function () {
 		},
 
 		'#execute string'() {
-			return session.get(require.toUrl('tests/functional/data/scripting.html'))
+			return session.get(toUrl('./data/scripting.html'))
 				.then(function () {
 					return session.execute(
 						'return interns[arguments[0]] + interns[arguments[1]];',
@@ -271,7 +273,7 @@ registerSuite(function () {
 		},
 
 		'#execute function'() {
-			return session.get(require.toUrl('tests/functional/data/scripting.html'))
+			return session.get(toUrl('./data/scripting.html'))
 				.then(function () {
 					return session.execute(function (first: string, second: string) {
 						/*global interns:false */
@@ -288,7 +290,7 @@ registerSuite(function () {
 				this.skip('execute element broken');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/scripting.html'))
+			return session.get(toUrl('./data/scripting.html'))
 				.then(function () {
 					return session.execute(function () {
 						return document.getElementById('child');
@@ -307,7 +309,7 @@ registerSuite(function () {
 				this.skip('execute element broken');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/scripting.html'))
+			return session.get(toUrl('./data/scripting.html'))
 				.then(function () {
 					return session.execute(function () {
 						return [ interns.poo, document.getElementById('child') ];
@@ -324,7 +326,7 @@ registerSuite(function () {
 		},
 
 		'#execute -> error'() {
-			return session.get(require.toUrl('tests/functional/data/scripting.html'))
+			return session.get(toUrl('./data/scripting.html'))
 				.then(function () {
 					return session.execute(function () {
 						/*global interns:false */
@@ -343,9 +345,9 @@ registerSuite(function () {
 		},
 
 		'#execute -> undefined'() {
-			return session.get(require.toUrl('tests/functional/data/scripting.html'))
+			return session.get(toUrl('./data/scripting.html'))
 				.then(function () {
-					return Promise.all([
+					return CancelablePromise.all([
 						session.execute('return "not undefined";'),
 						session.execute('return undefined;')
 					]);
@@ -386,7 +388,7 @@ registerSuite(function () {
 						this.skip('executeAsync not supported');
 					}
 
-					return session.get(require.toUrl('tests/functional/data/scripting.html'))
+					return session.get(toUrl('./data/scripting.html'))
 						.then(function () {
 							/*jshint maxlen:140 */
 							return session.executeAsync(
@@ -404,7 +406,7 @@ registerSuite(function () {
 						this.skip('executeAsync not supported');
 					}
 
-					return session.get(require.toUrl('tests/functional/data/scripting.html'))
+					return session.get(toUrl('./data/scripting.html'))
 						.then(function () {
 							return session.executeAsync(function (first: string, second: string, done: Function) {
 								setTimeout(function () {
@@ -421,7 +423,7 @@ registerSuite(function () {
 						this.skip('executeAsync not supported');
 					}
 
-					return session.get(require.toUrl('tests/functional/data/scripting.html'))
+					return session.get(toUrl('./data/scripting.html'))
 						.then(function () {
 							return session.executeAsync(function (done: Function) {
 								/*global interns:false */
@@ -471,7 +473,7 @@ registerSuite(function () {
 				this.skip('switch to parent frame not supported');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/window.html')).then(function () {
+			return session.get(toUrl('./data/window.html')).then(function () {
 				return session.findById('child');
 			})
 			.then(function (child: any) {
@@ -520,7 +522,7 @@ registerSuite(function () {
 			let popupHandle: string;
 			let allHandles: string[];
 
-			return session.get(require.toUrl('tests/functional/data/window.html')).then(function () {
+			return session.get(toUrl('./data/window.html')).then(function () {
 				return session.getAllWindowHandles();
 			}).then(function (handles: string[]) {
 				allHandles = handles;
@@ -532,7 +534,7 @@ registerSuite(function () {
 				return opener.click();
 			}).then(function () {
 				// Give the new window time to open
-				return new Promise(function (resolve) {
+				return new CancelablePromise(function (resolve) {
 					setTimeout(resolve, 1000);
 				});
 			}).then(function () {
@@ -628,7 +630,7 @@ registerSuite(function () {
 				this.skip('cookies are broken');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/default.html')).then(function () {
+			return session.get(toUrl('./data/default.html')).then(function () {
 				return session.setCookie({ name: 'foo', value: '1=3' });
 			}).then(function () {
 				return session.clearCookies();
@@ -681,7 +683,7 @@ registerSuite(function () {
 
 		'#getPageSource'() {
 			// Page source is serialised from the current DOM, so will not match the original source on file
-			return session.get(require.toUrl('tests/functional/data/default.html')).then(function () {
+			return session.get(toUrl('./data/default.html')).then(function () {
 				return session.getPageSource();
 			}).then(function (source: string) {
 				assert.include(source, '<meta charset="utf-8"');
@@ -691,7 +693,7 @@ registerSuite(function () {
 		},
 
 		'#getPageTitle'() {
-			return session.get(require.toUrl('tests/functional/data/default.html')).then(function () {
+			return session.get(toUrl('./data/default.html')).then(function () {
 				return session.getPageTitle();
 			}).then(function (pageTitle: string) {
 				assert.strictEqual(pageTitle, 'Default & <b>default</b>');
@@ -707,7 +709,7 @@ registerSuite(function () {
 			return {
 				setup() {
 					resetBrowserState = false;
-					return session.get(require.toUrl('tests/functional/data/elements.html'));
+					return session.get(toUrl('./data/elements.html'));
 				},
 
 				teardown() {
@@ -812,7 +814,7 @@ registerSuite(function () {
 		'#find (with implicit timeout)': (function () {
 			let startTime: number;
 			return function () {
-				return session.get(require.toUrl('tests/functional/data/elements.html')).then(function () {
+				return session.get(toUrl('./data/elements.html')).then(function () {
 					return session.setTimeout('implicit', 2000);
 				}).then(function () {
 					startTime = Date.now();
@@ -852,7 +854,7 @@ registerSuite(function () {
 						' should look like an element object');
 				});
 
-				return Promise.all(elements.map(function (element: Element) {
+				return CancelablePromise.all(elements.map(function (element: Element) {
 					return element.getAttribute('id');
 				}));
 			}
@@ -860,7 +862,7 @@ registerSuite(function () {
 			return {
 				setup() {
 					resetBrowserState = false;
-					return session.get(require.toUrl('tests/functional/data/elements.html'));
+					return session.get(toUrl('./data/elements.html'));
 				},
 
 				teardown() {
@@ -961,7 +963,7 @@ registerSuite(function () {
 				this.skip('element serialization is broken');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/visibility.html')).then(function () {
+			return session.get(toUrl('./data/visibility.html')).then(function () {
 				return session.findDisplayed('id', 'does-not-exist').then(
 					function () {
 						throw new Error('findDisplayed should not find non-existing elements');
@@ -1028,7 +1030,7 @@ registerSuite(function () {
 		'#waitForDeleted'() {
 			let startTime: number;
 
-			return session.get(require.toUrl('tests/functional/data/elements.html')).then(function () {
+			return session.get(toUrl('./data/elements.html')).then(function () {
 				// Verifies element to be deleted exists at the start of the test
 				return session.findById('e');
 			}).then(function () {
@@ -1052,7 +1054,7 @@ registerSuite(function () {
 		'#waitForDeleted -> timeout'() {
 			let startTime: number;
 
-			return session.get(require.toUrl('tests/functional/data/elements.html')).then(function () {
+			return session.get(toUrl('./data/elements.html')).then(function () {
 				// Verifies element to be deleted exists at the start of the test
 				return session.findById('e');
 			}).then(function () {
@@ -1080,7 +1082,7 @@ registerSuite(function () {
 				this.skip('element serialization is broken');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/form.html')).then(function () {
+			return session.get(toUrl('./data/form.html')).then(function () {
 				return session.getActiveElement();
 			}).then(function (element: Element) {
 				return element.getTagName();
@@ -1102,7 +1104,7 @@ registerSuite(function () {
 			let formElement: Element;
 
 			// TODO: Complex characters, tabs and arrows, copy and paste
-			return session.get(require.toUrl('tests/functional/data/form.html')).then(function () {
+			return session.get(toUrl('./data/form.html')).then(function () {
 				return session.findById('input');
 			}).then(function (element: Element) {
 				formElement = element;
@@ -1141,7 +1143,7 @@ registerSuite(function () {
 				this.skip('cannot handle alerts');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/prompts.html')).then(function () {
+			return session.get(toUrl('./data/prompts.html')).then(function () {
 				return session.findById('alert');
 			}).then(function (element: Element) {
 				return element.click();
@@ -1162,7 +1164,7 @@ registerSuite(function () {
 				this.skip('cannot handle alerts');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/prompts.html')).then(function () {
+			return session.get(toUrl('./data/prompts.html')).then(function () {
 				return session.findById('prompt');
 			}).then(function (element: Element) {
 				return element.click();
@@ -1185,7 +1187,7 @@ registerSuite(function () {
 				this.skip('cannot handle alerts');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/prompts.html')).then(function () {
+			return session.get(toUrl('./data/prompts.html')).then(function () {
 				return session.findById('prompt');
 			}).then(function (element: Element) {
 				return element.click();
@@ -1208,7 +1210,7 @@ registerSuite(function () {
 				this.skip('cannot handle alerts');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/prompts.html')).then(function () {
+			return session.get(toUrl('./data/prompts.html')).then(function () {
 				return session.findById('confirm');
 			}).then(function (element: Element) {
 				return element.click();
@@ -1229,7 +1231,7 @@ registerSuite(function () {
 				this.skip('cannot handle alerts');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/prompts.html')).then(function () {
+			return session.get(toUrl('./data/prompts.html')).then(function () {
 				return session.findById('confirm');
 			}).then(function (element: Element) {
 				return element.click();
@@ -1251,7 +1253,7 @@ registerSuite(function () {
 				this.skip('mouse not enabled');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/pointer.html')).then(function () {
+			return session.get(toUrl('./data/pointer.html')).then(function () {
 				return session.moveMouseTo(100, 12);
 			}).then(function () {
 				return session.execute(
@@ -1315,7 +1317,7 @@ registerSuite(function () {
 				};
 			}
 
-			return session.get(require.toUrl('tests/functional/data/pointer.html')).then(function () {
+			return session.get(toUrl('./data/pointer.html')).then(function () {
 				return session.findById('a');
 			}).then(function (element: Element) {
 				return session.moveMouseTo(element);
@@ -1329,7 +1331,7 @@ registerSuite(function () {
 				this.skip('mouse not enabled');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/pointer.html')).then(function () {
+			return session.get(toUrl('./data/pointer.html')).then(function () {
 				return session.findById('a');
 			}).then(function (element: Element) {
 				return session.moveMouseTo(element);
@@ -1357,7 +1359,7 @@ registerSuite(function () {
 				this.skip('mouse not enabled');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/pointer.html')).then(function () {
+			return session.get(toUrl('./data/pointer.html')).then(function () {
 				return session.findById('a');
 			}).then(function (element: Element) {
 				return session.moveMouseTo(element);
@@ -1386,7 +1388,7 @@ registerSuite(function () {
 				this.skip('touch not supported');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/pointer.html')).then(function () {
+			return session.get(toUrl('./data/pointer.html')).then(function () {
 				return session.findById('a');
 			}).then(function (element: Element) {
 				return session.tap(element);
@@ -1408,7 +1410,7 @@ registerSuite(function () {
 				this.skip('move finger support is broken');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/pointer.html')).then(function () {
+			return session.get(toUrl('./data/pointer.html')).then(function () {
 				return session.pressFinger(5, 5);
 			}).then(function () {
 				return session.moveFinger(200, 53);
@@ -1429,7 +1431,7 @@ registerSuite(function () {
 				this.skip('touch is not enabled');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/scrollable.html'))
+			return session.get(toUrl('./data/scrollable.html'))
 				.then(getScrollPosition)
 				.then(function (position: Position) {
 					assert.deepEqual(position, { x: 0, y: 0 });
@@ -1450,7 +1452,7 @@ registerSuite(function () {
 				this.skip('touch is not enabled');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/pointer.html')).then(function () {
+			return session.get(toUrl('./data/pointer.html')).then(function () {
 				return session.findById('a');
 			}).then(function (element: Element) {
 				return session.doubleTap(element);
@@ -1470,7 +1472,7 @@ registerSuite(function () {
 				this.skip('long tap is broken');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/pointer.html')).then(function () {
+			return session.get(toUrl('./data/pointer.html')).then(function () {
 				return session.findById('a');
 			}).then(function (element: Element) {
 				return session.longTap(element);
@@ -1491,7 +1493,7 @@ registerSuite(function () {
 				this.skip('flick finger is broken');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/scrollable.html'))
+			return session.get(toUrl('./data/scrollable.html'))
 			.then(getScrollPosition)
 			.then(function (originalPosition: Position) {
 				assert.deepEqual(originalPosition, { x: 0, y: 0 });
@@ -1523,7 +1525,7 @@ registerSuite(function () {
 				this.skip('flick finger is broken');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/scrollable.html')).then(function () {
+			return session.get(toUrl('./data/scrollable.html')).then(function () {
 				return session.flickFinger(400, 400);
 			}).then(getScrollPosition).then(function (position: Position) {
 				assert.operator(0, '<', position.x);
@@ -1536,7 +1538,7 @@ registerSuite(function () {
 				this.skip('location context not enabled');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/default.html')).then(function () {
+			return session.get(toUrl('./data/default.html')).then(function () {
 				return session.setGeolocation({ latitude: 12, longitude: -22.334455, altitude: 1000 });
 			}).then(function () {
 				return session.getGeolocation();
@@ -1554,7 +1556,7 @@ registerSuite(function () {
 		},
 
 		'#getLogsFor'() {
-			return session.get(require.toUrl('tests/functional/data/default.html')).then(function () {
+			return session.get(toUrl('./data/default.html')).then(function () {
 				return session.getAvailableLogTypes();
 			}).then(function (types: any[]) {
 				if (!types.length) {
@@ -1579,7 +1581,7 @@ registerSuite(function () {
 		},
 
 		'#getAvailableLogTypes'() {
-			return session.get(require.toUrl('tests/functional/data/default.html')).then(function () {
+			return session.get(toUrl('./data/default.html')).then(function () {
 				return session.getAvailableLogTypes();
 			}).then(function (types: any[]) {
 				assert.isArray(types);
@@ -1591,7 +1593,7 @@ registerSuite(function () {
 				this.skip('application cache is not enabled');
 			}
 
-			return session.get(require.toUrl('tests/functional/data/default.html')).then(function () {
+			return session.get(toUrl('./data/default.html')).then(function () {
 				return session.getApplicationCacheStatus();
 			}).then(function (status: number) {
 				assert.strictEqual(status, 0);

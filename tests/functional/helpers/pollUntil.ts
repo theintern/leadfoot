@@ -4,10 +4,11 @@ import Command from 'src/Command';
 import Session from 'src/Session';
 import pollUntil from 'src/helpers/pollUntil';
 import * as util from '../support/util';
-import { IRequire } from 'dojo/loader';
 import Test = require('intern/lib/Test');
 
-declare const require: IRequire;
+function toUrl(url: string) {
+	return (<any> require).toUrl(url);
+}
 
 registerSuite(function (this: Test) {
 	let command: Command<any>;
@@ -24,7 +25,7 @@ registerSuite(function (this: Test) {
 
 		'basic test'() {
 			return command
-				.get(require.toUrl('tests/functional/data/elements.html'))
+				.get(toUrl('../data/elements.html'))
 				.findById('makeD')
 				.click()
 				.then(pollUntil('return document.getElementById("d");', [], 1000))
@@ -35,7 +36,7 @@ registerSuite(function (this: Test) {
 
 		'without args'() {
 			return command
-				.get(require.toUrl('tests/functional/data/elements.html'))
+				.get(toUrl('../data/elements.html'))
 				.findById('makeD')
 				.click()
 				.then(pollUntil('return document.getElementById("d");', 1000))
@@ -46,7 +47,7 @@ registerSuite(function (this: Test) {
 
 		'early timeout'() {
 			return command
-				.get(require.toUrl('tests/functional/data/elements.html'))
+				.get(toUrl('../data/elements.html'))
 				.findById('makeDSlowly')
 				.click()
 				.then(pollUntil('return document.getElementById("d");', [], 100, 25))
@@ -63,7 +64,7 @@ registerSuite(function (this: Test) {
 		'iteration check'() {
 			/* jshint browser:true */
 			return command
-				.get(require.toUrl('tests/functional/data/default.html'))
+				.get(toUrl('../data/default.html'))
 				.then(pollUntil(function () {
 					const anyWindow = <any> window;
 					if (!anyWindow.counter) {

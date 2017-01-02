@@ -9,6 +9,11 @@ export { default as Server } from './Server';
 export { default as Session} from './Session';
 
 /**
+ * @see [[Element]]
+ */
+export { default as Element } from './Element';
+
+/**
  * @see [[Command]]
  */
 export { default as Command } from './Command';
@@ -22,5 +27,7 @@ export { default as keys } from './keys';
  * @see [[helpers/pollUntil]]
  */
 export { default as pollUntil } from './helpers/pollUntil';
+
+export { default as CancelablePromise } from './lib/CancelablePromise';
 
 export * from './interfaces';

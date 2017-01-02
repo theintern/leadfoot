@@ -14,7 +14,8 @@
     "removeComments": false,
     "rootDir": ".",
     "sourceMap": true,
-    "target": "ES5"
+    "target": "ES5",
+    "lib": [ "ES5", "ES2015.Promise", "ES2015.Symbol", "ES2015.Iterable", "DOM" ]
   },
   "files": [
     "./types/dojo2/dojo.d.ts",
