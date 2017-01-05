@@ -58,14 +58,14 @@ registerSuite(function () {
 	return {
 		name: 'Element',
 
-		setup: function (this: Test) {
+		setup(this: Test) {
 			const remote = <any> this.remote;
 			return util.createSessionFromRemote(remote).then(function () {
 				session = arguments[0];
 			});
 		},
 
-		beforeEach: function () {
+		beforeEach() {
 			if (resetBrowserState) {
 				return session.get('about:blank').then(function () {
 					return session.setTimeout('implicit', 0);
@@ -73,7 +73,7 @@ registerSuite(function () {
 			}
 		},
 
-		'#toJSON': function () {
+		'#toJSON'() {
 			const element = new Element('test');
 			assert.deepEqual(element.toJSON(), { ELEMENT: 'test' });
 		},
@@ -87,7 +87,7 @@ registerSuite(function () {
 			let element: Element;
 
 			return {
-				setup: function () {
+				setup() {
 					resetBrowserState = false;
 					return session.get(toUrl('tests/functional/data/elements.html')).then(function () {
 						return session.find('id', 'h');
@@ -96,11 +96,11 @@ registerSuite(function () {
 					});
 				},
 
-				teardown: function () {
+				teardown() {
 					resetBrowserState = true;
 				},
 
-				'by class name': function () {
+				'by class name'() {
 					return element.find('class name', 'i')
 						.then(getId)
 						.then(function (id) {
@@ -108,7 +108,7 @@ registerSuite(function () {
 						});
 				},
 
-				'by css selector': function () {
+				'by css selector'() {
 					return element.find('css selector', '#j b.i')
 						.then(getId)
 						.then(function (id: string) {
@@ -116,7 +116,7 @@ registerSuite(function () {
 						});
 				},
 
-				'by name': function () {
+				'by name'() {
 					return element.find('name', 'nothing')
 						.then(getId)
 						.then(function (id: string) {
@@ -124,7 +124,7 @@ registerSuite(function () {
 						});
 				},
 
-				'by link text': function () {
+				'by link text'() {
 					return element.find('link text', 'What a cute, red cap.')
 						.then(getId)
 						.then(function (id) {
@@ -132,7 +132,7 @@ registerSuite(function () {
 						});
 				},
 
-				'by partial link text': function () {
+				'by partial link text'() {
 					return element.find('partial link text', 'cute, red')
 						.then(getId)
 						.then(function (id) {
@@ -140,7 +140,7 @@ registerSuite(function () {
 						});
 				},
 
-				'by link text (hidden text)': function () {
+				'by link text (hidden text)'() {
 					return element.find('link text', 'What a cap.')
 						.then(getId)
 						.then(function (id) {
@@ -148,7 +148,7 @@ registerSuite(function () {
 						});
 				},
 
-				'by partial link text (hidden text)': function () {
+				'by partial link text (hidden text)'() {
 					return element.find('partial link text', 'a cap')
 						.then(getId)
 						.then(function (id) {
@@ -156,7 +156,7 @@ registerSuite(function () {
 						});
 				},
 
-				'by tag name': function () {
+				'by tag name'() {
 					return element.find('tag name', 'b')
 						.then(getId)
 						.then(function (id) {
@@ -164,7 +164,7 @@ registerSuite(function () {
 						});
 				},
 
-				'by xpath': function () {
+				'by xpath'() {
 					return element.find('xpath', 'id("h")/a[2]')
 						.then(getId)
 						.then(function (id) {
@@ -172,8 +172,7 @@ registerSuite(function () {
 						});
 				},
 
-				'non-existent': function () {
-					debugger;
+				'non-existent'() {
 					return element.find('id', 'does-not-exist').then(
 						function () {
 							throw new Error('Requesting non-existing element should throw error');
@@ -235,7 +234,7 @@ registerSuite(function () {
 			let element: Element;
 
 			return {
-				setup: function () {
+				setup() {
 					resetBrowserState = false;
 					return session.get(toUrl('tests/functional/data/elements.html')).then(function () {
 						return session.find('id', 'h');
@@ -244,11 +243,11 @@ registerSuite(function () {
 					});
 				},
 
-				teardown: function () {
+				teardown() {
 					resetBrowserState = true;
 				},
 
-				'by id': function () {
+				'by id'() {
 					return element.findAll('id', 'j')
 						.then(getIds)
 						.then(function (ids) {
@@ -256,7 +255,7 @@ registerSuite(function () {
 						});
 				},
 
-				'by class name': function () {
+				'by class name'() {
 					return element.findAll('class name', 'i')
 						.then(getIds)
 						.then(function (ids) {
@@ -264,7 +263,7 @@ registerSuite(function () {
 						});
 				},
 
-				'by css selector': function () {
+				'by css selector'() {
 					return element.findAll('css selector', '#j b.i')
 						.then(getIds)
 						.then(function (ids) {
@@ -272,7 +271,7 @@ registerSuite(function () {
 						});
 				},
 
-				'by name': function () {
+				'by name'() {
 					return element.findAll('name', 'nothing')
 						.then(getIds)
 						.then(function (ids) {
@@ -280,7 +279,7 @@ registerSuite(function () {
 						});
 				},
 
-				'by link text': function () {
+				'by link text'() {
 					return element.findAll('link text', 'What a cute, red cap.')
 						.then(getIds)
 						.then(function (ids) {
@@ -288,7 +287,7 @@ registerSuite(function () {
 						});
 				},
 
-				'by partial link text': function () {
+				'by partial link text'() {
 					return element.findAll('partial link text', 'cute, red')
 						.then(getIds)
 						.then(function (ids) {
@@ -296,7 +295,7 @@ registerSuite(function () {
 						});
 				},
 
-				'by link text (hidden text)': function () {
+				'by link text (hidden text)'() {
 					return element.findAll('link text', 'What a cap.')
 						.then(getIds)
 						.then(function (ids) {
@@ -304,7 +303,7 @@ registerSuite(function () {
 						});
 				},
 
-				'by partial link text (hidden text)': function () {
+				'by partial link text (hidden text)'() {
 					return element.findAll('partial link text', 'a cap')
 						.then(getIds)
 						.then(function (ids) {
@@ -312,7 +311,7 @@ registerSuite(function () {
 						});
 				},
 
-				'by tag name': function () {
+				'by tag name'() {
 					return element.findAll('tag name', 'b')
 						.then(getIds)
 						.then(function (ids) {
@@ -320,7 +319,7 @@ registerSuite(function () {
 						});
 				},
 
-				'by xpath': function () {
+				'by xpath'() {
 					return element.findAll('xpath', 'id("j")/b')
 						.then(getIds)
 						.then(function (ids) {
@@ -328,7 +327,7 @@ registerSuite(function () {
 						});
 				},
 
-				'non-existent': function () {
+				'non-existent'() {
 					return element.findAll('id', 'does-not-exist')
 						.then(function (elements) {
 							assert.deepEqual(elements, []);
@@ -368,7 +367,7 @@ registerSuite(function () {
 			strategies
 		),
 
-		'#click': function (this: Test) {
+		'#click'(this: Test) {
 			if (!session.capabilities.mouseEnabled) {
 				this.skip('mouse not enabled');
 			}
@@ -389,7 +388,7 @@ registerSuite(function () {
 			});
 		},
 
-		'#submit (submit button)': function () {
+		'#submit (submit button)'() {
 			return session.get(toUrl('tests/functional/data/form.html')).then(function () {
 				return session.getCurrentUrl();
 			}).then(function (expectedUrl) {
@@ -408,7 +407,7 @@ registerSuite(function () {
 			});
 		},
 
-		'#submit (form)': function () {
+		'#submit (form)'() {
 			return session.get(toUrl('tests/functional/data/form.html')).then(function () {
 				return session.getCurrentUrl();
 			}).then(function (expectedUrl) {
@@ -427,7 +426,7 @@ registerSuite(function () {
 			});
 		},
 
-		'#getVisibleText': function () {
+		'#getVisibleText'() {
 			return session.get(toUrl('tests/functional/data/elements.html')).then(function () {
 				return session.findById('c3');
 			}).then(function (element) {
@@ -437,7 +436,7 @@ registerSuite(function () {
 			});
 		},
 
-		'#getVisibleText (multi-line)': function () {
+		'#getVisibleText (multi-line)'() {
 			return session.get(toUrl('tests/functional/data/elements.html')).then(function () {
 				return session.findById('i4');
 			}).then(function (element) {
@@ -456,7 +455,7 @@ registerSuite(function () {
 			});
 		},
 
-		'#type': function () {
+		'#type'() {
 			// TODO: Complex characters, tabs and arrows, copy and paste
 			return session.get(toUrl('tests/functional/data/form.html')).then(function () {
 				return session.findById('input');
@@ -469,7 +468,7 @@ registerSuite(function () {
 			});
 		},
 
-		'#type -> file upload': function (this: Test) {
+		'#type -> file upload'(this: Test) {
 			if (!session.capabilities.remoteFiles || session.capabilities.brokenFileSendKeys) {
 				this.skip('Remote file uploads not supported by server');
 			}
@@ -491,7 +490,7 @@ registerSuite(function () {
 			});
 		},
 
-		'#getTagName': function () {
+		'#getTagName'() {
 			return session.get(toUrl('tests/functional/data/default.html')).then(function () {
 				return session.findByTagName('body');
 			}).then(function (element) {
@@ -501,7 +500,7 @@ registerSuite(function () {
 			});
 		},
 
-		'#clearValue': function () {
+		'#clearValue'() {
 			return session.get(toUrl('tests/functional/data/form.html')).then(function () {
 				return session.findById('input2');
 			}).then(function (element) {
@@ -516,7 +515,7 @@ registerSuite(function () {
 			});
 		},
 
-		'#isSelected (radio button)': function () {
+		'#isSelected (radio button)'() {
 			return session.get(toUrl('tests/functional/data/form.html')).then(function () {
 				return session.findById('radio1');
 			}).then(function (element) {
@@ -540,16 +539,16 @@ registerSuite(function () {
 		},
 
 		'#isSelected (checkbox)': {
-			setup: function () {
+			setup() {
 				resetBrowserState = false;
 				return session.get(toUrl('tests/functional/data/form.html'));
 			},
 
-			teardown: function () {
+			teardown() {
 				resetBrowserState = true;
 			},
 
-			'initial selection': function () {
+			'initial selection'() {
 				return session.findById('checkbox').then(function (element) {
 					return element.isSelected();
 				}).then(function (isSelected) {
@@ -557,7 +556,7 @@ registerSuite(function () {
 				});
 			},
 
-			'change selection': function () {
+			'change selection'() {
 				return session.findById('checkbox').then(function (element) {
 					return element.click().then(function () {
 						return element.isSelected();
@@ -574,16 +573,16 @@ registerSuite(function () {
 		},
 
 		'#isSelected (drop-down)': {
-			setup: function () {
+			setup() {
 				resetBrowserState = false;
 				return session.get(toUrl('tests/functional/data/form.html'));
 			},
 
-			teardown: function () {
+			teardown() {
 				resetBrowserState = true;
 			},
 
-			'initial selection': function () {
+			'initial selection'() {
 				return session.findById('option2').then(function (element) {
 					return element.isSelected();
 				}).then(function (isSelected) {
@@ -597,7 +596,7 @@ registerSuite(function () {
 				});
 			},
 
-			'change selection': function (this: Test) {
+			'change selection'(this: Test) {
 				if (session.capabilities.brokenOptionSelect) {
 					this.skip('broken option select');
 				}
@@ -623,7 +622,7 @@ registerSuite(function () {
 			}
 		},
 
-		'#isEnabled': function () {
+		'#isEnabled'() {
 			return session.get(toUrl('tests/functional/data/form.html')).then(function () {
 				return session.findById('input');
 			}).then(function (element) {
@@ -638,7 +637,7 @@ registerSuite(function () {
 			});
 		},
 
-		'#getSpecAttribute': function () {
+		'#getSpecAttribute'() {
 			/*jshint maxlen:140 */
 			return session.get(toUrl('tests/functional/data/form.html')).then(function () {
 				return session.findById('input2');
@@ -689,7 +688,7 @@ registerSuite(function () {
 			});
 		},
 
-		'#getAttribute': function () {
+		'#getAttribute'() {
 			return session.get(toUrl('tests/functional/data/form.html')).then(function () {
 				return session.findById('form');
 			}).then(function (element) {
@@ -708,7 +707,7 @@ registerSuite(function () {
 			});
 		},
 
-		'#getProperty': function () {
+		'#getProperty'() {
 			return session.get(toUrl('tests/functional/data/form.html')).then(function () {
 				return session.findById('form');
 			}).then(function (element) {
@@ -727,7 +726,7 @@ registerSuite(function () {
 			});
 		},
 
-		'#equals': function () {
+		'#equals'() {
 			return session.get(toUrl('tests/functional/data/elements.html')).then(function () {
 				return session.findById('a');
 			}).then(function (element) {
@@ -764,11 +763,11 @@ registerSuite(function () {
 			};
 
 			const suite = {
-				setup: function () {
+				setup() {
 					resetBrowserState = false;
 					return session.get(toUrl('tests/functional/data/visibility.html'));
 				},
-				teardown: function () {
+				teardown() {
 					resetBrowserState = true;
 				}
 			};
@@ -801,11 +800,11 @@ registerSuite(function () {
 			positions.f = { x: 0, y: 2472 };
 
 			const suite = {
-				setup: function () {
+				setup() {
 					resetBrowserState = false;
 					return session.get(toUrl('tests/functional/data/dimensions.html'));
 				},
-				teardown: function () {
+				teardown() {
 					resetBrowserState = true;
 				}
 			};
@@ -836,7 +835,7 @@ registerSuite(function () {
 			dimensions.f = { width: -1, height: 0 };
 
 			const suite = {
-				setup: function () {
+				setup() {
 					resetBrowserState = false;
 					return session.get(toUrl('tests/functional/data/dimensions.html')).then(function () {
 						return session.execute('return document.body.offsetWidth;');
@@ -844,7 +843,7 @@ registerSuite(function () {
 						documentWidth = width;
 					});
 				},
-				teardown: function () {
+				teardown() {
 					resetBrowserState = true;
 				}
 			};
@@ -871,7 +870,7 @@ registerSuite(function () {
 			return suite;
 		})(),
 
-		'#getComputedStyle': function () {
+		'#getComputedStyle'() {
 			/*jshint maxlen:140 */
 
 			// TODO: Spec: pseudo-elements?

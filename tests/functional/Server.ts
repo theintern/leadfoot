@@ -14,7 +14,7 @@ registerSuite(function () {
 	return {
 		name: 'Server',
 
-		setup: function (this: Test) {
+		setup(this: Test) {
 			const remote = <any> this.remote;
 			server = util.createServerFromRemote(remote);
 		},

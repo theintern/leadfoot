@@ -28,7 +28,7 @@ registerSuite(function () {
 		},
 
 		'error handling': {
-			'DEBUG initialiser throws': function () {
+			'DEBUG initialiser throws'() {
 				return new Command(session, function () {
 					throw new Error('broken');
 				}).then(function () {
@@ -46,7 +46,7 @@ registerSuite(function () {
 				});
 			},
 
-			'DEBUG invalid async command': function () {
+			'DEBUG invalid async command'() {
 				const command: any = new Command(session).sleep(100);
 				Command.addSessionMethod(command, 'invalid', function () {
 					return new CancelablePromise(function (resolve, reject) {
@@ -69,7 +69,7 @@ registerSuite(function () {
 					});
 			},
 
-			'catch recovery': function () {
+			'catch recovery'() {
 				return new Command(session)
 					.then(function () {
 						throw new Error('Boom');
@@ -82,7 +82,7 @@ registerSuite(function () {
 			}
 		},
 
-		'initialisation': function (this: Test) {
+		'initialisation'(this: Test) {
 			assert.throws(function () {
 				/*jshint nonew:false */
 				new (<any> Command)();
@@ -112,7 +112,7 @@ registerSuite(function () {
 			return dfd.promise;
 		},
 
-		'basic chaining': function () {
+		'basic chaining'() {
 			const command = new Command(session);
 			return command.get(require.toUrl('tests/functional/data/default.html'))
 				.getPageTitle()
@@ -126,7 +126,7 @@ registerSuite(function () {
 				});
 		},
 
-		'child is a separate command': function () {
+		'child is a separate command'() {
 			const parent = new Command(session).get(require.toUrl('tests/functional/data/default.html'));
 			const child = parent.findByTagName('p');
 
@@ -139,7 +139,7 @@ registerSuite(function () {
 				});
 		},
 
-		'basic form interaction': function () {
+		'basic form interaction'() {
 			const command = new Command(session);
 			return command.get(require.toUrl('tests/functional/data/form.html'))
 				.findById('input')
@@ -151,7 +151,7 @@ registerSuite(function () {
 					});
 		},
 
-		'#findAll': function () {
+		'#findAll'() {
 			return new Command(session).get(require.toUrl('tests/functional/data/elements.html'))
 				.findAllByClassName('b')
 				.getAttribute('id')
@@ -160,7 +160,7 @@ registerSuite(function () {
 				});
 		},
 
-		'#findAll chain': function () {
+		'#findAll chain'() {
 			return new Command(session).get(require.toUrl('tests/functional/data/elements.html'))
 				.findById('c')
 					.findAllByClassName('b')
@@ -181,7 +181,7 @@ registerSuite(function () {
 					});
 		},
 
-		'#findAll + #findAll': function () {
+		'#findAll + #findAll'() {
 			return new Command(session).get(require.toUrl('tests/functional/data/elements.html'))
 				.findAllByTagName('div')
 					.findAllByCssSelector('span, a')
@@ -191,7 +191,7 @@ registerSuite(function () {
 						});
 		},
 
-		'#findDisplayed': function () {
+		'#findDisplayed'() {
 			return new Command(session).get(require.toUrl('tests/functional/data/visibility.html'))
 				.findDisplayedByClassName('multipleVisible')
 				.getVisibleText()
@@ -203,7 +203,7 @@ registerSuite(function () {
 		// Check that when the mouse is pressed on one element and is moved over another element before being
 		// released, the mousedown event is generated for the first element and the mouseup event is generated for
 		// the second.
-		'#moveMouseTo usesElement': function () {
+		'#moveMouseTo usesElement'() {
 			return new Command(session).get(require.toUrl('tests/functional/data/pointer.html'))
 				.findById('a')
 				.moveMouseTo()
@@ -217,7 +217,7 @@ registerSuite(function () {
 				});
 		},
 
-		'#sleep': function () {
+		'#sleep'() {
 			const startTime = Date.now();
 			return new Command(session)
 				.sleep(2000)
@@ -227,7 +227,7 @@ registerSuite(function () {
 				});
 		},
 
-		'#end beyond the top of the command list': function () {
+		'#end beyond the top of the command list'() {
 			const expected: Context = [ 'a' ];
 			expected.depth = 0;
 
@@ -238,7 +238,7 @@ registerSuite(function () {
 				});
 		},
 
-		'#end in a long chain': function () {
+		'#end in a long chain'() {
 			return new Command(session).then(function (_: any, setContext: Function) {
 				setContext([ 'a' ]);
 			})
@@ -252,7 +252,7 @@ registerSuite(function () {
 			});
 		},
 
-		'#catch': function () {
+		'#catch'() {
 			const command = new Command(session);
 			let callback: Function;
 			let errback: Function;
@@ -268,7 +268,7 @@ registerSuite(function () {
 			assert.strictEqual(errback, expectedErrback);
 		},
 
-		'#finally': function () {
+		'#finally'() {
 			const command = new Command(session);
 			let callback: Function;
 			let errback: Function;
@@ -284,7 +284,7 @@ registerSuite(function () {
 			assert.strictEqual(errback, expected);
 		},
 
-		'#cancel': function () {
+		'#cancel'() {
 			const command = new Command(session);
 			const sleepCommand = command.sleep(5000);
 			sleepCommand.cancel();
@@ -299,7 +299,7 @@ registerSuite(function () {
 			});
 		},
 
-		'session createsContext': function () {
+		'session createsContext'() {
 			const command: any = new Command(session, function (setContext) {
 				setContext('a');
 			});
@@ -318,7 +318,7 @@ registerSuite(function () {
 			});
 		},
 
-		'element createsContext': function () {
+		'element createsContext'() {
 			const command: any = new Command(session, function (setContext) {
 				setContext({
 					elementId: 'farts',
@@ -340,7 +340,7 @@ registerSuite(function () {
 			});
 		},
 
-		'session usesElement single': function () {
+		'session usesElement single'() {
 			const command: any = new Command(session, function (setContext) {
 				setContext('a');
 			});
@@ -355,7 +355,7 @@ registerSuite(function () {
 			return command.useElement('arg1');
 		},
 
-		'session usesElement multiple': function () {
+		'session usesElement multiple'() {
 			const command: any = new Command(session, function (setContext) {
 				setContext([ 'a', 'b' ]);
 			});
