@@ -28,14 +28,14 @@ registerSuite(function () {
 		},
 
 		'error handling': {
-			'initialiser throws': function () {
+			'DEBUG initialiser throws': function () {
 				return new Command(session, function () {
 					throw new Error('broken');
 				}).then(function () {
 					throw new Error('Error thrown in initialiser should reject the Command');
 				}, function (error: Error) {
 					assert.strictEqual(error.message, 'broken');
-					assert.include(error.stack, 'tests/functional/Command.js:33:31',
+					assert.include(error.stack, 'tests/functional/Command.js:92:31',
 						'Stack trace should point back to the error');
 					error.message += ' 2';
 					throw error;
@@ -46,7 +46,7 @@ registerSuite(function () {
 				});
 			},
 
-			'invalid async command': function () {
+			'DEBUG invalid async command': function () {
 				const command: any = new Command(session).sleep(100);
 				Command.addSessionMethod(command, 'invalid', function () {
 					return new CancelablePromise(function (resolve, reject) {
@@ -64,7 +64,7 @@ registerSuite(function () {
 						assert.strictEqual(error.message, 'Invalid call');
 						assert.include(error.stack.slice(0, error.stack.indexOf('\n')), error.message,
 							'Original error message should be provided on the first line of the stack trace');
-						assert.include(error.stack, 'tests/functional/Command.js:52',
+						assert.include(error.stack, 'tests/functional/Command.js:131',
 							'Stack trace should point back to the async method call that eventually threw the error');
 					});
 			},
