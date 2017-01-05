@@ -18,7 +18,6 @@
     "lib": [ "ES5", "ES2015.Promise", "ES2015.Symbol", "ES2015.Iterable", "DOM" ]
   },
   "files": [
-    "./types/dojo2/dojo.d.ts",
     "./types/jszip/jszip.d.ts"
   ],
   "include": [

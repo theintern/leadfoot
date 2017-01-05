@@ -8,7 +8,6 @@
   },
   "license": "BSD-3-Clause",
   "dependencies": {
-    "dojo": "2.0.0-alpha.7",
     "dojo-core": "^2.0.0-alpha.18",
     "dojo-has": "^2.0.0-alpha.6",
     "dojo-interfaces": "^2.0.0-alpha.9",

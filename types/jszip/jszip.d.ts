@@ -4,7 +4,6 @@
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
 declare module 'jszip' {
-	import Promise = require('dojo/Promise');
 	interface JSZip {
 		files: {[key: string]: JSZipObject};
 
