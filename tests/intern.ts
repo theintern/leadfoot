@@ -44,8 +44,7 @@ export const loaders = {
 };
 
 export const suites = [
-	'dojo/has!host-node?tests/unit/lib/util',
-	'dojo/has!host-node?tests/unit/compat'
+	'dojo/has!host-node?tests/unit/lib/util'
 ];
 
 export const functionalSuites = [
@@ -53,8 +52,7 @@ export const functionalSuites = [
 	'tests/functional/Server',
 	'tests/functional/Session',
 	'tests/functional/Element',
-	'tests/functional/Command',
-	'tests/functional/compat'
+	'tests/functional/Command'
 ];
 
 export const excludeInstrumentation = /^(?:tests|node_modules)\//;
