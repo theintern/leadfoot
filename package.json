@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@types/node": "^6.0.54",
+    "dojo-has": "^2.0.0-alpha.6",
     "dojo-loader": "~2.0.0-beta.7",
     "intern": "~3.4.2",
     "intern-dev": "https://github.com/theintern/intern-dev/releases/download/0.1.0/intern-dev-0.1.0.tgz",
