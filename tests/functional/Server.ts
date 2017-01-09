@@ -1,7 +1,7 @@
 import registerSuite = require('intern!object');
 import * as assert from 'intern/chai!assert';
 import * as util from './support/util';
-import CancelablePromise from 'src/lib/CancelablePromise';
+import Task from 'dojo-core/async/Task';
 import Server from 'src/Server';
 import Session from 'src/Session';
 import * as urlUtil from 'url';
@@ -154,7 +154,7 @@ registerSuite(function () {
 						assert.strictEqual(data.desiredCapabilities, desiredCapabilities);
 						assert.strictEqual(data.requiredCapabilities, requiredCapabilities);
 
-						return CancelablePromise.resolve({
+						return Task.resolve({
 							sessionId: 'test',
 							value: mockCapabilities
 						});
@@ -183,7 +183,7 @@ registerSuite(function () {
 			(<any> server)._delete = function (command: string, data: any, pathData: string[]) {
 				assert.strictEqual(command, 'session/$0');
 				assert.deepEqual(pathData, [ 'test' ]);
-				return CancelablePromise.resolve(null);
+				return Task.resolve(null);
 			};
 
 			try {

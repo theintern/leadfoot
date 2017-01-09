@@ -1,4 +1,4 @@
-import CancelablePromise from './CancelablePromise';
+import Task from 'dojo-core/async/Task';
 import statusCodes from './statusCodes';
 import Session from '../Session';
 import Element from '../Element';
@@ -18,7 +18,7 @@ abstract class WaitForDeleted<E extends Thenable<Element>, V extends Thenable<vo
 			originalTimeout = value;
 			session.setTimeout('implicit', 0);
 		}).then(function () {
-			return new CancelablePromise((resolve, reject) => {
+			return new Task((resolve, reject) => {
 				const startTime = Date.now();
 
 				(function poll() {

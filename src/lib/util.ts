@@ -1,4 +1,4 @@
-import CancelablePromise from './CancelablePromise';
+import Task from 'dojo-core/async/Task';
 import { mixin } from 'dojo-core/lang';
 
 /**
@@ -6,9 +6,9 @@ import { mixin } from 'dojo-core/lang';
  *
  * @param ms Time until resolution in milliseconds.
  */
-export function sleep(ms: number): CancelablePromise<void> {
+export function sleep(ms: number): Task<void> {
 	let timer: any;
-	return new CancelablePromise<void>(function (resolve) {
+	return new Task<void>(function (resolve) {
 		timer = setTimeout(() => {
 			resolve();
 		}, ms);

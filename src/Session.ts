@@ -2,7 +2,7 @@ import Element, { ElementOrElementId } from './Element';
 import Server from './Server';
 import FindDisplayed from './lib/findDisplayed';
 import { partial } from 'dojo-core/lang';
-import CancelablePromise from './lib/CancelablePromise';
+import Task from 'dojo-core/async/Task';
 import statusCodes from './lib/statusCodes';
 import Strategies from './lib/strategies';
 import * as util from './lib/util';
@@ -363,20 +363,20 @@ function simulateMouse(kwArgs: any) {
 	}
 }
 
-export default class Session extends Strategies<CancelablePromise<Element>, CancelablePromise<Element[]>, CancelablePromise<void>>
-							implements WaitForDeleted<CancelablePromise<Element>, CancelablePromise<void>>,
-								FindDisplayed<CancelablePromise<Element>> {
+export default class Session extends Strategies<Task<Element>, Task<Element[]>, Task<void>>
+							implements WaitForDeleted<Task<Element>, Task<void>>,
+								FindDisplayed<Task<Element>> {
 	private _sessionId: string;
 	private _server: Server;
 	private _capabilities: Capabilities;
 	private _closedWindows: any = null;
 	// TODO: Timeouts are held so that we can fiddle with the implicit wait timeout to add efficient `waitFor`
 	// and `waitForDeleted` convenience methods. Technically only the implicit timeout is necessary.
-	private _timeouts: { [key: string]: CancelablePromise<number>; } = {};
+	private _timeouts: { [key: string]: Task<number>; } = {};
 	private _movedToElement: boolean = false;
 	private _lastMousePosition: any = null;
 	private _lastAltitude: any = null;
-	private _nextRequest: CancelablePromise<any>;
+	private _nextRequest: Task<any>;
 
 	/**
 	 * A Session represents a connection to a remote environment that can be driven programmatically.
@@ -393,9 +393,9 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 		this._capabilities = capabilities;
 		this._closedWindows = {};
 		this._timeouts = {
-			script: CancelablePromise.resolve(0),
-			implicit: CancelablePromise.resolve(0),
-			'page load': CancelablePromise.resolve(Infinity)
+			script: Task.resolve(0),
+			implicit: Task.resolve(0),
+			'page load': Task.resolve(Infinity)
 		};
 	}
 
@@ -431,7 +431,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 *
 	 * @private
 	 */
-	private _delegateToServer(method: string, path: string, requestData: any, pathParts?: string[]): CancelablePromise<any> {
+	private _delegateToServer(method: string, path: string, requestData: any, pathParts?: string[]): Task<any> {
 		path = 'session/' + this._sessionId + (path ? ('/' + path) : '');
 
 		if (method === '_post' && !requestData && this.capabilities.brokenEmptyPost) {
@@ -439,10 +439,10 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 		}
 
 		let cancelled = false;
-		return new CancelablePromise((resolve, reject) => {
+		return new Task((resolve, reject) => {
 			// The promise is cleared from `_nextRequest` once it has been resolved in order to avoid
 			// infinitely long chains of promises retaining values that are not used any more
-			let thisRequest: CancelablePromise<any>;
+			let thisRequest: Task<any>;
 			const clearNextRequest = () => {
 				if (this._nextRequest === thisRequest) {
 					this._nextRequest = null;
@@ -452,7 +452,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 			const runRequest = () => {
 				// `runRequest` is normally called once the previous request is finished. If this request
 				// is cancelled before the previous request is finished, then it should simply never run.
-				// (This CancelablePromise will have been rejected already by the cancellation.)
+				// (This Task will have been rejected already by the cancellation.)
 				if (cancelled) {
 					clearNextRequest();
 					return;
@@ -464,7 +464,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 				// The value of the response always needs to be taken directly from the server call
 				// rather than from the chained `_nextRequest` promise, since if an undefined value is
 				// returned by the server call and that value is returned through `finally(runRequest)`,
-				// the *previous* CancelablePromise’s resolved value will be used as the resolved value, which is
+				// the *previous* Task’s resolved value will be used as the resolved value, which is
 				// wrong
 				resolve(response);
 
@@ -484,15 +484,15 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 		}, () => cancelled = true);
 	}
 
-	private _get(path: string, requestData?: any, pathParts?: string[]): CancelablePromise<any> {
+	private _get(path: string, requestData?: any, pathParts?: string[]): Task<any> {
 		return this._delegateToServer('_get', path, requestData, pathParts);
 	}
 
-	private _post(path: string, requestData?: any, pathParts?: string[]): CancelablePromise<any> {
+	private _post(path: string, requestData?: any, pathParts?: string[]): Task<any> {
 		return this._delegateToServer('_post', path, requestData, pathParts);
 	}
 
-	private _delete(path: string, requestData?: any, pathParts?: string[]): CancelablePromise<any> {
+	private _delete(path: string, requestData?: any, pathParts?: string[]): Task<any> {
 		return this._delegateToServer('_delete', path, requestData, pathParts);
 	}
 
@@ -502,7 +502,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * @param type The type of timeout to retrieve. One of 'script', 'implicit', or 'page load'.
 	 * @returns The timeout, in milliseconds.
 	 */
-	getTimeout(type: string): CancelablePromise<number> {
+	getTimeout(type: string): Task<number> {
 		return this._timeouts[type];
 	}
 
@@ -516,7 +516,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * The length of time to use for the timeout, in milliseconds. A value of 0 will cause operations to time out
 	 * immediately.
 	 */
-	setTimeout(type: string, ms: number): CancelablePromise<void> {
+	setTimeout(type: string, ms: number): Task<void> {
 		// Infinity cannot be serialised by JSON
 		if (ms === Infinity) {
 			// It seems that at least ChromeDriver 2.10 has a limit here that is near the 32-bit signed integer limit,
@@ -559,7 +559,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 *
 	 * @returns A window handle identifier that can be used with other window handling functions.
 	 */
-	getCurrentWindowHandle(): CancelablePromise<string> {
+	getCurrentWindowHandle(): Task<string> {
 		return this._get('window_handle').then(handle => {
 			if (this.capabilities.brokenDeleteWindow && this._closedWindows[handle]) {
 				const error: any = new Error();
@@ -576,7 +576,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	/**
 	 * Gets a list of identifiers for all currently open windows.
 	 */
-	getAllWindowHandles(): CancelablePromise<string[]> {
+	getAllWindowHandles(): Task<string[]> {
 		return this._get('window_handles').then((handles: string[]) => {
 			if (this.capabilities.brokenDeleteWindow) {
 				return handles.filter(handle => { return !this._closedWindows[handle]; });
@@ -589,14 +589,14 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	/**
 	 * Gets the URL that is loaded in the focused window/frame.
 	 */
-	getCurrentUrl(): CancelablePromise<string> {
+	getCurrentUrl(): Task<string> {
 		return this._get('url');
 	}
 
 	/**
 	 * Navigates the focused window/frame to a new URL.
 	 */
-	get(url: string): CancelablePromise<void> {
+	get(url: string): Task<void> {
 		this._movedToElement = false;
 
 		if (this.capabilities.brokenMouseEvents) {
@@ -611,7 +611,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	/**
 	 * Navigates the focused window/frame forward one page using the browser’s navigation history.
 	 */
-	goForward(): CancelablePromise<void> {
+	goForward(): Task<void> {
 		// TODO: SPEC: Seems like this and `back` should return the newly navigated URL.
 		return this._post('forward').then(noop);
 	}
@@ -619,14 +619,14 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	/**
 	 * Navigates the focused window/frame back one page using the browser’s navigation history.
 	 */
-	goBack(): CancelablePromise<void> {
+	goBack(): Task<void> {
 		return this._post('back').then(noop);
 	}
 
 	/**
 	 * Reloads the current browser window/frame.
 	 */
-	refresh(): CancelablePromise<void> {
+	refresh(): Task<void> {
 		if (this.capabilities.brokenRefresh) {
 			return this.execute('location.reload();');
 		}
@@ -653,7 +653,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * The value returned by the remote code. Only values that can be serialised to JSON, plus DOM elements, can be
 	 * returned.
 	 */
-	execute(script: Function|string, args?: any[]): CancelablePromise<any> {
+	execute(script: Function|string, args?: any[]): Task<any> {
 		// At least FirefoxDriver 2.40.0 will throw a confusing NullPointerException if args is not an array;
 		// provide a friendlier error message to users that accidentally pass a non-array
 		if (typeof args !== 'undefined' && !Array.isArray(args)) {
@@ -703,7 +703,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * The value returned by the remote code. Only values that can be serialised to JSON, plus DOM elements, can be
 	 * returned.
 	 */
-	executeAsync(script: Function|string, args?: any[]): CancelablePromise<any> {
+	executeAsync(script: Function|string, args?: any[]): Task<any> {
 		// At least FirefoxDriver 2.40.0 will throw a confusing NullPointerException if args is not an array;
 		// provide a friendlier error message to users that accidentally pass a non-array
 		if (typeof args !== 'undefined' && !Array.isArray(args)) {
@@ -721,7 +721,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 *
 	 * @returns A buffer containing a PNG image.
 	 */
-	takeScreenshot(): CancelablePromise<Buffer> {
+	takeScreenshot(): Task<Buffer> {
 		return this._get('screenshot').then(function (data) {
 			/*jshint node:true */
 			return new Buffer(data, 'base64');
@@ -732,7 +732,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * Gets a list of input method editor engines available to the remote environment.
 	 * As of April 2014, no known remote environments support IME functions.
 	 */
-	getAvailableImeEngines(): CancelablePromise<string[]> {
+	getAvailableImeEngines(): Task<string[]> {
 		return this._get('ime/available_engines');
 	}
 
@@ -740,7 +740,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * Gets the currently active input method editor for the remote environment.
 	 * As of April 2014, no known remote environments support IME functions.
 	 */
-	getActiveImeEngine(): CancelablePromise<string> {
+	getActiveImeEngine(): Task<string> {
 		return this._get('ime/active_engine');
 	}
 
@@ -748,7 +748,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * Returns whether or not an input method editor is currently active in the remote environment.
 	 * As of April 2014, no known remote environments support IME functions.
 	 */
-	isImeActivated(): CancelablePromise<boolean> {
+	isImeActivated(): Task<boolean> {
 		return this._get('ime/activated');
 	}
 
@@ -756,7 +756,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * Deactivates any active input method editor in the remote environment.
 	 * As of April 2014, no known remote environments support IME functions.
 	 */
-	deactivateIme(): CancelablePromise<void> {
+	deactivateIme(): Task<void> {
 		return this._post('ime/deactivate');
 	}
 
@@ -766,7 +766,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 *
 	 * @param engine The type of IME to activate.
 	 */
-	activateIme(engine: string): CancelablePromise<void> {
+	activateIme(engine: string): Task<void> {
 		return this._post('ime/activate', {
 			engine: engine
 		});
@@ -780,7 +780,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * `window.frames` object of the currently active frame. If `null`, the topmost (default) frame will be used.
 	 * If an Element is provided, it must correspond to a `<frame>` or `<iframe>` element.
 	 */
-	switchToFrame(id: string|number|Element): CancelablePromise<void> {
+	switchToFrame(id: string|number|Element): Task<void> {
 		return this._post('frame', {
 			id: id
 		}).then(noop);
@@ -795,7 +795,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 *
 	 * In environments using the JsonWireProtocol, this value corresponds to the `window.name` property of a window.
 	 */
-	switchToWindow(handle: string): CancelablePromise<void> {
+	switchToWindow(handle: string): Task<void> {
 		return this._post('window', {
 			// TODO: Note that in the W3C standard, the property is 'handle'
 			name: handle
@@ -805,7 +805,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	/**
 	 * Switches the currently focused frame to the parent of the currently focused frame.
 	 */
-	switchToParentFrame(): CancelablePromise<void> {
+	switchToParentFrame(): Task<void> {
 		return this._post('frame/parent').catch(error => {
 			// At least FirefoxDriver 2.40.0 does not implement this command, but we can fake it by retrieving
 			// the parent frame element using JavaScript and switching to it directly by reference
@@ -837,7 +837,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * Closes the currently focused window. In most environments, after the window has been closed, it is necessary
 	 * to explicitly switch to whatever window is now focused.
 	 */
-	closeCurrentWindow(): CancelablePromise<void> {
+	closeCurrentWindow(): Task<void> {
 		const self = this;
 		function manualClose() {
 			return self.getCurrentWindowHandle().then(function (handle: any) {
@@ -875,9 +875,9 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * @param height
 	 * The new height of the window, in CSS pixels.
 	 */
-	setWindowSize(width: number, height: number): CancelablePromise<void>;
-	setWindowSize(windowHandle: string, width: number, height: number): CancelablePromise<void>;
-	setWindowSize(...args: any[]): CancelablePromise<void> {
+	setWindowSize(width: number, height: number): Task<void>;
+	setWindowSize(windowHandle: string, width: number, height: number): Task<void>;
+	setWindowSize(...args: any[]): Task<void> {
 		let [windowHandle, width, height ] = args;
 
 		if (typeof height === 'undefined') {
@@ -935,7 +935,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * @returns
 	 * An object describing the width and height of the window, in CSS pixels.
 	 */
-	getWindowSize(windowHandle?: string): CancelablePromise<{ width: number, height: number }> {
+	getWindowSize(windowHandle?: string): Task<{ width: number, height: number }> {
 		if (this.capabilities.implicitWindowHandles) {
 			if (windowHandle == null) {
 				return this._get('window/size');
@@ -986,9 +986,9 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * @param y
 	 * The screen y-coordinate to move to, in CSS pixels, relative to the top edge of the primary monitor.
 	 */
-	setWindowPosition(x: number, y: number): CancelablePromise<void>;
-	setWindowPosition(windowHandle: string, x: number, y: number): CancelablePromise<void>;
-	setWindowPosition(...args: any[]): CancelablePromise<void> {
+	setWindowPosition(x: number, y: number): Task<void>;
+	setWindowPosition(windowHandle: string, x: number, y: number): Task<void>;
+	setWindowPosition(...args: any[]): Task<void> {
 		let [ windowHandle, x, y ] = args;
 
 		if (typeof y === 'undefined') {
@@ -1017,7 +1017,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * primary monitor. If a secondary monitor exists above or to the left of the primary monitor, these values
 	 * will be negative.
 	 */
-	getWindowPosition(windowHandle?: string): CancelablePromise<{ x: number, y: number }> {
+	getWindowPosition(windowHandle?: string): Task<{ x: number, y: number }> {
 		if (typeof windowHandle === 'undefined') {
 			windowHandle = 'current';
 		}
@@ -1035,7 +1035,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * The name of the window to resize. See [[Session.switchToWindow]] to learn about valid
 	 * window names. Omit this argument to resize the currently focused window.
 	 */
-	maximizeWindow(windowHandle?: string): CancelablePromise<void> {
+	maximizeWindow(windowHandle?: string): Task<void> {
 		if (typeof windowHandle === 'undefined') {
 			windowHandle = 'current';
 		}
@@ -1046,7 +1046,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	/**
 	 * Gets all cookies set on the current page.
 	 */
-	getCookies(): CancelablePromise<WebDriverCookie[]> {
+	getCookies(): Task<WebDriverCookie[]> {
 		return this._get('cookie').then(function (cookies: WebDriverCookie[]) {
 			// At least SafariDriver 2.41.0 returns cookies with extra class and hCode properties that should not
 			// exist
@@ -1072,7 +1072,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	/**
 	 * Sets a cookie on the current page.
 	 */
-	setCookie(cookie: WebDriverCookie): CancelablePromise<void> {
+	setCookie(cookie: WebDriverCookie): Task<void> {
 		if (typeof cookie.expiry === 'string') {
 			cookie.expiry = new Date(cookie.expiry);
 		}
@@ -1121,7 +1121,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	/**
 	 * Clears all cookies for the current page.
 	 */
-	clearCookies(): CancelablePromise<void> {
+	clearCookies(): Task<void> {
 		if (this.capabilities.brokenDeleteCookie) {
 			return this.getCookies().then(cookies => {
 				return cookies.reduce((promise, cookie) => {
@@ -1138,7 +1138,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 							document.cookie = `${expiredCookie}; domain=${encodeURIComponent(document.domain)}; path=/`;
 						}, [ expiredCookie.join(';') ]);
 					});
-				}, CancelablePromise.resolve());
+				}, Task.resolve());
 			}).then(noop);
 		}
 
@@ -1150,7 +1150,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 *
 	 * @param name The name of the cookie to delete.
 	 */
-	deleteCookie(name: string): CancelablePromise<void> {
+	deleteCookie(name: string): Task<void> {
 		if (this.capabilities.brokenDeleteCookie) {
 			return this.getCookies().then(cookies => {
 				let cookie: any;
@@ -1183,7 +1183,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * Gets the HTML loaded in the focused window/frame. This markup is serialised by the remote environment so
 	 * may not exactly match the HTML provided by the Web server.
 	 */
-	getPageSource(): CancelablePromise<string> {
+	getPageSource(): Task<string> {
 		if (this.capabilities.brokenPageSource) {
 			return this.execute(/* istanbul ignore next */ function () {
 				return document.documentElement.outerHTML;
@@ -1197,7 +1197,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	/**
 	 * Gets the title of the top-level browsing context of the current window or tab.
 	 */
-	getPageTitle(): CancelablePromise<string> {
+	getPageTitle(): Task<string> {
 		return this._get('title');
 	}
 
@@ -1216,7 +1216,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * The strategy-specific value to search for. For example, if `using` is 'id', `value` should be the ID of the
 	 * element to retrieve.
 	 */
-	find(using: string, value: string): CancelablePromise<Element> {
+	find(using: string, value: string): Task<Element> {
 		if (this.capabilities.isWebDriver) {
 			const locator = util.toW3Locator(using, value);
 			using = locator.using;
@@ -1252,7 +1252,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * @param {string} value
 	 * The strategy-specific value to search for. See [[Session.find]] for details.
 	 */
-	findAll(using: string, value: string): CancelablePromise<Element[]> {
+	findAll(using: string, value: string): Task<Element[]> {
 		if (this.capabilities.isWebDriver) {
 			const locator = util.toW3Locator(using, value);
 			using = locator.using;
@@ -1282,7 +1282,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * Gets the currently focused element from the focused window/frame.
 	 */
 	@forCommand({ createsContext: true })
-	getActiveElement(): CancelablePromise<Element> {
+	getActiveElement(): Task<Element> {
 		const getDocumentActiveElement = () => {
 			return this.execute('return document.activeElement;');
 		};
@@ -1315,7 +1315,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * deactivated. To deactivate a modifier key, type the same modifier key a second time, or send `\uE000`
 	 * ('NULL') to deactivate all currently active modifier keys.
 	 */
-	pressKeys(keys: string|string[]): CancelablePromise<void> {
+	pressKeys(keys: string|string[]): Task<void> {
 		if (!Array.isArray(keys)) {
 			keys = [ keys ];
 		}
@@ -1334,7 +1334,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 *
 	 * @returns Either 'portrait' or 'landscape'.
 	 */
-	getOrientation(): CancelablePromise<'portrait'|'landscape'> {
+	getOrientation(): Task<'portrait'|'landscape'> {
 		return this._get('orientation').then(function (orientation) {
 			return orientation.toLowerCase();
 		});
@@ -1345,7 +1345,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 *
 	 * @param orientation Either 'portrait' or 'landscape'.
 	 */
-	setOrientation(orientation: string): CancelablePromise<void> {
+	setOrientation(orientation: string): Task<void> {
 		orientation = orientation.toUpperCase();
 
 		return this._post('orientation', {
@@ -1356,7 +1356,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	/**
 	 * Gets the text displayed in the currently active alert pop-up.
 	 */
-	getAlertText(): CancelablePromise<string> {
+	getAlertText(): Task<string> {
 		return this._get('alert_text');
 	}
 
@@ -1365,7 +1365,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 *
 	 * @param text The text to type into the pop-up’s input box.
 	 */
-	typeInPrompt(text: string|string[]): CancelablePromise<void> {
+	typeInPrompt(text: string|string[]): Task<void> {
 		if (Array.isArray(text)) {
 			text = text.join('');
 		}
@@ -1378,7 +1378,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	/**
 	 * Accepts an alert, prompt, or confirmation pop-up. Equivalent to clicking the 'OK' button.
 	 */
-	acceptAlert(): CancelablePromise<void> {
+	acceptAlert(): Task<void> {
 		return this._post('accept_alert').then(noop);
 	}
 
@@ -1386,7 +1386,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * Dismisses an alert, prompt, or confirmation pop-up. Equivalent to clicking the 'OK' button of an alert pop-up
 	 * or the 'Cancel' button of a prompt or confirmation pop-up.
 	 */
-	dismissAlert(): CancelablePromise<void> {
+	dismissAlert(): Task<void> {
 		return this._post('dismiss_alert').then(noop);
 	}
 
@@ -1408,11 +1408,11 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * client rectangle. If no element is specified, the offset is relative to the previous position of the mouse,
 	 * or to the top edge of the page’s root element if the mouse was never moved before.
 	 */
-	moveMouseTo(): CancelablePromise<void>;
-	moveMouseTo(xOffset?: number, yOffset?: number): CancelablePromise<void>;
-	moveMouseTo(element?: Element, xOffset?: number, yOffset?: number): CancelablePromise<void>;
+	moveMouseTo(): Task<void>;
+	moveMouseTo(xOffset?: number, yOffset?: number): Task<void>;
+	moveMouseTo(element?: Element, xOffset?: number, yOffset?: number): Task<void>;
 	@forCommand({ usesElement: true })
-	moveMouseTo(...args: any[]): CancelablePromise<void> {
+	moveMouseTo(...args: any[]): Task<void> {
 		let [ element, xOffset, yOffset ] = args;
 
 		if (typeof yOffset === 'undefined' && typeof xOffset !== 'undefined') {
@@ -1472,7 +1472,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * The button to click. 0 corresponds to the primary mouse button, 1 to the middle mouse button, 2 to the
 	 * secondary mouse button. Numbers above 2 correspond to any additional buttons a mouse might provide.
 	 */
-	clickMouseButton(button?: number): CancelablePromise<void> {
+	clickMouseButton(button?: number): Task<void> {
 		if (this.capabilities.brokenMouseEvents) {
 			return this.execute(simulateMouse, [ {
 				action: 'click',
@@ -1497,7 +1497,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 *
 	 * @param button The button to press. See [[Session.click]] for available options.
 	 */
-	pressMouseButton(button?: number): CancelablePromise<void> {
+	pressMouseButton(button?: number): Task<void> {
 		if (this.capabilities.brokenMouseEvents) {
 			return this.execute(simulateMouse, [ {
 				action: 'mousedown',
@@ -1516,7 +1516,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 *
 	 * @param button The button to press. See [[Session.click]] for available options.
 	 */
-	releaseMouseButton(button?: number): CancelablePromise<void> {
+	releaseMouseButton(button?: number): Task<void> {
 		if (this.capabilities.brokenMouseEvents) {
 			return this.execute(simulateMouse, [ {
 				action: 'mouseup',
@@ -1533,7 +1533,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	/**
 	 * Double-clicks the primary mouse button.
 	 */
-	doubleClick(): CancelablePromise<void> {
+	doubleClick(): Task<void> {
 		if (this.capabilities.brokenMouseEvents) {
 			return this.execute(simulateMouse, [ {
 				action: 'dblclick',
@@ -1559,7 +1559,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * @param element The element to tap.
 	 */
 	@forCommand({ usesElement: true })
-	tap(element: Element): CancelablePromise<void> {
+	tap(element: Element): Task<void> {
 		// if (element) {
 		// 	element = element.elementId;
 		// }
@@ -1575,7 +1575,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * @param x The screen x-coordinate to press, maybe in device pixels.
 	 * @param y The screen y-coordinate to press, maybe in device pixels.
 	 */
-	pressFinger(x: number, y: number): CancelablePromise<void> {
+	pressFinger(x: number, y: number): Task<void> {
 		// TODO: If someone specifies the same coordinates as as an existing finger, will it switch the active finger
 		// back to that finger instead of adding a new one?
 		return this._post('touch/down', {
@@ -1590,7 +1590,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * @param x The screen x-coordinate where a finger is pressed, maybe in device pixels.
 	 * @param y The screen y-coordinate where a finger is pressed, maybe in device pixels.
 	 */
-	releaseFinger(x: number, y: number): CancelablePromise<void> {
+	releaseFinger(x: number, y: number): Task<void> {
 		return this._post('touch/up', {
 			x: x,
 			y: y
@@ -1603,7 +1603,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * @param x The screen x-coordinate to move to, maybe in device pixels.
 	 * @param y The screen y-coordinate to move to, maybe in device pixels.
 	 */
-	moveFinger(x: number, y: number): CancelablePromise<void> {
+	moveFinger(x: number, y: number): Task<void> {
 		return this._post('touch/move', {
 			x: x,
 			y: y
@@ -1625,10 +1625,10 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * An optional y-offset, relative to the top edge of the element, in CSS pixels. If no element is specified,
 	 * the offset is relative to the previous scroll position of the window.
 	 */
-	touchScroll(xOffset: number, yOffset: number): CancelablePromise<void>;
-	touchScroll(element?: Element, xOffset?: number, yOffset?: number): CancelablePromise<void>;
+	touchScroll(xOffset: number, yOffset: number): Task<void>;
+	touchScroll(element?: Element, xOffset?: number, yOffset?: number): Task<void>;
 	@forCommand({ usesElement: true })
-	touchScroll(...args: any[]): CancelablePromise<void> {
+	touchScroll(...args: any[]): Task<void> {
 		let [ element, xOffset, yOffset ] = args;
 		if (typeof yOffset === 'undefined' && typeof xOffset !== 'undefined') {
 			yOffset = xOffset;
@@ -1667,7 +1667,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * @param element The element to double-tap.
 	 */
 	@forCommand({ usesElement: true })
-	doubleTap(element?: Element): CancelablePromise<void> {
+	doubleTap(element?: Element): Task<void> {
 		const elementId = element && element.elementId;
 
 		return this._post('touch/doubleclick', {
@@ -1681,7 +1681,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * @param element The element to long-tap.
 	 */
 	@forCommand({ usesElement: true })
-	longTap(element?: Element): CancelablePromise<void> {
+	longTap(element?: Element): Task<void> {
 		const elementId = element && element.elementId;
 		return this._post('touch/longclick', {
 			element: elementId
@@ -1698,10 +1698,10 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * @param speed The speed of the flick, in pixels per *second*. Most human flicks are 100–200ms, so
 	 * this value will be higher than expected.
 	 */
-	flickFinger(element: Element, xOffset: number, yOffset: number, speed?: number): CancelablePromise<void>;
-	flickFinger(xOffset: number, yOffset: number, speed?: number): CancelablePromise<void>;
+	flickFinger(element: Element, xOffset: number, yOffset: number, speed?: number): Task<void>;
+	flickFinger(xOffset: number, yOffset: number, speed?: number): Task<void>;
 	@forCommand({ usesElement: true })
-	flickFinger(...args: any[]): CancelablePromise<void> {
+	flickFinger(...args: any[]): Task<void> {
 		let [ element, xOffset, yOffset, speed ] = args;
 		if (typeof speed === 'undefined' && typeof yOffset === 'undefined' && typeof xOffset !== 'undefined') {
 			return this._post('touch/flick', {
@@ -1729,7 +1729,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * Latitude and longitude are specified using standard WGS84 decimal latitude/longitude. Altitude is specified
 	 * as meters above the WGS84 ellipsoid. Not all environments support altitude.
 	 */
-	getGeolocation(): CancelablePromise<Geolocation> {
+	getGeolocation(): Task<Geolocation> {
 		return this._get('location').then(location => {
 			// ChromeDriver 2.9 ignores altitude being set and then returns 0; to match the Geolocation API
 			// specification, we will just pretend that altitude is not supported by the browser at all by
@@ -1749,7 +1749,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * Latitude and longitude are specified using standard WGS84 decimal latitude/longitude. Altitude is specified
 	 * as meters above the WGS84 ellipsoid. Not all environments support altitude.
 	 */
-	setGeolocation(location: Geolocation): CancelablePromise<void> {
+	setGeolocation(location: Geolocation): Task<void> {
 		// TODO: Is it weird that this accepts an object argument? `setCookie` does too, but nothing else does.
 		if (location.altitude !== undefined) {
 			this._lastAltitude = location.altitude;
@@ -1772,7 +1772,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * @returns
 	 * An array of log entry objects. Timestamps in log entries are Unix timestamps, in seconds.
 	 */
-	getLogsFor(type: string): CancelablePromise<LogEntry[]> {
+	getLogsFor(type: string): Task<LogEntry[]> {
 		return this._post('log', {
 			type: type
 		}).then(function (logs) {
@@ -1804,9 +1804,9 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	/**
 	 * Gets the types of logs that are currently available for retrieval from the remote environment.
 	 */
-	getAvailableLogTypes(): CancelablePromise<string[]> {
+	getAvailableLogTypes(): Task<string[]> {
 		if (this.capabilities.fixedLogTypes) {
-			return CancelablePromise.resolve(this.capabilities.fixedLogTypes);
+			return Task.resolve(this.capabilities.fixedLogTypes);
 		}
 
 		return this._get('log/types');
@@ -1819,14 +1819,14 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * The cache status. One of 0 (uncached), 1 (cached/idle), 2 (checking), 3 (downloading), 4 (update ready), 5
 	 * (obsolete).
 	 */
-	getApplicationCacheStatus(): CancelablePromise<number> {
+	getApplicationCacheStatus(): Task<number> {
 		return this._get('application_cache/status');
 	}
 
 	/**
 	 * Terminates the session. No more commands will be accepted by the remote after this point.
 	 */
-	quit(): CancelablePromise<void> {
+	quit(): Task<void> {
 		return this._server.deleteSession(this._sessionId).then(noop);
 	}
 
@@ -1879,7 +1879,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	/**
 	 * Gets the list of keys set in local storage for the focused window/frame.
 	 */
-	getLocalStorageKeys(): CancelablePromise<string[]> {
+	getLocalStorageKeys(): Task<string[]> {
 		return this._get('local_storage');
 	}
 
@@ -1889,14 +1889,14 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * @param key The key to set.
 	 * @param value The value to set.
 	 */
-	setLocalStorageItem(key: string, value: string): CancelablePromise<void> {
+	setLocalStorageItem(key: string, value: string): Task<void> {
 		return this._post('local_storage', { key, value });
 	}
 
 	/**
 	 * Clears all data in local storage for the focused window/frame.
 	 */
-	clearLocalStorage(): CancelablePromise<void> {
+	clearLocalStorage(): Task<void> {
 		return this._delete('local_storage');
 	}
 
@@ -1905,7 +1905,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 *
 	 * @param key The key of the data to get.
 	 */
-	getLocalStorageItem(key: string): CancelablePromise<string> {
+	getLocalStorageItem(key: string): Task<string> {
 		return this._get('local_storage/key/$0', null, [ key ]);
 	}
 
@@ -1914,21 +1914,21 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 *
 	 * @param key The key of the data to delete.
 	 */
-	deleteLocalStorageItem(key: string): CancelablePromise<void> {
+	deleteLocalStorageItem(key: string): Task<void> {
 		return this._delete('local_storage/key/$0', null, [ key ]);
 	}
 
 	/**
 	 * Gets the number of keys set in local storage for the focused window/frame.
 	 */
-	getLocalStorageLength(): CancelablePromise<number> {
+	getLocalStorageLength(): Task<number> {
 		return this._get('local_storage/size');
 	}
 
 	/**
 	 * Gets the list of keys set in session storage for the focused window/frame.
 	 */
-	getSessionStorageKeys(): CancelablePromise<string[]> {
+	getSessionStorageKeys(): Task<string[]> {
 		return this._get('session_storage');
 	}
 
@@ -1938,14 +1938,14 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * @param key The key to set.
 	 * @param value The value to set.
 	 */
-	setSessionStorageItem(key: string, value: string): CancelablePromise<void> {
+	setSessionStorageItem(key: string, value: string): Task<void> {
 		return this._post('session_storage', { key, value });
 	}
 
 	/**
 	 * Clears all data in session storage for the focused window/frame.
 	 */
-	clearSessionStorage(): CancelablePromise<void> {
+	clearSessionStorage(): Task<void> {
 		return this._delete('session_storage');
 	}
 
@@ -1954,7 +1954,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 *
 	 * @param key The key of the data to get.
 	 */
-	getSessionStorageItem(key: string): CancelablePromise<string> {
+	getSessionStorageItem(key: string): Task<string> {
 		return this._get('session_storage/key/$0', null, [ key ]);
 	}
 
@@ -1963,14 +1963,14 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 *
 	 * @param key The key of the data to delete.
 	 */
-	deleteSessionStorageItem(key: string): CancelablePromise<void> {
+	deleteSessionStorageItem(key: string): Task<void> {
 		return this._delete('session_storage/key/$0', null, [ key ]);
 	}
 
 	/**
 	 * Gets the number of keys set in session storage for the focused window/frame.
 	 */
-	getSessionStorageLength(): CancelablePromise<number> {
+	getSessionStorageLength(): Task<number> {
 		return this._get('session_storage/size');
 	}
 
@@ -1987,7 +1987,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * @param value
 	 * The strategy-specific value to search for. See [[Session.find]] for details.
 	 */
-	findDisplayed(using: string, value: string): CancelablePromise<Element> { return null; }
+	findDisplayed(using: string, value: string): Task<Element> { return null; }
 
 	/**
 	 * Waits for all elements in the currently active window/frame to be destroyed.
@@ -1998,12 +1998,12 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 * @param value
 	 * The strategy-specific value to search for. See [[Session.find]] for details.
 	 */
-	waitForDeleted(strategy: string, value: string): CancelablePromise<void> { return null; }
+	waitForDeleted(strategy: string, value: string): Task<void> { return null; }
 
 	/**
 	 * Gets the timeout for [[Session.executeAsync]] calls.
 	 */
-	getExecuteAsyncTimeout(): CancelablePromise<number> {
+	getExecuteAsyncTimeout(): Task<number> {
 		return this.getTimeout('script');
 	}
 
@@ -2012,14 +2012,14 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 *
 	 * @param ms The length of the timeout, in milliseconds.
 	 */
-	setExecuteAsyncTimeout(ms: number): CancelablePromise<void> {
+	setExecuteAsyncTimeout(ms: number): Task<void> {
 		return this.setTimeout('script', ms);
 	}
 
 	/**
 	 * Gets the timeout for [[Session.find]] calls.
 	 */
-	getFindTimeout(): CancelablePromise<number> {
+	getFindTimeout(): Task<number> {
 		return this.getTimeout('implicit');
 	}
 
@@ -2028,14 +2028,14 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 *
 	 * @param ms The length of the timeout, in milliseconds.
 	 */
-	setFindTimeout(ms: number): CancelablePromise<void> {
+	setFindTimeout(ms: number): Task<void> {
 		return this.setTimeout('implicit', ms);
 	}
 
 	/**
 	 * Gets the timeout for [[Session.get]] calls.
 	 */
-	getPageLoadTimeout(): CancelablePromise<number> {
+	getPageLoadTimeout(): Task<number> {
 		return this.getTimeout('page load');
 	}
 
@@ -2044,7 +2044,7 @@ export default class Session extends Strategies<CancelablePromise<Element>, Canc
 	 *
 	 * @param ms The length of the timeout, in milliseconds.
 	 */
-	setPageLoadTimeout(ms: number): CancelablePromise<void> {
+	setPageLoadTimeout(ms: number): Task<void> {
 		return this.setTimeout('page load', ms);
 	}
 }

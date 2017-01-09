@@ -4,7 +4,7 @@ import * as util from './support/util';
 import Command, { Context } from 'src/Command';
 import Session from 'src/Session';
 import { IRequire } from 'dojo/loader';
-import CancelablePromise from 'src/lib/CancelablePromise';
+import Task from 'dojo-core/async/Task';
 import Test = require('intern/lib/Test');
 
 declare const require: IRequire;
@@ -28,7 +28,7 @@ registerSuite(function () {
 		},
 
 		'error handling': {
-			'DEBUG initialiser throws'() {
+			'initialiser throws'() {
 				return new Command(session, function () {
 					throw new Error('broken');
 				}).then(function () {
@@ -46,10 +46,10 @@ registerSuite(function () {
 				});
 			},
 
-			'DEBUG invalid async command'() {
+			'invalid async command'() {
 				const command: any = new Command(session).sleep(100);
 				Command.addSessionMethod(command, 'invalid', function () {
-					return new CancelablePromise(function (resolve, reject) {
+					return new Task(function (resolve, reject) {
 						setTimeout(function () {
 							reject(new Error('Invalid call'));
 						}, 0);
@@ -91,7 +91,7 @@ registerSuite(function () {
 			const dfd = this.async();
 			const parent = new Command(session, function (setContext) {
 				setContext('foo');
-				return CancelablePromise.resolve('bar');
+				return Task.resolve('bar');
 			});
 
 			const expectedContext: Context = [ 'foo' ];
@@ -270,18 +270,19 @@ registerSuite(function () {
 
 		'#finally'() {
 			const command = new Command(session);
-			let callback: Function;
-			let errback: Function;
+			const promise = command['_promise'];
 			const expected = function () {};
-			command.then = <any> function (cb: Function, eb: Function) {
-				callback = cb;
-				errback = eb;
-				return 'thenCalled';
+			let wasCalled = false;
+			let result: Function;
+
+			promise.finally = <any> function (cb: Function) {
+				wasCalled = true;
+				result = cb;
 			};
-			const result = command.finally(expected);
-			assert.strictEqual(result, 'thenCalled');
-			assert.strictEqual(callback, expected);
-			assert.strictEqual(errback, expected);
+
+			command.finally(expected);
+			assert.isTrue(wasCalled);
+			assert.strictEqual(result, expected);
 		},
 
 		'#cancel'() {
@@ -291,11 +292,8 @@ registerSuite(function () {
 
 			const startTime = Date.now();
 
-			return sleepCommand.then(function () {
-				throw new Error('Sleep command should have been cancelled');
-			}, function (error: Error) {
+			return sleepCommand.finally(function () {
 				assert.operator(Date.now() - startTime, '<', 4000, 'Cancel should not wait for sleep to complete');
-				assert.strictEqual(error.name, 'CancelError');
 			});
 		},
 
@@ -305,7 +303,7 @@ registerSuite(function () {
 			});
 
 			Command.addSessionMethod(command, 'newContext', util.forCommand(function () {
-				return CancelablePromise.resolve('b');
+				return Task.resolve('b');
 			}, { createsContext: true }));
 
 			return command.newContext().then(function (this: Command<any>) {
@@ -323,7 +321,7 @@ registerSuite(function () {
 				setContext({
 					elementId: 'farts',
 					newContext: util.forCommand(function () {
-						return CancelablePromise.resolve('b');
+						return Task.resolve('b');
 					}, { createsContext: true })
 				});
 			});

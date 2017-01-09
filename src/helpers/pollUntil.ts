@@ -1,6 +1,6 @@
 import * as util from '../lib/util';
 import Command from '../Command';
-import CancelablePromise from '../lib/CancelablePromise';
+import Task from 'dojo-core/async/Task';
 
 /**
  * A [[Command]] helper that polls for a value within the client environment until the value exists
@@ -60,9 +60,9 @@ import CancelablePromise from '../lib/CancelablePromise';
  *     });
  * ```
  */
-export default function pollUntil(poller: Function|string, args?: any[], timeout?: number, pollInterval?: number): () => CancelablePromise<any>;
-export default function pollUntil(poller: Function|string, timeout?: number, pollInterval?: number): () => CancelablePromise<any>;
-export default function pollUntil(...allArgs: any[]): () => CancelablePromise<any> {
+export default function pollUntil(poller: Function|string, args?: any[], timeout?: number, pollInterval?: number): () => Task<any>;
+export default function pollUntil(poller: Function|string, timeout?: number, pollInterval?: number): () => Task<any>;
+export default function pollUntil(...allArgs: any[]): () => Task<any> {
 	let [ poller, args, timeout, pollInterval ] = allArgs;
 	if (typeof args === 'number') {
 		pollInterval = timeout;
@@ -82,6 +82,25 @@ export default function pollUntil(...allArgs: any[]): () => CancelablePromise<an
 
 			function storeResult(result: any) {
 				resultOrError = result;
+			}
+
+			function finish() {
+				if (resultOrError instanceof Error) {
+					throw resultOrError;
+				}
+				if (resultOrError == null) {
+					const error = new Error('Polling timed out with no result');
+					error.name = 'ScriptTimeout';
+					throw error;
+				}
+				return resultOrError;
+			}
+
+			function cleanup() {
+				if (!isNaN(originalTimeout)) {
+					return session.setExecuteAsyncTimeout(originalTimeout).then(finish);
+				}
+				return finish();
 			}
 
 			if (!isNaN(timeout)) {
@@ -117,24 +136,7 @@ export default function pollUntil(...allArgs: any[]): () => CancelablePromise<an
 					}, [ util.toExecuteString(poller), args, timeout, pollInterval ]);
 				})
 				.then(storeResult, storeResult)
-				.finally(function () {
-					function finish() {
-						if (resultOrError instanceof Error) {
-							throw resultOrError;
-						}
-						if (resultOrError === null) {
-							const error = new Error('Polling timed out with no result');
-							error.name = 'ScriptTimeout';
-							throw error;
-						}
-						return resultOrError;
-					}
-
-					if (!isNaN(originalTimeout)) {
-						return session.setExecuteAsyncTimeout(originalTimeout).then(finish);
-					}
-					return finish();
-				});
+				.then(cleanup, cleanup);
 		});
 	};
 }

@@ -43,8 +43,8 @@ export const loaders = {
 	'host-node': 'dojo-loader'
 };
 
-export const suites = [
-	'dojo/has!host-node?tests/unit/lib/util'
+export const suites: any = [
+	'tests/unit/lib/util'
 ];
 
 export const functionalSuites = [

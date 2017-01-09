@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import  Strategies from './lib/strategies';
 import WaitForDeleted from './lib/waitForDeleted';
 import * as util from './lib/util';
-import CancelablePromise from './lib/CancelablePromise';
+import Task from 'dojo-core/async/Task';
 import Session from './Session';
 import JSZip = require('jszip');
 import { basename } from 'path';
@@ -18,9 +18,9 @@ export type ElementOrElementId = { ELEMENT: string; } | Element | string;
 /**
  * An Element represents a DOM or UI element within the remote environment.
  */
-export default class Element extends Strategies<CancelablePromise<Element>, CancelablePromise<Element[]>, CancelablePromise<void>>
-							implements WaitForDeleted<CancelablePromise<Element>, CancelablePromise<void>>,
-									FindDisplayed<CancelablePromise<Element>> {
+export default class Element extends Strategies<Task<Element>, Task<Element[]>, Task<void>>
+							implements WaitForDeleted<Task<Element>, Task<void>>,
+									FindDisplayed<Task<Element>> {
 	private _elementId: string;
 	private _session: Session;
 
@@ -58,12 +58,12 @@ export default class Element extends Strategies<CancelablePromise<Element>, Canc
 		return this._session;
 	}
 
-	private _get(path: string, requestData?: any, pathParts?: any): CancelablePromise<any> {
+	private _get(path: string, requestData?: any, pathParts?: any): Task<any> {
 		path = 'element/' + encodeURIComponent(this._elementId) + '/' + path;
 		return this._session['_get'](path, requestData, pathParts);
 	}
 
-	private _post(path: string, requestData?: any, pathParts?: any): CancelablePromise<any> {
+	private _post(path: string, requestData?: any, pathParts?: any): Task<any> {
 		path = 'element/' + encodeURIComponent(this._elementId) + '/' + path;
 		return this._session['_post'](path, requestData, pathParts);
 	}
@@ -97,8 +97,8 @@ export default class Element extends Strategies<CancelablePromise<Element>, Canc
 	 * use [[Element.type]] to type the name of the local file into a file input field and the file
 	 * will be transparently transmitted and used by the server.
 	 */
-	private _uploadFile(filename: string): CancelablePromise<string> {
-		return new CancelablePromise(resolve => {
+	private _uploadFile(filename: string): Task<string> {
+		return new Task(resolve => {
 			const content = fs.readFileSync(filename);
 
 			let zip = new JSZip();
@@ -123,7 +123,7 @@ export default class Element extends Strategies<CancelablePromise<Element>, Canc
 	 * @param value
 	 * The strategy-specific value to search for. See [[Session.find]] for details.
 	 */
-	find(using: string, value: string): CancelablePromise<Element> {
+	find(using: string, value: string): Task<Element> {
 		const session = this._session;
 
 		if (session.capabilities.isWebDriver) {
@@ -171,7 +171,7 @@ export default class Element extends Strategies<CancelablePromise<Element>, Canc
 	 * @param value
 	 * The strategy-specific value to search for. See [[Session.find]] for details.
 	 */
-	findAll(using: string, value: string): CancelablePromise<Element[]> {
+	findAll(using: string, value: string): Task<Element[]> {
 		const session = this._session;
 
 		if (session.capabilities.isWebDriver) {
@@ -203,7 +203,7 @@ export default class Element extends Strategies<CancelablePromise<Element>, Canc
 	/**
 	 * Clicks the element. This method works on both mouse and touch platforms.
 	 */
-	click(): CancelablePromise<void> {
+	click(): Task<void> {
 		if (this.session.capabilities.brokenClick) {
 			return this.session.execute(function (element: HTMLElement) {
 				element.click();
@@ -222,7 +222,7 @@ export default class Element extends Strategies<CancelablePromise<Element>, Canc
 	/**
 	 * Submits the element, if it is a form, or the form belonging to the element, if it is a form element.
 	 */
-	submit(): CancelablePromise<void> {
+	submit(): Task<void> {
 		if (this.session.capabilities.brokenSubmitElement) {
 			return this.session.execute(/* istanbul ignore next */ function (element: any) {
 				if (element.submit) {
@@ -241,7 +241,7 @@ export default class Element extends Strategies<CancelablePromise<Element>, Canc
 	 * Gets the visible text within the element. `<br>` elements are converted to line breaks in the returned
 	 * text, and whitespace is normalised per the usual XML/HTML whitespace normalisation rules.
 	 */
-	getVisibleText(): CancelablePromise<string> {
+	getVisibleText(): Task<string> {
 		const result = this._get('text');
 
 		if (this.session.capabilities.brokenWhitespaceNormalization) {
@@ -263,7 +263,7 @@ export default class Element extends Strategies<CancelablePromise<Element>, Canc
 	 * @param value
 	 * The text to type in the remote environment. See [[Session.pressKeys]] for more information.
 	 */
-	type(value: string|string[]): CancelablePromise<void> {
+	type(value: string|string[]): Task<void> {
 		const getPostData = (value: string[]): { value: string[] } => {
 			if (this.session.capabilities.isWebDriver) {
 				return { value: value.join('').split('') };
@@ -299,7 +299,7 @@ export default class Element extends Strategies<CancelablePromise<Element>, Canc
 	/**
 	 * Gets the tag name of the element. For HTML documents, the value is always lowercase.
 	 */
-	getTagName(): CancelablePromise<string> {
+	getTagName(): Task<string> {
 		return this._get('name').then((name: string) => {
 			if (this.session.capabilities.brokenHtmlTagName) {
 				return this.session.execute(
@@ -316,7 +316,7 @@ export default class Element extends Strategies<CancelablePromise<Element>, Canc
 	/**
 	 * Clears the value of a form element.
 	 */
-	clearValue(): CancelablePromise<void> {
+	clearValue(): Task<void> {
 		return this._post('clear').then(noop);
 	}
 
@@ -324,14 +324,14 @@ export default class Element extends Strategies<CancelablePromise<Element>, Canc
 	 * Returns whether or not a form element is currently selected (for drop-down options and radio buttons), or
 	 * whether or not the element is currently checked (for checkboxes).
 	 */
-	isSelected(): CancelablePromise<boolean> {
+	isSelected(): Task<boolean> {
 		return this._get('selected');
 	}
 
 	/**
 	 * Returns whether or not a form element can be interacted with.
 	 */
-	isEnabled(): CancelablePromise<boolean> {
+	isEnabled(): Task<boolean> {
 		return this._get('enabled');
 	}
 
@@ -361,7 +361,7 @@ export default class Element extends Strategies<CancelablePromise<Element>, Canc
 	 * @returns The value of the attribute as a string, or `null` if no such property or
 	 * attribute exists.
 	 */
-	getSpecAttribute(name: string): CancelablePromise<string> {
+	getSpecAttribute(name: string): Task<string> {
 		return this._get('attribute/$0', null, [ name ]).then((value) => {
 			if (this.session.capabilities.brokenNullGetSpecAttribute && (value === '' || value === undefined)) {
 				return this.session.execute(/* istanbul ignore next */ function (element: HTMLElement, name: string) {
@@ -390,7 +390,7 @@ export default class Element extends Strategies<CancelablePromise<Element>, Canc
 	 * @param name The name of the attribute.
 	 * @returns The value of the attribute, or `null` if no such attribute exists.
 	 */
-	getAttribute(name: string): CancelablePromise<string> {
+	getAttribute(name: string): Task<string> {
 		return this.session.execute('return arguments[0].getAttribute(arguments[1]);', [ this, name ]);
 	}
 
@@ -401,14 +401,14 @@ export default class Element extends Strategies<CancelablePromise<Element>, Canc
 	 * @param name The name of the property.
 	 * @returns The value of the property.
 	 */
-	getProperty(name: string): CancelablePromise<any> {
+	getProperty(name: string): Task<any> {
 		return this.session.execute('return arguments[0][arguments[1]];', [ this, name ]);
 	}
 
 	/**
 	 * Determines if this element is equal to another element.
 	 */
-	equals(other: Element): CancelablePromise<boolean> {
+	equals(other: Element): Task<boolean> {
 		const elementId = other.elementId || other;
 		return this._get('equals/$0', null, [ elementId ]).catch((error) => {
 			// At least Selendroid 0.9.0 does not support this command;
@@ -433,7 +433,7 @@ export default class Element extends Strategies<CancelablePromise<Element>, Canc
 	 * 4. Elements with `opacity: 0`
 	 * 5. Elements with no `offsetWidth` or `offsetHeight`
 	 */
-	isDisplayed(): CancelablePromise<boolean> {
+	isDisplayed(): Task<boolean> {
 		return this._get('displayed').then((isDisplayed: boolean) => {
 
 			if (isDisplayed && (
@@ -466,7 +466,7 @@ export default class Element extends Strategies<CancelablePromise<Element>, Canc
 	 * Gets the position of the element relative to the top-left corner of the document, taking into account
 	 * scrolling and CSS transformations (if they are supported).
 	 */
-	getPosition(): CancelablePromise<{ x: number, y: number }> {
+	getPosition(): Task<{ x: number, y: number }> {
 		if (this.session.capabilities.brokenElementPosition) {
 			/* jshint browser:true */
 			return this.session.execute(/* istanbul ignore next */ function (element: HTMLElement) {
@@ -488,7 +488,7 @@ export default class Element extends Strategies<CancelablePromise<Element>, Canc
 	/**
 	 * Gets the size of the element, taking into account CSS transformations (if they are supported).
 	 */
-	getSize(): CancelablePromise<{ width: number, height: number }> {
+	getSize(): Task<{ width: number, height: number }> {
 		const getUsingExecute = () => {
 			return this.session.execute(/* istanbul ignore next */ function (element: HTMLElement) {
 				const bbox = element.getBoundingClientRect();
@@ -519,14 +519,14 @@ export default class Element extends Strategies<CancelablePromise<Element>, Canc
 	 * @param propertyName
 	 * The CSS property to retrieve. This argument must be hyphenated, *not* camel-case.
 	 */
-	getComputedStyle(propertyName: string): CancelablePromise<string> {
+	getComputedStyle(propertyName: string): Task<string> {
 		const manualGetStyle = () => {
 			return this.session.execute(/* istanbul ignore next */ function (element: any, propertyName: string) {
 				return (<any> window.getComputedStyle(element, null))[propertyName];
 			}, [ this, propertyName ]);
 		};
 
-		let promise: CancelablePromise<string>;
+		let promise: Task<string>;
 
 		if (this.session.capabilities.brokenComputedStyles) {
 			promise = manualGetStyle();
@@ -573,7 +573,7 @@ export default class Element extends Strategies<CancelablePromise<Element>, Canc
 	 * @param value
 	 * The strategy-specific value to search for. See [[Session.find]] for details.
 	 */
-	findDisplayed(using: string, value: string): CancelablePromise<Element> { return null; }
+	findDisplayed(using: string, value: string): Task<Element> { return null; }
 
 	/**
 	 * Waits for all elements inside this element that match the given query to be destroyed.
@@ -587,7 +587,7 @@ export default class Element extends Strategies<CancelablePromise<Element>, Canc
 	 * @param value
 	 * The strategy-specific value to search for. See [[Session.find]] for details.
 	 */
-	waitForDeleted(strategy: string, value: string): CancelablePromise<void> { return null; }
+	waitForDeleted(strategy: string, value: string): Task<void> { return null; }
 }
 
 util.applyMixins(Element, [ FindDisplayed, WaitForDeleted ]);

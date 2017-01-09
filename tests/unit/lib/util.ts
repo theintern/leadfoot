@@ -19,11 +19,8 @@ registerSuite({
 		const startTime = Date.now();
 		const sleep = util.sleep(10000);
 		sleep.cancel();
-		return sleep.then(function () {
-			throw new Error('Sleep should have been cancelled');
-		}, function (error) {
+		return sleep.finally(function() {
 			assert.operator(Date.now() - startTime, '<', 500);
-			assert.strictEqual(error.name, 'CancelError');
 		});
 	},
 

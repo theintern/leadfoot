@@ -1,4 +1,4 @@
-import CancelablePromise from './lib/CancelablePromise';
+import Task from 'dojo-core/async/Task';
 import { Url } from 'url';
 
 export interface Capabilities {
@@ -47,7 +47,7 @@ export interface Capabilities {
 	deviceName?: string;
 	dynamicViewport?: boolean;
 	fixSessionCapabilities?: string|boolean;
-	fixedLogTypes?: false|string[]|CancelablePromise<string[]>;
+	fixedLogTypes?: false|string[]|Task<string[]>;
 	handleAlerts?: boolean;
 	handlesAlerts?: boolean;
 	hasTouchScreen?: boolean;

@@ -1,4 +1,4 @@
-import CancelablePromise from './CancelablePromise';
+import Task from 'dojo-core/async/Task';
 import statusCodes from './statusCodes';
 import Element from '../Element';
 import Session from '../Session';
@@ -33,7 +33,7 @@ abstract class FindDisplayed<E> {
 						}
 					}
 
-					return CancelablePromise.resolve(checkElement()).then(function (element) {
+					return Task.resolve(checkElement()).then(function (element) {
 						if (element) {
 							return element;
 						}

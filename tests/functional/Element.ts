@@ -4,7 +4,7 @@ import * as util from './support/util';
 import { strategies, suffixes } from 'src/lib/strategies';
 import Element from 'src/Element';
 import Session from 'src/Session';
-import CancelablePromise from 'src/lib/CancelablePromise';
+import Task from 'dojo-core/async/Task';
 import Test = require('intern/lib/Test');
 
 function toUrl(url: string): string {
@@ -226,7 +226,7 @@ registerSuite(function () {
 						' should look like an element object');
 				});
 
-				return CancelablePromise.all(elements.map(function (element) {
+				return Task.all(elements.map(function (element) {
 					return element.getAttribute('id');
 				}));
 			}
@@ -697,7 +697,7 @@ registerSuite(function () {
 				assert.strictEqual(action, 'form.html');
 				return session.findById('disabled');
 			}).then(function (element) {
-				return CancelablePromise.all({
+				return Task.all({
 					'non-existing': element.getAttribute('non-existing'),
 					disabled: element.getAttribute('disabled')
 				});
@@ -716,7 +716,7 @@ registerSuite(function () {
 				assert.operator(action.indexOf('http'), '===', 0);
 				return session.findById('disabled');
 			}).then(function (element) {
-				return CancelablePromise.all({
+				return Task.all({
 					'non-existing': element.getProperty('non-existing'),
 					disabled: element.getProperty('disabled')
 				});

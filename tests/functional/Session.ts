@@ -4,7 +4,7 @@ import * as util from './support/util';
 import { strategies, suffixes } from 'src/lib/strategies';
 import Element from 'src/Element';
 import { WebDriverCookie, Geolocation } from 'src/interfaces';
-import CancelablePromise from 'src/lib/CancelablePromise';
+import Task from 'dojo-core/async/Task';
 import Test = require('intern/lib/Test');
 
 declare let interns: any;
@@ -347,7 +347,7 @@ registerSuite(function () {
 		'#execute -> undefined'() {
 			return session.get(toUrl('./data/scripting.html'))
 				.then(function () {
-					return CancelablePromise.all([
+					return Task.all([
 						session.execute('return "not undefined";'),
 						session.execute('return undefined;')
 					]);
@@ -534,7 +534,7 @@ registerSuite(function () {
 				return opener.click();
 			}).then(function () {
 				// Give the new window time to open
-				return new CancelablePromise(function (resolve) {
+				return new Task(function (resolve) {
 					setTimeout(resolve, 1000);
 				});
 			}).then(function () {
@@ -854,7 +854,7 @@ registerSuite(function () {
 						' should look like an element object');
 				});
 
-				return CancelablePromise.all(elements.map(function (element: Element) {
+				return Task.all(elements.map(function (element: Element) {
 					return element.getAttribute('id');
 				}));
 			}

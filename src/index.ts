@@ -28,6 +28,4 @@ export { default as keys } from './keys';
  */
 export { default as pollUntil } from './helpers/pollUntil';
 
-export { default as CancelablePromise } from './lib/CancelablePromise';
-
 export * from './interfaces';

@@ -1,5 +1,5 @@
 import keys from './keys';
-import CancelablePromise from './lib/CancelablePromise';
+import Task from 'dojo-core/async/Task';
 import request, { RequestOptions, Response } from 'dojo-core/request';
 import Session from './Session';
 import Element from './Element';
@@ -109,7 +109,7 @@ export default class Server {
 	 *
 	 * @param pathParts Optional placeholder values to inject into the path of the URL.
 	 */
-	private _sendRequest(method: string, path: string, requestData: any, pathParts?: string[]): CancelablePromise<Object> {
+	private _sendRequest(method: string, path: string, requestData: any, pathParts?: string[]): Task<Object> {
 		const url = this.url + path.replace(/\$(\d)/, function (_, index) {
 			return encodeURIComponent(pathParts[index]);
 		});
@@ -145,9 +145,13 @@ export default class Server {
 		const trace: any = {};
 		Error.captureStackTrace(trace, this._sendRequest);
 
-		return new CancelablePromise((resolve, reject) => {
-			request(url, kwArgs).then(resolve, reject);
-		}).then(function handleResponse(response: Response<any>): Object|CancelablePromise<Object> {
+		return new Task((resolve, reject) => {
+			request(url, kwArgs).then(resolve, reject).finally(() => {
+				const error = new Error('Canceled');
+				error.name = 'CancelError';
+				reject(error);
+			});
+		}).then(function handleResponse(response: Response<any>): Object|Task<Object> {
 			/*jshint maxcomplexity:24 */
 			// The JsonWireProtocol specification prior to June 2013 stated that creating a new session should
 			// perform a 3xx redirect to the session capabilities URL, instead of simply returning the returning
@@ -302,15 +306,15 @@ export default class Server {
 		});
 	}
 
-	private _get(path: string, requestData?: Object, pathParts?: string[]): CancelablePromise<any> {
+	private _get(path: string, requestData?: Object, pathParts?: string[]): Task<any> {
 		return this._sendRequest('GET', path, requestData, pathParts);
 	}
 
-	private _post(path: string, requestData?: Object, pathParts?: string[]): CancelablePromise<any> {
+	private _post(path: string, requestData?: Object, pathParts?: string[]): Task<any> {
 		return this._sendRequest('POST', path, requestData, pathParts);
 	}
 
-	private _delete(path: string, requestData?: Object, pathParts?: string[]): CancelablePromise<any> {
+	private _delete(path: string, requestData?: Object, pathParts?: string[]): Task<any> {
 		return this._sendRequest('DELETE', path, requestData, pathParts);
 	}
 
@@ -335,7 +339,7 @@ export default class Server {
 	 * A hash map of required capabilities of the remote environment. The server will not return an environment that
 	 * does not match all the required capabilities if one is not available.
 	 */
-	createSession(desiredCapabilities: Capabilities, requiredCapabilities: Capabilities): CancelablePromise<Session|void> {
+	createSession(desiredCapabilities: Capabilities, requiredCapabilities: Capabilities): Task<Session|void> {
 		const fixSessionCapabilities = desiredCapabilities.fixSessionCapabilities !== false &&
 			this.fixSessionCapabilities;
 
@@ -348,11 +352,11 @@ export default class Server {
 		return this._post('session', {
 			desiredCapabilities,
 			requiredCapabilities
-		}).then((response): Session | CancelablePromise<Session|void> => {
+		}).then((response): Session | Task<Session|void> => {
 			const session = new this.sessionConstructor(response.sessionId, this, response.value);
 			if (fixSessionCapabilities) {
 				return this._fillCapabilities(session).catch(function (error) {
-					// The session was started on the server, but we did not resolve the CancelablePromise yet. If a failure
+					// The session was started on the server, but we did not resolve the Task yet. If a failure
 					// occurs during capabilities filling, we should quit the session on the server too since the
 					// caller will not be aware that it ever got that far and will have no access to the session to
 					// quit itself.
@@ -367,7 +371,7 @@ export default class Server {
 		});
 	}
 
-	private _fillCapabilities(session: Session): CancelablePromise<void|Session> {
+	private _fillCapabilities(session: Session): Task<void|Session> {
 		const capabilities = session.capabilities;
 
 		function supported() { return true; }
@@ -381,8 +385,8 @@ export default class Server {
 		 * the current session. If a tested capability value is a function, it is assumed that it still needs to
 		 * be executed serially in order to resolve the correct value of that particular capability.
 		 */
-		function addCapabilities(testedCapabilities: Capabilities): CancelablePromise<void> {
-			return new CancelablePromise<void>(function (resolve, reject) {
+		function addCapabilities(testedCapabilities: Capabilities): Task<void> {
+			return new Task<void>(function (resolve, reject) {
 				const keys = Object.keys(testedCapabilities);
 				let i = 0;
 
@@ -410,7 +414,7 @@ export default class Server {
 			});
 		}
 
-		function get(page: string): CancelablePromise<any> {
+		function get(page: string): Task<any> {
 			if (capabilities.supportsNavigationDataUris !== false) {
 				return session.get('data:text/html;charset=utf-8,' + encodeURIComponent(page));
 			}
@@ -442,7 +446,7 @@ export default class Server {
 			});
 		}
 
-		function discoverFeatures(): Capabilities|CancelablePromise<Capabilities> {
+		function discoverFeatures(): Capabilities|Task<Capabilities> {
 			const testedCapabilities: any = {};
 
 			// At least SafariDriver 2.41.0 fails to allow stand-alone feature testing because it does not inject user
@@ -564,7 +568,7 @@ export default class Server {
 				// It is not possible to test this since the feature tests runs in quirks-mode on IE<10, but we
 				// know that IE9 supports CSS transforms
 				if (capabilities.browserName === 'internet explorer' && parseFloat(capabilities.version) === 9) {
-					return CancelablePromise.resolve(true);
+					return Task.resolve(true);
 				}
 
 				/*jshint maxlen:240 */
@@ -590,10 +594,10 @@ export default class Server {
 				return keys.CONTROL;
 			})();
 
-			return CancelablePromise.all(testedCapabilities);
+			return Task.all(testedCapabilities);
 		}
 
-		function discoverDefects(): Capabilities | CancelablePromise<Capabilities> {
+		function discoverDefects(): Capabilities | Task<Capabilities> {
 			const testedCapabilities: any = {};
 
 			// At least SafariDriver 2.41.0 fails to allow stand-alone feature testing because it does not inject user
@@ -920,13 +924,13 @@ export default class Server {
 			testedCapabilities.brokenRefresh = function () {
 				return session.get('about:blank?1').then(function () {
 					let timer: any;
-					let refresh: CancelablePromise<any>;
+					let refresh: Task<any>;
 
 					function cleanup() {
 						clearTimeout(timer);
 						refresh.cancel();
 					}
-					return new CancelablePromise(function (resolve, reject) {
+					return new Task(function (resolve, reject) {
 						refresh = session.refresh().then(function () {
 							cleanup();
 							resolve(false);
@@ -982,12 +986,12 @@ export default class Server {
 
 				// At least ChromeDriver 2.9.248307 does not correctly emit the entire sequence of events that would
 				// normally occur during a double-click
-				testedCapabilities.brokenDoubleClick = function retry(): CancelablePromise<any> {
+				testedCapabilities.brokenDoubleClick = function retry(): Task<any> {
 					// InternetExplorerDriver is not buggy, but IE9 in quirks-mode is; since we cannot do feature
 					// tests in standards-mode in IE<10, force the value to false since it is not broken in this
 					// browser
 					if (capabilities.browserName === 'internet explorer' && capabilities.version === '9') {
-						return CancelablePromise.resolve(false);
+						return Task.resolve(false);
 					}
 
 					return get('<!DOCTYPE html><script>window.counter = 0; var d = document; d.onclick = d.onmousedown = d.onmouseup = function () { window.counter++; };</script>').then(function () {
@@ -1070,7 +1074,7 @@ export default class Server {
 				};
 			}
 
-			return CancelablePromise.all(testedCapabilities);
+			return Task.all(testedCapabilities);
 		}
 
 		function discoverServerFeatures() {
@@ -1143,15 +1147,15 @@ export default class Server {
 					unsupported);
 			}
 
-			return CancelablePromise.all(testedCapabilities);
+			return Task.all(testedCapabilities);
 		}
 
 		if (capabilities._filled) {
-			return CancelablePromise.resolve(session);
+			return Task.resolve(session);
 		}
 
 		// At least geckodriver 0.11 and Firefox 49+ may hang when getting 'about:blank' in the first request
-		const promise: CancelablePromise<Session|void> = isGeckodriver(capabilities) ? CancelablePromise.resolve(session) : session.get('about:blank');
+		const promise: Task<Session|void> = isGeckodriver(capabilities) ? Task.resolve(session) : session.get('about:blank');
 
 		return promise
 			.then(discoverServerFeatures)
@@ -1175,7 +1179,7 @@ export default class Server {
 	/**
 	 * Gets a list of all currently active remote control sessions on this server.
 	 */
-	getSessions(): CancelablePromise<Session[]> {
+	getSessions(): Task<Session[]> {
 		return this._get('sessions').then(function (sessions: any) {
 			// At least BrowserStack is now returning an array for the sessions response
 			if (sessions && !Array.isArray(sessions)) {
@@ -1199,14 +1203,14 @@ export default class Server {
 	 * by this command will not include any of the extra session capabilities detected by Leadfoot and may be
 	 * inaccurate.
 	 */
-	getSessionCapabilities(sessionId: string): CancelablePromise<Capabilities> {
+	getSessionCapabilities(sessionId: string): Task<Capabilities> {
 		return this._get('session/$0', null, [ sessionId ]).then(returnValue);
 	}
 
 	/**
 	 * Terminates a session on the server.
 	 */
-	deleteSession(sessionId: string): CancelablePromise<void> {
+	deleteSession(sessionId: string): Task<void> {
 		return this._delete('session/$0', null, [ sessionId ]).then(noop);
 	}
 }
