@@ -20,6 +20,12 @@
   "files": [
     "./types/jszip/jszip.d.ts"
   ],
+  "formatCodeOptions": {
+    "convertTabsToSpaces": false,
+    "insertSpaceAfterCommaDelimiter": true,
+    "insertSpaceAfterFunctionKeywordForAnonymousFunctions": true,
+    "insertSpaceAfterSemicolonInForStatements": true
+  },
   "include": [
     "./src/**/*.ts"
   ]

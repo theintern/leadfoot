@@ -6,6 +6,7 @@ import Session from 'src/Session';
 import { IRequire } from 'dojo/loader';
 import Task from 'dojo-core/async/Task';
 import Test = require('intern/lib/Test');
+import Element from 'src/Element';
 
 declare const require: IRequire;
 
@@ -270,7 +271,7 @@ registerSuite(function () {
 
 		'#finally'() {
 			const command = new Command(session);
-			const promise = command['_promise'];
+			const promise = command['_task'];
 			const expected = function () {};
 			let wasCalled = false;
 			let result: Function;

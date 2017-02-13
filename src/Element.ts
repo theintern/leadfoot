@@ -1,26 +1,17 @@
 import FindDisplayed from './lib/findDisplayed';
 import * as fs from 'fs';
-import  Strategies from './lib/strategies';
+import Searchable from './lib/Searchable';
 import WaitForDeleted from './lib/waitForDeleted';
-import * as util from './lib/util';
+import { applyMixins, sleep, toW3Locator } from './lib/util';
 import Task from 'dojo-core/async/Task';
 import Session from './Session';
 import JSZip = require('jszip');
 import { basename } from 'path';
 
-function noop() {
-	// At least ios-driver 0.6.6 returns an empty object for methods that are supposed to return no value at all,
-	// which is not correct
-}
-
-export type ElementOrElementId = { ELEMENT: string; } | Element | string;
-
 /**
  * An Element represents a DOM or UI element within the remote environment.
  */
-export default class Element extends Strategies<Task<Element>, Task<Element[]>, Task<void>>
-							implements WaitForDeleted<Task<Element>, Task<void>>,
-									FindDisplayed<Task<Element>> {
+export default class Element extends Searchable<Task<Element>, Task<Element[]>, Task<void>> {
 	private _elementId: string;
 	private _session: Session;
 
@@ -58,14 +49,14 @@ export default class Element extends Strategies<Task<Element>, Task<Element[]>, 
 		return this._session;
 	}
 
-	private _get(path: string, requestData?: any, pathParts?: any): Task<any> {
+	private _get<T>(path: string, requestData?: any, pathParts?: any): Task<any> {
 		path = 'element/' + encodeURIComponent(this._elementId) + '/' + path;
-		return this._session['_get'](path, requestData, pathParts);
+		return this._session['_get']<T>(path, requestData, pathParts);
 	}
 
-	private _post(path: string, requestData?: any, pathParts?: any): Task<any> {
+	private _post<T>(path: string, requestData?: any, pathParts?: any): Task<any> {
 		path = 'element/' + encodeURIComponent(this._elementId) + '/' + path;
-		return this._session['_post'](path, requestData, pathParts);
+		return this._session['_post']<T>(path, requestData, pathParts);
 	}
 
 	toJSON() {
@@ -127,13 +118,13 @@ export default class Element extends Strategies<Task<Element>, Task<Element[]>, 
 		const session = this._session;
 
 		if (session.capabilities.isWebDriver) {
-			const locator = util.toW3Locator(using, value);
+			const locator = toW3Locator(using, value);
 			using = locator.using;
 			value = locator.value;
 		}
 
 		if (using.indexOf('link text') !== -1 && this.session.capabilities.brokenWhitespaceNormalization) {
-			return this.session.execute(/* istanbul ignore next */ this.session['_manualFindByLinkText'], [
+			return this.session.execute<any>(/* istanbul ignore next */ this.session['_manualFindByLinkText'], [
 				using, value, false, this
 			]).then(function (element: ElementOrElementId) {
 				if (!element) {
@@ -175,7 +166,7 @@ export default class Element extends Strategies<Task<Element>, Task<Element[]>, 
 		const session = this._session;
 
 		if (session.capabilities.isWebDriver) {
-			const locator = util.toW3Locator(using, value);
+			const locator = toW3Locator(using, value);
 			using = locator.using;
 			value = locator.value;
 		}
@@ -203,18 +194,18 @@ export default class Element extends Strategies<Task<Element>, Task<Element[]>, 
 	/**
 	 * Clicks the element. This method works on both mouse and touch platforms.
 	 */
-	click(): Task<void> {
+	click() {
 		if (this.session.capabilities.brokenClick) {
-			return this.session.execute(function (element: HTMLElement) {
+			return this.session.execute<void>((element: HTMLElement) => {
 				element.click();
 			}, [ this ]);
 		}
 
-		return this._post('click').then(() => {
+		return this._post<void>('click').then(() => {
 			// ios-driver 0.6.6-SNAPSHOT April 2014 and MS Edge Driver 14316 do not wait until the default action for
 			// a click event occurs before returning
 			if (this.session.capabilities.touchEnabled || this.session.capabilities.returnsFromClickImmediately) {
-				return util.sleep(500);
+				return sleep(500);
 			}
 		});
 	}
@@ -222,9 +213,9 @@ export default class Element extends Strategies<Task<Element>, Task<Element[]>, 
 	/**
 	 * Submits the element, if it is a form, or the form belonging to the element, if it is a form element.
 	 */
-	submit(): Task<void> {
+	submit() {
 		if (this.session.capabilities.brokenSubmitElement) {
-			return this.session.execute(/* istanbul ignore next */ function (element: any) {
+			return this.session.execute<void>(/* istanbul ignore next */ (element: any) => {
 				if (element.submit) {
 					element.submit();
 				}
@@ -234,7 +225,7 @@ export default class Element extends Strategies<Task<Element>, Task<Element[]>, 
 			}, [ this ]);
 		}
 
-		return this._post('submit').then(noop);
+		return this._post<void>('submit');
 	}
 
 	/**
@@ -590,4 +581,12 @@ export default class Element extends Strategies<Task<Element>, Task<Element[]>, 
 	waitForDeleted(strategy: string, value: string): Task<void> { return null; }
 }
 
-util.applyMixins(Element, [ FindDisplayed, WaitForDeleted ]);
+applyMixins(Element, [ FindDisplayed, WaitForDeleted ]);
+
+function noop() {
+	// At least ios-driver 0.6.6 returns an empty object for methods that are supposed to return no value at all,
+	// which is not correct
+}
+
+export type ElementOrElementId = { ELEMENT: string; } | Element | string;
+

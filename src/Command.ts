@@ -1,23 +1,9 @@
-import * as util from './lib/util';
+import { sleep, trimStack } from './lib/util';
 import Element from './Element';
 import Task from 'dojo-core/async/Task';
 import Session from './Session';
-import Strategies from './lib/strategies';
+import Searchable from './lib/Searchable';
 import { LogEntry, Geolocation, WebDriverCookie } from './interfaces';
-
-export interface SetContextMethod<T> {
-	(context: T|T[]): void;
-}
-
-// TODO: is this the correct type of array?
-export interface Context extends Array<any> {
-	isSingle?: boolean;
-	depth?: number;
-}
-
-const TOP_CONTEXT: Context = [];
-TOP_CONTEXT.isSingle = true;
-TOP_CONTEXT.depth = 0;
 
 /**
  * The Command class is a chainable, subclassable object type that can be used to execute commands serially against a
@@ -149,11 +135,124 @@ TOP_CONTEXT.depth = 0;
  * Note that returning `this`, or a command chain starting from `this`, from a callback or command initialiser will
  * deadlock the Command, as it waits for itself to settle before settling.
  */
-export default class Command<T> extends Strategies<Command<Element>, Command<Element[]>, Command<void>> {
-	private _parent: Command<any>|Session;
+export default class Command<T> extends Searchable<Command<Element>, Command<Element[]>, Command<void>> {
+	/**
+	 * Augments `target` with a conversion of the `originalFn` method that enables its use with a Command object.
+	 * This can be used to easily add new methods from any custom object that implements the Session API to any target
+	 * object that implements the Command API.
+	 *
+	 * Functions that are copied may have the following extra properties in order to change the way that Command works
+	 * with these functions:
+	 *
+	 * - `createsContext` (boolean): If this property is specified, the return value from the function will be used as
+	 *   the new context for the returned Command.
+	 * - `usesElement` (boolean): If this property is specified, element(s) from the current context will be used as
+	 *   the first argument to the function, if the explicitly specified first argument is not already an element.
+	 *
+	 * @memberOf module:leadfoot/Command
+	 * @param {module:leadfoot/Command} target
+	 * @param {string} key
+	 * @param {Function} originalFn
+	 */
+	static addSessionMethod<U>(target: Command<U>, key: string, originalFn: Function) {
+		// Checking for private/non-functions here deduplicates this logic; otherwise it would need to exist in both
+		// the Command constructor (for copying functions from sessions) as well as the Command factory below
+		if (key.charAt(0) !== '_' && !(<any>target)[key] && typeof originalFn === 'function') {
+			(<any>target)[key] = function (this: Command<U>, ...args: any[]): Command<U> {
+				return new (this.constructor as typeof Command)<U>(this, function (this: Command<U>, setContext: Function) {
+					const parentContext = this._context;
+					const session = this._session;
+					let promise: Task<any>;
+					// The function may have come from a session object prototype but have been overridden on the actual
+					// session instance; in such a case, the overridden function should be used instead of the one from
+					// the original source object. The original source object may still be used, however, if the
+					// function is being added like a mixin and does not exist on the actual session object for this
+					// session
+					const fn = (<any>session)[key] || originalFn;
+
+					if (fn.usesElement && parentContext.length && (!args[0] || !args[0].elementId)) {
+						// Defer converting arguments into an array until it is necessary to avoid overhead
+						args = Array.prototype.slice.call(args, 0);
+
+						if (parentContext.isSingle) {
+							promise = fn.apply(session, [parentContext[0]].concat(args));
+						}
+						else {
+							promise = Task.all(parentContext.map(function (element: Element) {
+								return fn.apply(session, [element].concat(args));
+							}));
+						}
+					}
+					else {
+						promise = fn.apply(session, args);
+					}
+
+					if (fn.createsContext) {
+						promise = promise.then(function (newContext) {
+							setContext(newContext);
+							return newContext;
+						});
+					}
+
+					return <Task<U>>promise;
+				});
+			};
+		}
+	}
+
+	/**
+	 * Augments `target` with a method that will call `key` on all context elements stored within `target`.
+	 * This can be used to easily add new methods from any custom object that implements the Element API to any target
+	 * object that implements the Command API.
+	 *
+	 * Functions that are copied may have the following extra properties in order to change the way that Command works
+	 * with these functions:
+	 *
+	 * - `createsContext` (boolean): If this property is specified, the return value from the function will be used as
+	 *   the new context for the returned Command.
+	 *
+	 * @memberOf module:leadfoot/Command
+	 * @param {module:leadfoot/Command} target
+	 * @param {string} key
+	 */
+	static addElementMethod<T>(target: Command<T>, key: string) {
+		const anyTarget = <any>target;
+		if (key.charAt(0) !== '_') {
+			// some methods, like `click`, exist on both Session and Element; deduplicate these methods by appending the
+			// element ones with 'Element'
+			const targetKey = key + (anyTarget[key] ? 'Element' : '');
+			anyTarget[targetKey] = function (this: Command<T>, ...args: any[]): Command<T> {
+				return new (this.constructor as typeof Command)(this, function (this: Command<T>, setContext: Function) {
+					const parentContext = this._context;
+					let promise: Task<any>;
+					let fn = (<any>parentContext)[0] && (<any>parentContext)[0][key];
+
+					if (parentContext.isSingle) {
+						promise = fn.apply(parentContext[0], args);
+					}
+					else {
+						promise = Task.all(parentContext.map(function (element: any) {
+							return element[key].apply(element, args);
+						}));
+					}
+
+					if (fn && fn.createsContext) {
+						promise = promise.then(function (newContext) {
+							setContext(newContext);
+							return newContext;
+						});
+					}
+
+					return <Task<T>>promise;
+				});
+			};
+		}
+	}
+
+	private _parent: Command<any> | Session;
 	private _session: Session;
 	private _context: Context;
-	private _promise: Task<any>;
+	private _task: Task<any>;
 
 	/**
 	 * @param parent
@@ -170,7 +269,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * a new context for the current command by calling the passed `setContext` function any time prior to resolving the
 	 * Promise that it returns. If no context is explicitly provided, the context from the parent command will be used.
 	 */
-	constructor(parent: Session|Command<any>, initialiser?: (setContext: Function, value: any) => Task<any>|any, errback?: (setContext: Function, error: Error) => Task<any>|any) {
+	constructor(parent: Session | Command<any>, initialiser?: (setContext: Function, value: any) => Task<any> | any, errback?: (setContext: Function, error: Error) => Task<any> | any) {
 		super();
 
 		const self = this;
@@ -179,14 +278,14 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 
 		function setContext(context: Context) {
 			if (!Array.isArray(context)) {
-				context = <Context> [ context ];
+				context = <Context>[context];
 				context.isSingle = true;
 			}
 
 			// If the context being set has depth, then it is coming from `Command#end`,
 			// or someone smart knows what they are doing; do not change the depth
 			if (!('depth' in context)) {
-				context.depth = parent ? (<Command<T>> parent).context.depth + 1 : 0;
+				context.depth = parent ? (<Command<T>>parent).context.depth + 1 : 0;
 			}
 
 			self._context = context;
@@ -194,7 +293,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 
 		function fixStack(error: any) {
 			// TODO: fix error type
-			error.stack = error.stack + util.trimStack(trace.stack);
+			error.stack = error.stack + trimStack(trace.stack);
 			throw error;
 		}
 
@@ -214,15 +313,15 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 		// using the fluid interfaces
 		// TODO: Test
 		for (let key in session) {
-			if ((<any> session)[key] !== (<any> Session.prototype)[key]) {
-				Command.addSessionMethod(this, key, (<any> session)[key]);
+			if ((<any>session)[key] !== (<any>Session.prototype)[key]) {
+				Command.addSessionMethod(this, key, (<any>session)[key]);
 			}
 		}
 
 		Error.captureStackTrace(trace, Command);
 
-		let parentCommand = <Command<T>> parent;
-		this._promise = (parentCommand ? parentCommand.promise : Task.resolve(undefined)).then(function (returnValue) {
+		let parentCommand = <Command<T>>parent;
+		this._task = (parentCommand ? parentCommand.promise : Task.resolve(undefined)).then(function (returnValue) {
 			self._context = parentCommand ? parentCommand.context : TOP_CONTEXT;
 			return returnValue;
 		}, function (error) {
@@ -239,7 +338,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 					.catch(errback.bind(self, setContext))
 					.catch(fixStack);
 			}
-		);
+			);
 	}
 
 	/**
@@ -282,7 +381,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * @readonly
 	 */
 	get promise() {
-		return this._promise;
+		return this._task;
 	}
 
 	/**
@@ -292,7 +391,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 */
 	sleep(ms: number) {
 		return new (this.constructor as typeof Command)(this, function () {
-			return util.sleep(ms);
+			return sleep(ms);
 		});
 	}
 
@@ -315,12 +414,12 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 *
 	 * @param numCommandsToPop The number of element contexts to pop. Defaults to 1.
 	 */
-	end(numCommandsToPop: number = 1): Command<T> {
+	end(numCommandsToPop: number = 1) {
 		return new (this.constructor as typeof Command)<void>(this, function (this: Command<T>, setContext: Function) {
 			let command = this;
 			let depth: number = this.context.depth;
 
-			while (depth && numCommandsToPop && (command = <Command<any>> command.parent)) {
+			while (depth && numCommandsToPop && (command = <Command<any>>command.parent)) {
 				if (command.context.depth < depth) {
 					--numCommandsToPop;
 					depth = command.context.depth;
@@ -344,7 +443,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 *    element(s) will be used as the context for subsequent element method invocations (`click`, etc.). If
 	 *    the `setContext` method is not called, the element context from the parent will be passed through unmodified.
 	 */
-	then(callback: Function, errback?: Function): Command<T> {
+	then<U>(callback?: (value: T, setContext: SetContextMethod<U>) => U | Command<U>, errback?: (error: Error) => void | U | Command<U>) {
 		function runCallback(command: Command<T>, callback: Function, value: T, setContext: SetContextMethod<T>): T {
 			const returnValue = callback.call(command, value, setContext);
 
@@ -356,7 +455,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 					if (maybeCommand === command) {
 						throw new Error('Deadlock: do not use `return this` from a Command callback');
 					}
-				} while ((maybeCommand = <Command<any>> maybeCommand.parent));
+				} while ((maybeCommand = <Command<any>>maybeCommand.parent));
 			}
 
 			return returnValue;
@@ -372,15 +471,15 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	/**
 	 * Adds a callback to be invoked when any of the previously chained operations have failed.
 	 */
-	catch(errback: Function): Command<T> {
+	catch(errback: (reason: Error) => void | T | Command<T>) {
 		return this.then(null, errback);
 	}
 
 	/**
 	 * Adds a callback to be invoked once the previously chained operations have resolved.
 	 */
-	finally(callback: () => void): Command<T> {
-		this._promise = this._promise.finally(callback);
+	finally(callback: () => void) {
+		this._task = this._task.finally(callback);
 		return this;
 	}
 
@@ -388,20 +487,20 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * Cancels all outstanding chained operations of the Command. Calling this method will cause this command and all
 	 * subsequent chained commands to fail with a CancelError.
 	 */
-	cancel(): Command<T> {
-		this._promise.cancel();
+	cancel() {
+		this._task.cancel();
 		return this;
 	}
 
-	find(strategy: string, value: string): Command<Element> {
+	find(strategy: string, value: string) {
 		return this._callFindElementMethod<Element>('find', strategy, value);
 	}
 
-	findAll(strategy: string, value: string): Command<Element[]> {
+	findAll(strategy: string, value: string) {
 		return this._callFindElementMethod<Element[]>('findAll', strategy, value);
 	}
 
-	findDisplayed(strategy: string, value: string): Command<Element> {
+	findDisplayed(strategy: string, value: string) {
 		return this._callFindElementMethod<Element>('findDisplayed', strategy, value);
 	}
 
@@ -409,17 +508,17 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * a function that, when called, creates a new Command that retrieves elements from the parent context and
 	 * uses them as the context for the newly created Command.
 	 */
-	private _callFindElementMethod<U>(key: keyof Element, ...args: any[]): Command<U> {
+	private _callFindElementMethod<U>(key: keyof Element, ...args: any[]) {
 		return new (this.constructor as typeof Command)<U>(this, function (this: Command<U>, setContext: SetContextMethod<U>) {
 			const parentContext = this._context;
 			let promise: Task<U>;
 
 			if (parentContext.length && parentContext.isSingle) {
-				promise = (<any> parentContext)[0][key].apply(parentContext[0], args);
+				promise = (<any>parentContext)[0][key].apply(parentContext[0], args);
 			}
 			else if (parentContext.length) {
 				promise = Task.all(parentContext.map(function (element: Element) {
-					return (<any> element)[key].apply(element, args);
+					return (<any>element)[key].apply(element, args);
 				})).then(function (elements) {
 					// findAll against an array context will result in arrays of arrays; flatten into a single array of
 					// elments. It would also be possible to resort in document order but other parallel operations
@@ -429,7 +528,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 				});
 			}
 			else {
-				promise = (<any> this.session)[key].apply(this.session, args);
+				promise = (<any>this.session)[key].apply(this.session, args);
 			}
 
 			return promise.then(function (newContext) {
@@ -439,11 +538,11 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 		});
 	}
 
-	private _callElementMethod<U>(key: keyof Element, ...args: any[]): Command<U> {
+	private _callElementMethod<U>(key: keyof Element, ...args: any[]) {
 		return new (this.constructor as typeof Command)<U>(this, function (this: Command<T>, setContext: Function) {
 			const parentContext = this._context;
 			let promise: Task<any>;
-			let fn = (<any> parentContext)[0] && (<any> parentContext)[0][key];
+			let fn = (<any>parentContext)[0] && (<any>parentContext)[0][key];
 
 			if (parentContext.isSingle) {
 				promise = fn.apply(parentContext[0], args);
@@ -461,158 +560,45 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 				});
 			}
 
-			return <Task<U>> promise;
+			return <Task<U>>promise;
 		});
 	}
 
-	private _callSessionMethod<U>(key: keyof Session, ...args: any[]): Command<U> {
+	private _callSessionMethod<U>(key: keyof Session, ...args: any[]) {
 		return new (this.constructor as typeof Command)<U>(this, function (this: Command<T>, setContext: Function) {
 			const parentContext = this._context;
 			const session = this._session;
-			let promise: Task<any>;
+			let task: Task<any>;
 			// The function may have come from a session object prototype but have been overridden on the actual
 			// session instance; in such a case, the overridden function should be used instead of the one from
 			// the original source object. The original source object may still be used, however, if the
 			// function is being added like a mixin and does not exist on the actual session object for this
 			// session
-			const fn = (<any> session)[key] || (<any> Session.prototype)[key];
+			const fn = (<any>session)[key] || (<any>Session.prototype)[key];
 
 			if (fn.usesElement && parentContext.length && (!args[0] || !args[0].elementId)) {
 				if (parentContext.isSingle) {
-					promise = fn.apply(session, [ parentContext[0] ].concat(args));
+					task = fn.apply(session, [parentContext[0]].concat(args));
 				}
 				else {
-					promise = Task.all(parentContext.map(function (element: Element) {
-						return fn.apply(session, [ element ].concat(args));
+					task = Task.all(parentContext.map(element => {
+						return fn.apply(session, [element].concat(args));
 					}));
 				}
 			}
 			else {
-				promise = fn.apply(session, args);
+				task = fn.apply(session, args);
 			}
 
 			if (fn.createsContext) {
-				promise = promise.then(function (newContext) {
+				task = task.then(function (newContext) {
 					setContext(newContext);
 					return newContext;
 				});
 			}
 
-			return <Task<U>> promise;
+			return task;
 		});
-	}
-
-	/**
-	 * Augments `target` with a conversion of the `originalFn` method that enables its use with a Command object.
-	 * This can be used to easily add new methods from any custom object that implements the Session API to any target
-	 * object that implements the Command API.
-	 *
-	 * Functions that are copied may have the following extra properties in order to change the way that Command works
-	 * with these functions:
-	 *
-	 * - `createsContext` (boolean): If this property is specified, the return value from the function will be used as
-	 *   the new context for the returned Command.
-	 * - `usesElement` (boolean): If this property is specified, element(s) from the current context will be used as
-	 *   the first argument to the function, if the explicitly specified first argument is not already an element.
-	 *
-	 * @memberOf module:leadfoot/Command
-	 * @param {module:leadfoot/Command} target
-	 * @param {string} key
-	 * @param {Function} originalFn
-	 */
-	static addSessionMethod<U>(target: Command<U>, key: string, originalFn: Function): void {
-		// Checking for private/non-functions here deduplicates this logic; otherwise it would need to exist in both
-		// the Command constructor (for copying functions from sessions) as well as the Command factory below
-		if (key.charAt(0) !== '_' && !(<any> target)[key] && typeof originalFn === 'function') {
-			(<any> target)[key] = function (this: Command<U>, ...args: any[]): Command<U> {
-				return new (this.constructor as typeof Command)<U>(this, function (this: Command<U>, setContext: Function) {
-					const parentContext = this._context;
-					const session = this._session;
-					let promise: Task<any>;
-					// The function may have come from a session object prototype but have been overridden on the actual
-					// session instance; in such a case, the overridden function should be used instead of the one from
-					// the original source object. The original source object may still be used, however, if the
-					// function is being added like a mixin and does not exist on the actual session object for this
-					// session
-					const fn = (<any> session)[key] || originalFn;
-
-					if (fn.usesElement && parentContext.length && (!args[0] || !args[0].elementId)) {
-						// Defer converting arguments into an array until it is necessary to avoid overhead
-						args = Array.prototype.slice.call(args, 0);
-
-						if (parentContext.isSingle) {
-							promise = fn.apply(session, [ parentContext[0] ].concat(args));
-						}
-						else {
-							promise = Task.all(parentContext.map(function (element: Element) {
-								return fn.apply(session, [ element ].concat(args));
-							}));
-						}
-					}
-					else {
-						promise = fn.apply(session, args);
-					}
-
-					if (fn.createsContext) {
-						promise = promise.then(function (newContext) {
-							setContext(newContext);
-							return newContext;
-						});
-					}
-
-					return <Task<U>> promise;
-				});
-			};
-		}
-	}
-
-	/**
-	 * Augments `target` with a method that will call `key` on all context elements stored within `target`.
-	 * This can be used to easily add new methods from any custom object that implements the Element API to any target
-	 * object that implements the Command API.
-	 *
-	 * Functions that are copied may have the following extra properties in order to change the way that Command works
-	 * with these functions:
-	 *
-	 * - `createsContext` (boolean): If this property is specified, the return value from the function will be used as
-	 *   the new context for the returned Command.
-	 *
-	 * @memberOf module:leadfoot/Command
-	 * @param {module:leadfoot/Command} target
-	 * @param {string} key
-	 */
-	static addElementMethod<T>(target: Command<T>, key: string): void {
-		const anyTarget = <any> target;
-		if (key.charAt(0) !== '_') {
-			// some methods, like `click`, exist on both Session and Element; deduplicate these methods by appending the
-			// element ones with 'Element'
-			const targetKey = key + (anyTarget[key] ? 'Element' : '');
-			anyTarget[targetKey] = function (this: Command<T>, ...args: any[]): Command<T> {
-				return new (this.constructor as typeof Command)(this, function (this: Command<T>, setContext: Function) {
-					const parentContext = this._context;
-					let promise: Task<any>;
-					let fn = (<any> parentContext)[0] && (<any> parentContext)[0][key];
-
-					if (parentContext.isSingle) {
-						promise = fn.apply(parentContext[0], args);
-					}
-					else {
-						promise = Task.all(parentContext.map(function (element: any) {
-							return element[key].apply(element, args);
-						}));
-					}
-
-					if (fn && fn.createsContext) {
-						promise = promise.then(function (newContext) {
-							setContext(newContext);
-							return newContext;
-						});
-					}
-
-					return <Task<T>> promise;
-				});
-			};
-		}
 	}
 
 	// Session methods
@@ -623,7 +609,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * @param type The type of timeout to retrieve. One of 'script', 'implicit', or 'page load'.
 	 * @returns The timeout, in milliseconds.
 	 */
-	getTimeout(type: string): Command<number> {
+	getTimeout(type: string) {
 		return this._callSessionMethod<number>('getTimeout', type);
 	}
 
@@ -637,7 +623,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * The length of time to use for the timeout, in milliseconds. A value of 0 will cause operations to time out
 	 * immediately.
 	 */
-	setTimeout(type: string, ms: number): Command<void> {
+	setTimeout(type: string, ms: number) {
 		return this._callSessionMethod<void>('setTimeout', type, ms);
 	}
 
@@ -646,49 +632,49 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 *
 	 * @returns A window handle identifier that can be used with other window handling functions.
 	 */
-	getCurrentWindowHandle(): Command<string> {
+	getCurrentWindowHandle() {
 		return this._callSessionMethod<string>('getCurrentWindowHandle');
 	}
 
 	/**
 	 * Gets a list of identifiers for all currently open windows.
 	 */
-	getAllWindowHandles(): Command<string[]> {
+	getAllWindowHandles() {
 		return this._callSessionMethod<string[]>('getAllWindowHandles');
 	}
 
 	/**
 	 * Gets the URL that is loaded in the focused window/frame.
 	 */
-	getCurrentUrl(): Command<string> {
+	getCurrentUrl() {
 		return this._callSessionMethod<string>('getCurrentUrl');
 	}
 
 	/**
 	 * Navigates the focused window/frame to a new URL.
 	 */
-	get(url: string): Command<void> {
+	get(url: string) {
 		return this._callSessionMethod<void>('get', url);
 	}
 
 	/**
 	 * Navigates the focused window/frame forward one page using the browser’s navigation history.
 	 */
-	goForward(): Command<void> {
+	goForward() {
 		return this._callSessionMethod<void>('goForward');
 	}
 
 	/**
 	 * Navigates the focused window/frame back one page using the browser’s navigation history.
 	 */
-	goBack(): Command<void> {
+	goBack() {
 		return this._callSessionMethod<void>('goBack');
 	}
 
 	/**
 	 * Reloads the current browser window/frame.
 	 */
-	refresh(): Command<void> {
+	refresh() {
 		return this._callSessionMethod<void>('refresh');
 	}
 
@@ -711,7 +697,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * The value returned by the remote code. Only values that can be serialised to JSON, plus DOM elements, can be
 	 * returned.
 	 */
-	execute(script: Function|string, args?: any[]): Command<any> {
+	execute(script: Function | string, args?: any[]) {
 		return this._callSessionMethod<any>('execute', script, args);
 	}
 
@@ -740,14 +726,14 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * The value returned by the remote code. Only values that can be serialised to JSON, plus DOM elements, can be
 	 * returned.
 	 */
-	executeAsync(script: Function|string, args?: any[]): Command<any> {
+	executeAsync(script: Function | string, args?: any[]) {
 		return this._callSessionMethod<any>('executeAsync', script, args);
 	}
 
 	/**
 	 * Gets a screenshot of the focused window and returns it in PNG format.
 	 */
-	takeScreenshot(): Command<Buffer> {
+	takeScreenshot() {
 		return this._callSessionMethod<Buffer>('takeScreenshot');
 	}
 
@@ -755,7 +741,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * Gets a list of input method editor engines available to the remote environment.
 	 * As of April 2014, no known remote environments support IME functions.
 	 */
-	getAvailableImeEngines(): Command<string[]> {
+	getAvailableImeEngines() {
 		return this._callSessionMethod<string[]>('getAvailableImeEngines');
 	}
 
@@ -763,7 +749,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * Gets the currently active input method editor for the remote environment.
 	 * As of April 2014, no known remote environments support IME functions.
 	 */
-	getActiveImeEngine(): Command<string> {
+	getActiveImeEngine() {
 		return this._callSessionMethod<string>('getActiveImeEngine');
 	}
 
@@ -771,7 +757,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * Returns whether or not an input method editor is currently active in the remote environment.
 	 * As of April 2014, no known remote environments support IME functions.
 	 */
-	isImeActivated(): Command<boolean> {
+	isImeActivated() {
 		return this._callSessionMethod<boolean>('isImeActivated');
 	}
 
@@ -779,7 +765,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * Deactivates any active input method editor in the remote environment.
 	 * As of April 2014, no known remote environments support IME functions.
 	 */
-	deactivateIme(): Command<void> {
+	deactivateIme() {
 		return this._callSessionMethod<void>('deactivateIme');
 	}
 
@@ -789,7 +775,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 *
 	 * @param engine The type of IME to activate.
 	 */
-	activateIme(engine: string): Command<void> {
+	activateIme(engine: string) {
 		return this._callSessionMethod<void>('activateIme', engine);
 	}
 
@@ -801,7 +787,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * `window.frames` object of the currently active frame. If `null`, the topmost (default) frame will be used.
 	 * If an Element is provided, it must correspond to a `<frame>` or `<iframe>` element.
 	 */
-	switchToFrame(id: string|number|Element): Command<void> {
+	switchToFrame(id: string | number | Element) {
 		return this._callSessionMethod<void>('switchToFrame', id);
 	}
 
@@ -814,14 +800,14 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 *
 	 * In environments using the JsonWireProtocol, this value corresponds to the `window.name` property of a window.
 	 */
-	switchToWindow(handle: string): Command<void> {
+	switchToWindow(handle: string) {
 		return this._callSessionMethod<void>('switchToWindow', handle);
 	}
 
 	/**
 	 * Switches the currently focused frame to the parent of the currently focused frame.
 	 */
-	switchToParentFrame(): Command<void> {
+	switchToParentFrame() {
 		return this._callSessionMethod<void>('switchToParentFrame');
 	}
 
@@ -829,7 +815,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * Closes the currently focused window. In most environments, after the window has been closed, it is necessary
 	 * to explicitly switch to whatever window is now focused.
 	 */
-	closeCurrentWindow(): Command<void> {
+	closeCurrentWindow() {
 		return this._callSessionMethod<void>('closeCurrentWindow');
 	}
 
@@ -848,7 +834,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 */
 	setWindowSize(width: number, height: number): Command<void>;
 	setWindowSize(windowHandle: string, width: number, height: number): Command<void>;
-	setWindowSize(...args: any[]): Command<void> {
+	setWindowSize(...args: any[]) {
 		return this._callSessionMethod<void>('setWindowSize', ...args);
 	}
 
@@ -862,7 +848,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * @returns
 	 * An object describing the width and height of the window, in CSS pixels.
 	 */
-	getWindowSize(windowHandle?: string): Command<{ width: number, height: number }> {
+	getWindowSize(windowHandle?: string) {
 		return this._callSessionMethod<{ width: number, height: number }>('getWindowSize');
 	}
 
@@ -883,7 +869,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 */
 	setWindowPosition(x: number, y: number): Command<void>;
 	setWindowPosition(windowHandle: string, x: number, y: number): Command<void>;
-	setWindowPosition(...args: any[]): Command<void> {
+	setWindowPosition(...args: any[]) {
 		return this._callSessionMethod<void>('setWindowPosition', ...args);
 	}
 
@@ -901,7 +887,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * primary monitor. If a secondary monitor exists above or to the left of the primary monitor, these values
 	 * will be negative.
 	 */
-	getWindowPosition(windowHandle?: string): Command<{ x: number, y: number }> {
+	getWindowPosition(windowHandle?: string) {
 		return this._callSessionMethod<{ x: number, y: number }>('getWindowPosition', windowHandle);
 	}
 
@@ -912,28 +898,28 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * The name of the window to resize. See [[Command.switchToWindow] to learn about valid
 	 * window names. Omit this argument to resize the currently focused window.
 	 */
-	maximizeWindow(windowHandle?: string): Command<void> {
+	maximizeWindow(windowHandle?: string) {
 		return this._callSessionMethod<void>('maximizeWindow', windowHandle);
 	}
 
 	/**
 	 * Gets all cookies set on the current page.
 	 */
-	getCookies(): Command<WebDriverCookie[]> {
+	getCookies() {
 		return this._callSessionMethod<WebDriverCookie[]>('getCookies');
 	}
 
 	/**
 	 * Sets a cookie on the current page.
 	 */
-	setCookie(cookie: WebDriverCookie): Command<void> {
+	setCookie(cookie: WebDriverCookie) {
 		return this._callSessionMethod<void>('setCookie', cookie);
 	}
 
 	/**
 	 * Clears all cookies for the current page.
 	 */
-	clearCookies(): Command<void> {
+	clearCookies() {
 		return this._callSessionMethod<void>('clearCookies');
 	}
 
@@ -942,7 +928,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 *
 	 * @param name The name of the cookie to delete.
 	 */
-	deleteCookie(name: string): Command<void> {
+	deleteCookie(name: string) {
 		return this._callSessionMethod<void>('deleteCookie', name);
 	}
 
@@ -950,21 +936,21 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * Gets the HTML loaded in the focused window/frame. This markup is serialised by the remote environment so
 	 * may not exactly match the HTML provided by the Web server.
 	 */
-	getPageSource(): Command<string> {
+	getPageSource() {
 		return this._callSessionMethod<string>('getPageSource');
 	}
 
 	/**
 	 * Gets the title of the top-level browsing context of the current window or tab.
 	 */
-	getPageTitle(): Command<string> {
+	getPageTitle() {
 		return this._callSessionMethod<string>('getPageTitle');
 	}
 
 	/**
 	 * Gets the currently focused element from the focused window/frame.
 	 */
-	getActiveElement(): Command<Element> {
+	getActiveElement() {
 		return this._callSessionMethod<Element>('getActiveElement');
 	}
 
@@ -979,15 +965,15 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * deactivated. To deactivate a modifier key, type the same modifier key a second time, or send `\uE000`
 	 * ('NULL') to deactivate all currently active modifier keys.
 	 */
-	pressKeys(keys: string|string[]): Command<void> {
+	pressKeys(keys: string | string[]) {
 		return this._callSessionMethod<void>('pressKeys', keys);
 	}
 
 	/**
 	 * Gets the current screen orientation.
 	 */
-	getOrientation(): Command<'portrait'|'landscape'> {
-		return this._callSessionMethod<'portrait'|'landscape'>('getOrientation');
+	getOrientation() {
+		return this._callSessionMethod<'portrait' | 'landscape'>('getOrientation');
 	}
 
 	/**
@@ -995,14 +981,14 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 *
 	 * @param orientation Either 'portrait' or 'landscape'.
 	 */
-	setOrientation(orientation: 'portrait'|'landscape'): Command<void> {
+	setOrientation(orientation: 'portrait' | 'landscape') {
 		return this._callSessionMethod<void>('setOrientation', orientation);
 	}
 
 	/**
 	 * Gets the text displayed in the currently active alert pop-up.
 	 */
-	getAlertText(): Command<string> {
+	getAlertText() {
 		return this._callSessionMethod<string>('getAlertText');
 	}
 
@@ -1011,14 +997,14 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 *
 	 * @param text The text to type into the pop-up’s input box.
 	 */
-	typeInPrompt(text: string|string[]): Command<void> {
+	typeInPrompt(text: string | string[]) {
 		return this._callSessionMethod<void>('typeInPrompt', text);
 	}
 
 	/**
 	 * Accepts an alert, prompt, or confirmation pop-up. Equivalent to clicking the 'OK' button.
 	 */
-	acceptAlert(): Command<void> {
+	acceptAlert() {
 		return this._callSessionMethod<void>('acceptAlert');
 	}
 
@@ -1026,7 +1012,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * Dismisses an alert, prompt, or confirmation pop-up. Equivalent to clicking the 'OK' button of an alert pop-up
 	 * or the 'Cancel' button of a prompt or confirmation pop-up.
 	 */
-	dismissAlert(): Command<void> {
+	dismissAlert() {
 		return this._callSessionMethod<void>('dismissAlert');
 	}
 
@@ -1050,7 +1036,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 */
 	moveMouseTo(xOffset?: number, yOffset?: number): Command<void>;
 	moveMouseTo(element?: Element, xOffset?: number, yOffset?: number): Command<void>;
-	moveMouseTo(...args: any[]): Command<void> {
+	moveMouseTo(...args: any[]) {
 		return this._callSessionMethod<void>('moveMouseTo', ...args);
 	}
 
@@ -1062,7 +1048,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * The button to click. 0 corresponds to the primary mouse button, 1 to the middle mouse button, 2 to the
 	 * secondary mouse button. Numbers above 2 correspond to any additional buttons a mouse might provide.
 	 */
-	clickMouseButton(button?: number): Command<void> {
+	clickMouseButton(button?: number) {
 		return this._callSessionMethod<void>('clickMouseButton', button);
 	}
 
@@ -1071,7 +1057,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 *
 	 * @param button The button to press. See [[Command.click]] for available options.
 	 */
-	pressMouseButton(button?: number): Command<void> {
+	pressMouseButton(button?: number) {
 		return this._callSessionMethod<void>('pressMouseButton', button);
 	}
 
@@ -1080,14 +1066,14 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 *
 	 * @param button The button to press. See [[Command.click]] for available options.
 	 */
-	releaseMouseButton(button?: number): Command<void> {
+	releaseMouseButton(button?: number) {
 		return this._callSessionMethod<void>('releaseMouseButton', button);
 	}
 
 	/**
 	 * Double-clicks the primary mouse button.
 	 */
-	doubleClick(): Command<void> {
+	doubleClick() {
 		return this._callSessionMethod<void>('doubleClick');
 	}
 
@@ -1097,7 +1083,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 *
 	 * @param element The element to tap.
 	 */
-	tap(element: Element): Command<void> {
+	tap(element: Element) {
 		return this._callSessionMethod<void>('tap', element);
 	}
 
@@ -1107,7 +1093,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * @param x The screen x-coordinate to press, maybe in device pixels.
 	 * @param y The screen y-coordinate to press, maybe in device pixels.
 	 */
-	pressFinger(x: number, y: number): Command<void> {
+	pressFinger(x: number, y: number) {
 		return this._callSessionMethod<void>('pressFinger', x, y);
 	}
 
@@ -1117,7 +1103,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * @param x The screen x-coordinate where a finger is pressed, maybe in device pixels.
 	 * @param y The screen y-coordinate where a finger is pressed, maybe in device pixels.
 	 */
-	releaseFinger(x: number, y: number): Command<void> {
+	releaseFinger(x: number, y: number) {
 		return this._callSessionMethod<void>('releaseFinger', x, y);
 	}
 
@@ -1127,7 +1113,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * @param x The screen x-coordinate to move to, maybe in device pixels.
 	 * @param y The screen y-coordinate to move to, maybe in device pixels.
 	 */
-	moveFinger(x: number, y: number): Command<void> {
+	moveFinger(x: number, y: number) {
 		return this._callSessionMethod<void>('moveFinger', x, y);
 	}
 
@@ -1148,7 +1134,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 */
 	touchScroll(xOffset: number, yOffset: number): Command<void>;
 	touchScroll(element?: Element, xOffset?: number, yOffset?: number): Command<void>;
-	touchScroll(...args: any[]): Command<void> {
+	touchScroll(...args: any[]) {
 		return this._callSessionMethod<void>('touchScroll', ...args);
 	}
 
@@ -1158,7 +1144,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * @method
 	 * @param element The element to double-tap.
 	 */
-	doubleTap(element?: Element): Command<void> {
+	doubleTap(element?: Element) {
 		return this._callSessionMethod<void>('doubleTap', element);
 	}
 
@@ -1168,7 +1154,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * @method
 	 * @param element The element to long-tap.
 	 */
-	longTap(element?: Element): Command<void> {
+	longTap(element?: Element) {
 		return this._callSessionMethod<void>('longTap', element);
 	}
 
@@ -1184,7 +1170,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 */
 	flickFinger(element: Element, xOffset: number, yOffset: number, speed?: number): Command<void>;
 	flickFinger(xOffset: number, yOffset: number, speed?: number): Command<void>;
-	flickFinger(...args: any[]): Command<void> {
+	flickFinger(...args: any[]) {
 		return this._callSessionMethod<void>('flickFinger', ...args);
 	}
 
@@ -1195,7 +1181,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * Latitude and longitude are specified using standard WGS84 decimal latitude/longitude. Altitude is specified
 	 * as meters above the WGS84 ellipsoid. Not all environments support altitude.
 	 */
-	getGeolocation(): Command<Geolocation> {
+	getGeolocation() {
 		return this._callSessionMethod<Geolocation>('getGeolocation');
 	}
 
@@ -1206,7 +1192,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * Latitude and longitude are specified using standard WGS84 decimal latitude/longitude. Altitude is specified
 	 * as meters above the WGS84 ellipsoid. Not all environments support altitude.
 	 */
-	setGeolocation(location: Geolocation): Command<void> {
+	setGeolocation(location: Geolocation) {
 		return this._callSessionMethod<void>('setGeolocation', location);
 	}
 
@@ -1222,14 +1208,14 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * @returns
 	 * An array of log entry objects. Timestamps in log entries are Unix timestamps, in seconds.
 	 */
-	getLogsFor(type: string): Command<LogEntry[]> {
+	getLogsFor(type: string) {
 		return this._callSessionMethod<LogEntry[]>('getLogsFor', type);
 	}
 
 	/**
 	 * Gets the types of logs that are currently available for retrieval from the remote environment.
 	 */
-	getAvailableLogTypes(): Command<string[]> {
+	getAvailableLogTypes() {
 		return this._callSessionMethod<string[]>('getAvailableLogTypes');
 	}
 
@@ -1240,14 +1226,14 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * The cache status. One of 0 (uncached), 1 (cached/idle), 2 (checking), 3 (downloading), 4 (update ready), 5
 	 * (obsolete).
 	 */
-	getApplicationCacheStatus(): Command<number> {
+	getApplicationCacheStatus() {
 		return this._callSessionMethod<number>('getApplicationCacheStatus');
 	}
 
 	/**
 	 * Terminates the session. No more commands will be accepted by the remote after this point.
 	 */
-	quit(): Command<void> {
+	quit() {
 		return this._callSessionMethod<void>('quit');
 	}
 
@@ -1260,14 +1246,14 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * @param value
 	 * The strategy-specific value to search for. See [[Command.find]] for details.
 	 */
-	waitForDeleted(using: string, value: string): Command<void> {
+	waitForDeleted(using: string, value: string) {
 		return this._callSessionMethod<void>('waitForDeleted', using, value);
 	}
 
 	/**
 	 * Gets the timeout for [[Command.executeAsync]] calls.
 	 */
-	getExecuteAsyncTimeout(): Command<number> {
+	getExecuteAsyncTimeout() {
 		return this._callSessionMethod<number>('getExecuteAsyncTimeout');
 	}
 
@@ -1276,14 +1262,14 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 *
 	 * @param ms The length of the timeout, in milliseconds.
 	 */
-	setExecuteAsyncTimeout(ms: number): Command<void> {
+	setExecuteAsyncTimeout(ms: number) {
 		return this._callSessionMethod<void>('setExecuteAsyncTimeout', ms);
 	}
 
 	/**
 	 * Gets the timeout for [[Command.find]] calls.
 	 */
-	getFindTimeout(): Command<number> {
+	getFindTimeout() {
 		return this._callSessionMethod<number>('getFindTimeout');
 	}
 
@@ -1292,14 +1278,14 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 *
 	 * @param ms The length of the timeout, in milliseconds.
 	 */
-	setFindTimeout(ms: number): Command<void> {
+	setFindTimeout(ms: number) {
 		return this._callSessionMethod<void>('setFindTimeout', ms);
 	}
 
 	/**
 	 * Gets the timeout for [[Command.get]] calls.
 	 */
-	getPageLoadTimeout(): Command<number> {
+	getPageLoadTimeout() {
 		return this._callSessionMethod<number>('getPageLoadTimeout');
 	}
 
@@ -1308,7 +1294,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 *
 	 * @param ms The length of the timeout, in milliseconds.
 	 */
-	setPageLoadTimeout(ms: string): Command<void> {
+	setPageLoadTimeout(ms: string) {
 		return this._callSessionMethod<void>('setPageLoadTimeout', ms);
 	}
 
@@ -1317,14 +1303,14 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	/**
 	 * Clicks the element. This method works on both mouse and touch platforms.
 	 */
-	click(): Command<void> {
+	click() {
 		return this._callElementMethod<void>('click');
 	}
 
 	/**
 	 * Submits the element, if it is a form, or the form belonging to the element, if it is a form element.
 	 */
-	submit(): Command<void> {
+	submit() {
 		return this._callElementMethod<void>('submit');
 	}
 
@@ -1332,7 +1318,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * Gets the visible text within the element. `<br>` elements are converted to line breaks in the returned
 	 * text, and whitespace is normalised per the usual XML/HTML whitespace normalisation rules.
 	 */
-	getVisibleText(): Command<string> {
+	getVisibleText() {
 		return this._callElementMethod<string>('getVisibleText');
 	}
 
@@ -1348,21 +1334,21 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * @param value
 	 * The text to type in the remote environment. See [[Command.pressKeys]] for more information.
 	 */
-	type(value: string|string[]): Command<void> {
+	type(value: string | string[]) {
 		return this._callElementMethod<void>('type', value);
 	}
 
 	/**
 	 * Gets the tag name of the element. For HTML documents, the value is always lowercase.
 	 */
-	getTagName(): Command<string> {
+	getTagName() {
 		return this._callElementMethod<string>('getTagName');
 	}
 
 	/**
 	 * Clears the value of a form element.
 	 */
-	clearValue(): Command<void> {
+	clearValue() {
 		return this._callElementMethod<void>('clearValue');
 	}
 
@@ -1370,14 +1356,14 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * Returns whether or not a form element is currently selected (for drop-down options and radio buttons), or
 	 * whether or not the element is currently checked (for checkboxes).
 	 */
-	isSelected(): Command<boolean> {
+	isSelected() {
 		return this._callElementMethod<boolean>('isSelected');
 	}
 
 	/**
 	 * Returns whether or not a form element can be interacted with.
 	 */
-	isEnabled(): Command<boolean> {
+	isEnabled() {
 		return this._callElementMethod<boolean>('isEnabled');
 	}
 
@@ -1407,7 +1393,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * @returns The value of the attribute as a string, or `null` if no such property or
 	 * attribute exists.
 	 */
-	getSpecAttribute(name: string): Command<string> {
+	getSpecAttribute(name: string) {
 		return this._callElementMethod<string>('getSpecAttribute', name);
 	}
 
@@ -1418,8 +1404,8 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * @param name The name of the attribute.
 	 * @returns The value of the attribute, or `null` if no such attribute exists.
 	 */
-	getAttribute(name: string): Command<string> {
-		return this._callElementMethod<string>('getAttribute', name);
+	getAttribute(name: string) {
+		return this._callElementMethod('getAttribute', name);
 	}
 
 	/**
@@ -1429,14 +1415,14 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * @param name The name of the property.
 	 * @returns The value of the property.
 	 */
-	getProperty(name: string): Command<any> {
+	getProperty(name: string) {
 		return this._callElementMethod<any>('getProperty', name);
 	}
 
 	/**
 	 * Determines if this element is equal to another element.
 	 */
-	equals(other: Element): Command<boolean> {
+	equals(other: Element) {
 		return this._callElementMethod<boolean>('equals', other);
 	}
 
@@ -1450,7 +1436,7 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * 4. Elements with `opacity: 0`
 	 * 5. Elements with no `offsetWidth` or `offsetHeight`
 	 */
-	isDisplayed(): Command<boolean> {
+	isDisplayed() {
 		return this._callElementMethod<boolean>('isDisplayed');
 	}
 
@@ -1458,14 +1444,14 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * Gets the position of the element relative to the top-left corner of the document, taking into account
 	 * scrolling and CSS transformations (if they are supported).
 	 */
-	getPosition(): Command<{ x: number, y: number }> {
+	getPosition() {
 		return this._callElementMethod<{ x: number, y: number }>('getPosition');
 	}
 
 	/**
 	 * Gets the size of the element, taking into account CSS transformations (if they are supported).
 	 */
-	getSize(): Command<{ width: number, height: number }> {
+	getSize() {
 		return this._callElementMethod<{ width: number, height: number }>('getSize');
 	}
 
@@ -1475,20 +1461,34 @@ export default class Command<T> extends Strategies<Command<Element>, Command<Ele
 	 * @param propertyName
 	 * The CSS property to retrieve. This argument must be hyphenated, *not* camel-case.
 	 */
-	getComputedStyle(propertyName: string): Command<string> {
+	getComputedStyle(propertyName: string) {
 		return this._callElementMethod<string>('getComputedStyle', propertyName);
 	}
 
 }
 
+export interface SetContextMethod<T> {
+	(context: T | T[]): void;
+}
+
+// TODO: is this the correct type of array?
+export interface Context extends Array<any> {
+	isSingle?: boolean;
+	depth?: number;
+}
+
+const TOP_CONTEXT: Context = [];
+TOP_CONTEXT.isSingle = true;
+TOP_CONTEXT.depth = 0;
+
 let chaiAsPromised: any = null;
 try {
 	chaiAsPromised = require('chai-as-promised');
-} catch (error) {}
+} catch (error) { }
 
 // TODO: Add unit test
 if (chaiAsPromised) {
-	(<any> chaiAsPromised).transferPromiseness = function (assertion: any, promise: any) {
+	(<any>chaiAsPromised).transferPromiseness = function (assertion: any, promise: any) {
 		assertion.then = promise.then.bind(promise);
 		for (let method in promise) {
 			if (typeof promise[method] === 'function') {

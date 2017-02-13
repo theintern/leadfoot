@@ -1,6 +1,8 @@
 import keys from './keys';
 import Task from 'dojo-core/async/Task';
 import request, { RequestOptions, Response } from 'dojo-core/request';
+// TODO: This will change in dojo-core alpha 20
+import { NodeRequestOptions } from 'dojo-core/request/node';
 import Session from './Session';
 import Element from './Element';
 import statusCodes from './lib/statusCodes';
@@ -8,51 +10,6 @@ import * as urlUtil from 'url';
 import * as util from './lib/util';
 import { create } from 'dojo-core/lang';
 import { Capabilities, LeadfootURL, LeadfootError } from './interfaces';
-
-type Url = urlUtil.Url;
-
-function isMsEdge(capabilities: Capabilities, minVersion?: number, maxVersion?: number): boolean {
-	if (capabilities.browserName !== 'MicrosoftEdge') {
-		return false;
-	}
-	if (minVersion != null || maxVersion != null) {
-		const version = parseFloat(capabilities.browserVersion);
-		if (minVersion != null && version < minVersion) {
-			return false;
-		}
-		if (maxVersion != null && version > maxVersion) {
-			return false;
-		}
-	}
-	return true;
-}
-
-function isMacSafari(capabilities: Capabilities): boolean {
-	return capabilities.browserName === 'safari' &&
-		capabilities.platform === 'MAC' &&
-		capabilities.platformName !== 'ios';
-}
-
-function isGeckodriver(capabilities: Capabilities): boolean {
-	return capabilities.browserName === 'firefox' &&
-		parseFloat(capabilities.version) >= 49;
-}
-
-function isMacGeckodriver(capabilities: Capabilities): boolean {
-	return isGeckodriver(capabilities) && capabilities.platform === 'MAC';
-}
-
-function noop() { }
-
-/**
- * Returns the actual response value from the remote environment.
- *
- * @param response JsonWireProtocol response object.
- * @returns The actual response value.
- */
-function returnValue(response: any): any {
-	return response.value;
-}
 
 export default class Server {
 	url: string;
@@ -81,7 +38,8 @@ export default class Server {
 	 * @param options
 	 * Additional request options to be used for requests to the server.
 	 */
-	constructor(url: string|LeadfootURL, options?: RequestOptions) {
+	// TODO: NodeRequestOptions doesn't take a type in dojo-core alpha 20
+	constructor(url: string | LeadfootURL, options?: NodeRequestOptions<any>) {
 		if (typeof url === 'object') {
 			url = Object.create(url);
 			if (url.username || url.password || url.accessKey) {
@@ -89,7 +47,7 @@ export default class Server {
 			}
 		}
 
-		this.url = urlUtil.format(<Url> url).replace(/\/*$/, '/');
+		this.url = urlUtil.format(<Url>url).replace(/\/*$/, '/');
 		this.requestOptions = options || {};
 	}
 
@@ -109,7 +67,7 @@ export default class Server {
 	 *
 	 * @param pathParts Optional placeholder values to inject into the path of the URL.
 	 */
-	private _sendRequest(method: string, path: string, requestData: any, pathParts?: string[]): Task<Object> {
+	private _sendRequest<T>(method: string, path: string, requestData: any, pathParts?: string[]): Task<T> {
 		const url = this.url + path.replace(/\$(\d)/, function (_, index) {
 			return encodeURIComponent(pathParts[index]);
 		});
@@ -151,7 +109,7 @@ export default class Server {
 				error.name = 'CancelError';
 				reject(error);
 			});
-		}).then(function handleResponse(response: Response<any>): Object|Task<Object> {
+		}).then(function handleResponse(response: Response<any>): Object | Task<Object> {
 			/*jshint maxcomplexity:24 */
 			// The JsonWireProtocol specification prior to June 2013 stated that creating a new session should
 			// perform a 3xx redirect to the session capabilities URL, instead of simply returning the returning
@@ -234,7 +192,7 @@ export default class Server {
 				// thrown, so also coerce this back into an UnknownCommand response for end-user code
 				if (data.status === 13 && data.value && data.value.class &&
 					(data.value.class.indexOf('UnsupportedOperationException') > -1 ||
-					data.value.class.indexOf('UnsupportedCommandException') > -1)
+						data.value.class.indexOf('UnsupportedCommandException') > -1)
 				) {
 					data.status = 9;
 				}
@@ -259,7 +217,7 @@ export default class Server {
 					data.status = 9;
 				}
 
-				const [ name, message ] = (<any> statusCodes)[data.status];
+				const [name, message] = (<any>statusCodes)[data.status];
 				if (name && message) {
 					error.name = name;
 					error.message = message;
@@ -306,16 +264,16 @@ export default class Server {
 		});
 	}
 
-	private _get(path: string, requestData?: Object, pathParts?: string[]): Task<any> {
-		return this._sendRequest('GET', path, requestData, pathParts);
+	private _get<T>(path: string, requestData?: Object, pathParts?: string[]): Task<any> {
+		return this._sendRequest<T>('GET', path, requestData, pathParts);
 	}
 
-	private _post(path: string, requestData?: Object, pathParts?: string[]): Task<any> {
-		return this._sendRequest('POST', path, requestData, pathParts);
+	private _post<T>(path: string, requestData?: Object, pathParts?: string[]): Task<any> {
+		return this._sendRequest<T>('POST', path, requestData, pathParts);
 	}
 
-	private _delete(path: string, requestData?: Object, pathParts?: string[]): Task<any> {
-		return this._sendRequest('DELETE', path, requestData, pathParts);
+	private _delete<T>(path: string, requestData?: Object, pathParts?: string[]): Task<any> {
+		return this._sendRequest<T>('DELETE', path, requestData, pathParts);
 	}
 
 	/**
@@ -339,7 +297,7 @@ export default class Server {
 	 * A hash map of required capabilities of the remote environment. The server will not return an environment that
 	 * does not match all the required capabilities if one is not available.
 	 */
-	createSession(desiredCapabilities: Capabilities, requiredCapabilities: Capabilities): Task<Session|void> {
+	createSession(desiredCapabilities: Capabilities, requiredCapabilities?: Capabilities) {
 		const fixSessionCapabilities = desiredCapabilities.fixSessionCapabilities !== false &&
 			this.fixSessionCapabilities;
 
@@ -352,7 +310,7 @@ export default class Server {
 		return this._post('session', {
 			desiredCapabilities,
 			requiredCapabilities
-		}).then((response): Session | Task<Session|void> => {
+		}).then((response): Session | Task<Session | void> => {
 			const session = new this.sessionConstructor(response.sessionId, this, response.value);
 			if (fixSessionCapabilities) {
 				return this._fillCapabilities(session).catch(function (error) {
@@ -371,7 +329,7 @@ export default class Server {
 		});
 	}
 
-	private _fillCapabilities(session: Session): Task<void|Session> {
+	private _fillCapabilities(session: Session): Task<void | Session> {
 		const capabilities = session.capabilities;
 
 		function supported() { return true; }
@@ -391,7 +349,7 @@ export default class Server {
 				let i = 0;
 
 				(function next() {
-					const key = <keyof Capabilities> keys[i++];
+					const key = <keyof Capabilities>keys[i++];
 
 					if (!key) {
 						resolve();
@@ -414,7 +372,7 @@ export default class Server {
 			});
 		}
 
-		function get(page: string): Task<any> {
+		function get(page: string) {
 			if (capabilities.supportsNavigationDataUris !== false) {
 				return session.get('data:text/html;charset=utf-8,' + encodeURIComponent(page));
 			}
@@ -432,7 +390,7 @@ export default class Server {
 					'about:blank';
 
 				return session.get(initialUrl).then(function () {
-					return session.execute('document.body.innerHTML = arguments[0];', [
+					return session.execute<void>('document.body.innerHTML = arguments[0];', [
 						// The DOCTYPE does not apply, for obvious reasons, but also old IE will discard invisible
 						// elements like `<script>` and `<style>` if they are the first elements injected with
 						// `innerHTML`, so an extra text node is added before the rest of the content instead
@@ -442,11 +400,11 @@ export default class Server {
 			}
 
 			return session.get('about:blank').then(function () {
-				return session.execute('document.write(arguments[0]);', [ page ]);
+				return session.execute<void>('document.write(arguments[0]);', [page]);
 			});
 		}
 
-		function discoverFeatures(): Capabilities|Task<Capabilities> {
+		function discoverFeatures(): Capabilities | Task<Capabilities> {
 			const testedCapabilities: any = {};
 
 			// At least SafariDriver 2.41.0 fails to allow stand-alone feature testing because it does not inject user
@@ -699,7 +657,7 @@ export default class Server {
 				}).then(function (element) {
 					return session.execute(function (element: Element) {
 						return element.getAttribute('id');
-					}, [ element ]);
+					}, [element]);
 				}).then(function (attribute) {
 					return attribute !== 'a';
 				}).catch(broken);
@@ -716,10 +674,10 @@ export default class Server {
 			// At least Selendroid 0.9.0 always returns invalid element handles from JavaScript
 			testedCapabilities.brokenExecuteElementReturn = function () {
 				return get('<!DOCTYPE html><div id="a"></div>').then(function () {
-					return session.execute('return document.getElementById("a");');
-				}).then(function (element) {
-					return element && element.getTagName();
-				}).then(works, broken);
+					return session.execute<Element>('return document.getElementById("a");');
+				})
+				.then(element => element && element.getTagName())
+				.then(works, broken);
 			};
 
 			// At least Selendroid 0.9.0 treats fully transparent elements as displayed, but all others do not
@@ -877,7 +835,7 @@ export default class Server {
 			else {
 				testedCapabilities.fixedLogTypes = session.getAvailableLogTypes().then(unsupported, function (error: LeadfootError) {
 					if (capabilities.browserName === 'selendroid' && !error.response.text.length) {
-						return [ 'logcat' ];
+						return ['logcat'];
 					}
 
 					return [];
@@ -971,7 +929,7 @@ export default class Server {
 							return counter > 0 ? works() : broken();
 						},
 						broken
-					);
+						);
 				};
 
 				// At least ChromeDriver 2.12 through 2.19 will throw an error if mouse movement relative to the <html>
@@ -1046,7 +1004,7 @@ export default class Server {
 							return session.execute('return window.scrollY !== 3000;');
 						});
 					})
-					.catch(broken);
+						.catch(broken);
 				};
 
 				// Touch flick in ios-driver 0.6.6-SNAPSHOT is broken, does not scroll at all except in very
@@ -1057,7 +1015,7 @@ export default class Server {
 					}).then(function () {
 						return session.execute('return window.scrollY === 0;');
 					})
-					.catch(broken);
+						.catch(broken);
 				};
 			}
 
@@ -1065,7 +1023,7 @@ export default class Server {
 				testedCapabilities.brokenCssTransformedSize = function () {
 					/*jshint maxlen:240 */
 					return get('<!DOCTYPE html><style>#a{width:8px;height:8px;-ms-transform:scale(0.5);-moz-transform:scale(0.5);-webkit-transform:scale(0.5);transform:scale(0.5);}</style><div id="a"></div>').then(function () {
-						return session.execute('return document.getElementById("a");').then(function (element) {
+						return session.execute<Element>('return document.getElementById("a");').then(function (element) {
 							return element.getSize();
 						}).then(function (dimensions) {
 							return dimensions.width !== 4 || dimensions.height !== 4;
@@ -1083,7 +1041,8 @@ export default class Server {
 			// Check that the remote server will accept file uploads. There is a secondary test in discoverDefects that
 			// checks whether the server allows typing into file inputs.
 			testedCapabilities.remoteFiles = function () {
-				return session['_post']('file', {
+				// TODO: _post probably shouldn't be private
+				return session['_post']<string>('file', {
 					file: 'UEsDBAoAAAAAAD0etkYAAAAAAAAAAAAAAAAIABwAdGVzdC50eHRVVAkAA2WnXlVlp15VdXgLAAEE8gMAAATyAwAAUEsBAh4DCgAAAAAAPR62RgAAAAAAAAAAAAAAAAgAGAAAAAAAAAAAAKSBAAAAAHRlc3QudHh0VVQFAANlp15VdXgLAAEE8gMAAATyAwAAUEsFBgAAAAABAAEATgAAAEIAAAAAAA=='
 				}).then(function (filename) {
 					return filename && filename.indexOf('test.txt') > -1;
@@ -1123,16 +1082,16 @@ export default class Server {
 							return element.click().then(function () {
 								return element.isSelected();
 							}).then(assertSelected(true))
-							.then(function () {
-								return element.click().then(function () {
-									return element.isSelected();
-								});
-							}).then(assertSelected(false))
-							.then(function () {
-								return element.click().then(function () {
-									return element.isSelected();
-								});
-							}).then(assertSelected(true));
+								.then(function () {
+									return element.click().then(function () {
+										return element.isSelected();
+									});
+								}).then(assertSelected(false))
+								.then(function () {
+									return element.click().then(function () {
+										return element.isSelected();
+									});
+								}).then(assertSelected(true));
 						}).then(works, broken);
 					};
 				}
@@ -1143,7 +1102,7 @@ export default class Server {
 				testedCapabilities.supportsKeysCommand = false;
 			}
 			else {
-				testedCapabilities.supportsKeysCommand = session['_post']('keys', { value: [ 'a' ] }).then(supported,
+				testedCapabilities.supportsKeysCommand = session['_post']('keys', { value: ['a'] }).then(supported,
 					unsupported);
 			}
 
@@ -1155,7 +1114,7 @@ export default class Server {
 		}
 
 		// At least geckodriver 0.11 and Firefox 49+ may hang when getting 'about:blank' in the first request
-		const promise: Task<Session|void> = isGeckodriver(capabilities) ? Task.resolve(session) : session.get('about:blank');
+		const promise: Task<Session | void> = isGeckodriver(capabilities) ? Task.resolve(session) : session.get('about:blank');
 
 		return promise
 			.then(discoverServerFeatures)
@@ -1204,13 +1163,58 @@ export default class Server {
 	 * inaccurate.
 	 */
 	getSessionCapabilities(sessionId: string): Task<Capabilities> {
-		return this._get('session/$0', null, [ sessionId ]).then(returnValue);
+		return this._get('session/$0', null, [sessionId]).then(returnValue);
 	}
 
 	/**
 	 * Terminates a session on the server.
 	 */
-	deleteSession(sessionId: string): Task<void> {
-		return this._delete('session/$0', null, [ sessionId ]).then(noop);
+	deleteSession(sessionId: string) {
+		return this._delete<void>('session/$0', null, [sessionId]).then(noop);
 	}
+}
+
+type Url = urlUtil.Url;
+
+function isMsEdge(capabilities: Capabilities, minVersion?: number, maxVersion?: number): boolean {
+	if (capabilities.browserName !== 'MicrosoftEdge') {
+		return false;
+	}
+	if (minVersion != null || maxVersion != null) {
+		const version = parseFloat(capabilities.browserVersion);
+		if (minVersion != null && version < minVersion) {
+			return false;
+		}
+		if (maxVersion != null && version > maxVersion) {
+			return false;
+		}
+	}
+	return true;
+}
+
+function isMacSafari(capabilities: Capabilities): boolean {
+	return capabilities.browserName === 'safari' &&
+		capabilities.platform === 'MAC' &&
+		capabilities.platformName !== 'ios';
+}
+
+function isGeckodriver(capabilities: Capabilities): boolean {
+	return capabilities.browserName === 'firefox' &&
+		parseFloat(capabilities.version) >= 49;
+}
+
+function isMacGeckodriver(capabilities: Capabilities): boolean {
+	return isGeckodriver(capabilities) && capabilities.platform === 'MAC';
+}
+
+function noop() { }
+
+/**
+ * Returns the actual response value from the remote environment.
+ *
+ * @param response JsonWireProtocol response object.
+ * @returns The actual response value.
+ */
+function returnValue(response: any): any {
+	return response.value;
 }

@@ -1,37 +1,28 @@
-// Note that these are JSONWireProtocol strategies. W3C Webdriver only understands 4 strategies:
-//   1. css selector
-//   2. link text
-//   3. partial link text
-//   4. xpath
-export const strategies = [
-	'class name',
-	'css selector',
-	'id',
-	'name',
-	'link text',
-	'partial link text',
-	'tag name',
-	'xpath'
-];
+/**
+ * Searchable is a class that supports searching for specific element (E), list
+ * (L), and void (V) types by various strategies.
+ *
+ * Note that this class includes JSONWireProtocol strategies. W3C Webdriver only understands 4 strategies:
+ *   1. css selector
+ *   2. link text
+ *   3. partial link text
+ *   4. xpath
+ */
+abstract class Searchable<E, L, V> {
+	abstract find(strategy: Strategies, value: string): E;
 
-export const suffixes = strategies.map(function (strategy) {
-	return strategy.replace(/(?:^| )([a-z])/g, function (_, letter) {
-		return letter.toUpperCase();
-	});
-});
+	abstract findAll(strategy: Strategies, value: string): L;
 
-abstract class Strategies<E, L, V> {
-	abstract find(strategy: string, value: string): E;
-	abstract findAll(strategy: string, value: string): L;
-	abstract findDisplayed(strategy: string, value: string): E;
-	abstract waitForDeleted(strategy: string, value: string): V;
+	abstract findDisplayed(strategy: Strategies, value: string): E;
+
+	abstract waitForDeleted(strategy: Strategies, value: string): V;
 
 	/**
 	 * Gets the first element inside this element matching the given CSS class name.
 	 *
 	 * @param className The CSS class name to search for.
 	 */
-	findByClassName(className: string): E {
+	findByClassName(className: string) {
 		return this.find('class name', className);
 	}
 
@@ -40,7 +31,7 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param selector The CSS selector to search for.
 	 */
-	findByCssSelector(selector: string): E {
+	findByCssSelector(selector: string) {
 		return this.find('css selector', selector);
 	}
 
@@ -49,7 +40,7 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param id The ID of the element.
 	 */
-	findById(id: string): E {
+	findById(id: string) {
 		return this.find('id', id);
 	}
 
@@ -58,7 +49,7 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param name The name of the element.
 	 */
-	findByName(name: string): E {
+	findByName(name: string) {
 		return this.find('name', name);
 	}
 
@@ -67,7 +58,7 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param text The link text of the element.
 	 */
-	findByLinkText(text: string): E {
+	findByLinkText(text: string) {
 		return this.find('link text', text);
 	}
 
@@ -76,7 +67,7 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param text The partial link text of the element.
 	 */
-	findByPartialLinkText(text: string): E {
+	findByPartialLinkText(text: string) {
 		return this.find('partial link text', text);
 	}
 
@@ -85,7 +76,7 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param tagName The tag name of the element.
 	 */
-	findByTagName(tagName: string): E {
+	findByTagName(tagName: string) {
 		return this.find('tag name', tagName);
 	}
 
@@ -94,7 +85,7 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param path The XPath selector to search for.
 	 */
-	findByXpath(path: string): E {
+	findByXpath(path: string) {
 		return this.find('xpath', path);
 	}
 
@@ -103,7 +94,7 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param className The CSS class name to search for.
 	 */
-	findAllByClassName(className: string): L {
+	findAllByClassName(className: string) {
 		return this.findAll('class name', className);
 	}
 
@@ -112,7 +103,7 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param selector The CSS selector to search for.
 	 */
-	findAllByCssSelector(selector: string): L {
+	findAllByCssSelector(selector: string) {
 		return this.findAll('css selector', selector);
 	}
 
@@ -121,7 +112,7 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param name The name of the element.
 	 */
-	findAllByName(name: string): L {
+	findAllByName(name: string) {
 		return this.findAll('name', name);
 	}
 
@@ -130,7 +121,7 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param text The link text of the element.
 	 */
-	findAllByLinkText(text: string): L {
+	findAllByLinkText(text: string) {
 		return this.findAll('link text', text);
 	}
 
@@ -139,7 +130,7 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param text The partial link text of the element.
 	 */
-	findAllByPartialLinkText(text: string): L {
+	findAllByPartialLinkText(text: string) {
 		return this.findAll('partial link text', text);
 	}
 
@@ -148,7 +139,7 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param tagName The tag name of the element.
 	 */
-	findAllByTagName(tagName: string): L {
+	findAllByTagName(tagName: string) {
 		return this.findAll('tag name', tagName);
 	}
 
@@ -157,7 +148,7 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param path The XPath selector to search for.
 	 */
-	findAllByXpath(path: string): L {
+	findAllByXpath(path: string) {
 		return this.findAll('xpath', path);
 	}
 
@@ -169,7 +160,7 @@ abstract class Strategies<E, L, V> {
 	 * @since 1.6
 	 * @param className The CSS class name to search for.
 	 */
-	findDisplayedByClassName(className: string): E {
+	findDisplayedByClassName(className: string) {
 		return this.findDisplayed('class name', className);
 	}
 
@@ -181,7 +172,7 @@ abstract class Strategies<E, L, V> {
 	 * @since 1.6
 	 * @param selector The CSS selector to search for.
 	 */
-	findDisplayedByCssSelector(selector: string): E {
+	findDisplayedByCssSelector(selector: string) {
 		return this.findDisplayed('css selector', selector);
 	}
 
@@ -193,7 +184,7 @@ abstract class Strategies<E, L, V> {
 	 * @since 1.6
 	 * @param id The ID of the element.
 	 */
-	findDisplayedById(id: string): E {
+	findDisplayedById(id: string) {
 		return this.findDisplayed('id', id);
 	}
 
@@ -205,7 +196,7 @@ abstract class Strategies<E, L, V> {
 	 * @since 1.6
 	 * @param name The name of the element.
 	 */
-	findDisplayedByName(name: string): E {
+	findDisplayedByName(name: string) {
 		return this.findDisplayed('name', name);
 	}
 
@@ -217,7 +208,7 @@ abstract class Strategies<E, L, V> {
 	 * @since 1.6
 	 * @param text The link text of the element.
 	 */
-	findDisplayedByLinkText(text: string): E {
+	findDisplayedByLinkText(text: string) {
 		return this.findDisplayed('link text', text);
 	}
 
@@ -230,7 +221,7 @@ abstract class Strategies<E, L, V> {
 	 * @since 1.6
 	 * @param text The partial link text of the element.
 	 */
-	findDisplayedByPartialLinkText(text: string): E {
+	findDisplayedByPartialLinkText(text: string) {
 		return this.findDisplayed('partial link text', text);
 	}
 
@@ -242,7 +233,7 @@ abstract class Strategies<E, L, V> {
 	 * @since 1.6
 	 * @param tagName The tag name of the element.
 	 */
-	findDisplayedByTagName(tagName: string): E {
+	findDisplayedByTagName(tagName: string) {
 		return this.findDisplayed('tag name', tagName);
 	}
 
@@ -254,7 +245,7 @@ abstract class Strategies<E, L, V> {
 	 * @since 1.6
 	 * @param path The XPath selector to search for.
 	 */
-	findDisplayedByXpath(path: string): E {
+	findDisplayedByXpath(path: string) {
 		return this.findDisplayed('xpath', path);
 	}
 
@@ -263,7 +254,7 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param className The CSS class name to search for.
 	 */
-	waitForDeletedByClassName(className: string): V {
+	waitForDeletedByClassName(className: string) {
 		return this.waitForDeleted('class name', className);
 	}
 
@@ -272,7 +263,7 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param selector The CSS selector to search for.
 	 */
-	waitForDeletedByCssSelector(selector: string): V {
+	waitForDeletedByCssSelector(selector: string) {
 		return this.waitForDeleted('css selector', selector);
 	}
 
@@ -281,7 +272,7 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param id The ID of the element.
 	 */
-	waitForDeletedById(id: string): V {
+	waitForDeletedById(id: string) {
 		return this.waitForDeleted('id', id);
 	}
 
@@ -290,7 +281,7 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param name The name of the element.
 	 */
-	waitForDeletedByName(name: string): V {
+	waitForDeletedByName(name: string) {
 		return this.waitForDeleted('name', name);
 	}
 
@@ -299,7 +290,7 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param text The link text of the element.
 	 */
-	waitForDeletedByLinkText(text: string): V {
+	waitForDeletedByLinkText(text: string) {
 		return this.waitForDeleted('link text', text);
 	}
 
@@ -309,7 +300,7 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param text The partial link text of the element.
 	 */
-	waitForDeletedByPartialLinkText(text: string): V {
+	waitForDeletedByPartialLinkText(text: string) {
 		return this.waitForDeleted('partial link text', text);
 	}
 
@@ -318,7 +309,7 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param tagName The tag name of the element.
 	 */
-	waitForDeletedByTagName(tagName: string): V {
+	waitForDeletedByTagName(tagName: string) {
 		return this.waitForDeleted('tag name', tagName);
 	}
 
@@ -327,9 +318,22 @@ abstract class Strategies<E, L, V> {
 	 *
 	 * @param path The XPath selector to search for.
 	 */
-	waitForDeletedByXpath(path: string): V {
+	waitForDeletedByXpath(path: string) {
 		return this.waitForDeleted('xpath', path);
 	}
 }
 
-export default Strategies;
+export default Searchable;
+
+export const strategies = {
+	'class name': true,
+	'css selector': true,
+	'id': true,
+	'name': true,
+	'link text': true,
+	'partial link text': true,
+	'tag name': true,
+	'xpath': true
+};
+
+export type Strategies = keyof typeof strategies;

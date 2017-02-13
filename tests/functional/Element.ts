@@ -1,11 +1,17 @@
 import registerSuite = require('intern!object');
-import * as assert from 'intern/chai!assert';
+import { assert } from 'chai';
 import * as util from './support/util';
-import { strategies, suffixes } from 'src/lib/strategies';
+import { strategies } from 'src/lib/Searchable';
 import Element from 'src/Element';
 import Session from 'src/Session';
 import Task from 'dojo-core/async/Task';
 import Test = require('intern/lib/Test');
+
+const strategyNames = Object.keys(strategies);
+
+const suffixes = strategyNames.map(name => {
+	return name[0].toUpperCase() + name.slice(1).replace(/\s(\w)/g, (_, letter) => letter.toUpperCase());
+});
 
 function toUrl(url: string): string {
 	return (<any> require).toUrl(url);
@@ -340,21 +346,21 @@ registerSuite(function () {
 			'find',
 			'findBy_',
 			suffixes,
-			strategies
+			strategyNames
 		),
 
 		'#findAll convenience methods': createStubbedSuite(
 			'findAll',
 			'findAllBy_',
 			suffixes.filter(function (suffix) { return suffix !== 'Id'; }),
-			strategies.filter(function (strategy) { return strategy !== 'id'; })
+			strategyNames.filter(function (strategy) { return strategy !== 'id'; })
 		),
 
 		'#findDisplayed convenience methods': createStubbedSuite(
 			'findDisplayed',
 			'findDisplayedBy_',
 			suffixes.filter(function (suffix) { return suffix !== 'Id'; }),
-			strategies.filter(function (strategy) { return strategy !== 'id'; })
+			strategyNames.filter(function (strategy) { return strategy !== 'id'; })
 		),
 
 		// TODO: findDisplayed
@@ -364,7 +370,7 @@ registerSuite(function () {
 			'waitForDeleted',
 			'waitForDeletedBy_',
 			suffixes,
-			strategies
+			strategyNames
 		),
 
 		'#click'(this: Test) {
@@ -377,7 +383,7 @@ registerSuite(function () {
 			}).then(function (element) {
 				return element.click();
 			}).then(function () {
-				return session.execute('return result;');
+				return session.execute<any>('return result;');
 			}).then(function (result) {
 				assert.isArray(result.mousedown.a);
 				assert.isArray(result.mouseup.a);
@@ -838,8 +844,8 @@ registerSuite(function () {
 				setup() {
 					resetBrowserState = false;
 					return session.get(toUrl('tests/functional/data/dimensions.html')).then(function () {
-						return session.execute('return document.body.offsetWidth;');
-					}).then(function (width) {
+						return session.execute<number>('return document.body.offsetWidth;');
+					}).then(width => {
 						documentWidth = width;
 					});
 				},
