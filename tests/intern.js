@@ -29,6 +29,7 @@ define({
 
 	functionalSuites: [
 		'leadfoot/tests/functional/helpers/pollUntil',
+		'leadfoot/tests/functional/helpers/dijit',
 		'leadfoot/tests/functional/Server',
 		'leadfoot/tests/functional/Session',
 		'leadfoot/tests/functional/Element',

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Dijit</title>
+	</head>
+	<body>
+		<div id="fooNode"></div>
+		<script>
+			function FakeWidget (args, node) {
+				this.args = args;
+				this.node = document.getElementById('fooNode');
+				this.a = 1;
+				this.b = 'foo';
+				this.c = 3;
+			}
+
+			FakeWidget.prototype = {
+				constructor: FakeWidget,
+				get: function (propertyName) {
+					return this[propertyName];
+				}
+			};
+
+			require = function (mids, callback) {
+				var modules = {};
+				mids.forEach(function (mid) {
+					if (mid === 'dijit/registry') {
+						modules[mid] = {
+							byId: function (id) {
+								return new FakeWidget();
+							}
+						};
+					}
+					else if (mid === 'dojo/when')
+					{
+						function fakePromise(value) {
+							this.value = value;
+							var self = this;
+
+							this.always = function (callback) {
+								callback(this.value);
+							};
+							return this;
+						}
+						modules[mid] = fakePromise;
+					}
+				});
+				if (mids.length === 1) {
+					return callback(modules[mids[0]]);
+				}
+				else if (mids.length === 2) {
+					return callback(modules[mids[0]], modules[mids[1]]);
+				}
+				else
+				{
+					return callback();
+				}
+			};
+		</script>
+	</body>
+</html>
