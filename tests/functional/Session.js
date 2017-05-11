@@ -604,8 +604,8 @@ define([
 
 				var originalPosition;
 				return session.getWindowPosition().then(function (position) {
-					assert.property(position, 'x');
-					assert.property(position, 'y');
+					assert.notEqual(position.x, null, 'Expected x position to be defined');
+					assert.notEqual(position.y, null, 'Expected y position to be defined');
 					originalPosition = position;
 
 					return session.setWindowPosition(position.x + 2, position.y + 2);

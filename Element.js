@@ -98,15 +98,18 @@ Element.prototype = {
 	 */
 	find: function (using, value) {
 		var session = this._session;
+		var capabilities = session.capabilities;
 
-		if (session.capabilities.isWebDriver) {
+		if (capabilities.isWebDriver) {
 			var locator = strategies.toW3cLocator(using, value);
 			using = locator.using;
 			value = locator.value;
 		}
 
-		if (using.indexOf('link text') !== -1 && this.session.capabilities.brokenWhitespaceNormalization) {
-			return this.session.execute(/* istanbul ignore next */ this.session._manualFindByLinkText, [
+		if (using.indexOf('link text') !== -1 && (
+			capabilities.brokenWhitespaceNormalization || capabilities.brokenLinkTextLocator 
+		)) {
+			return session.execute(/* istanbul ignore next */ session._manualFindByLinkText, [
 				using, value, false, this
 			]).then(function (element) {
 				if (!element) {
@@ -148,15 +151,18 @@ Element.prototype = {
 	 */
 	findAll: function (using, value) {
 		var session = this._session;
+		var capabilities = session.capabilities;
 
-		if (session.capabilities.isWebDriver) {
+		if (capabilities.isWebDriver) {
 			var locator = strategies.toW3cLocator(using, value);
 			using = locator.using;
 			value = locator.value;
 		}
 
-		if (using.indexOf('link text') !== -1 && this.session.capabilities.brokenWhitespaceNormalization) {
-			return this.session.execute(/* istanbul ignore next */ this.session._manualFindByLinkText, [
+		if (using.indexOf('link text') !== -1 && (
+			capabilities.brokenWhitespaceNormalization || capabilities.brokenLinkTextLocator 
+		)) {
+			return session.execute(/* istanbul ignore next */ session._manualFindByLinkText, [
 				using, value, true, this
 			]).then(function (elements) {
 				return elements.map(function (element) {

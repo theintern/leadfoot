@@ -16,6 +16,10 @@ function isMsEdge(capabilities, minVersion, maxVersion) {
 	if (capabilities.browserName !== 'MicrosoftEdge') {
 		return false;
 	}
+	return isValidVersion(capabilities, minVersion, maxVersion);
+}
+
+function isValidVersion(capabilities, minVersion, maxVersion) {
 	if (minVersion != null || maxVersion != null) {
 		var version = parseFloat(capabilities.browserVersion);
 		if (minVersion != null && version < minVersion) {
@@ -34,9 +38,15 @@ function isMacSafari(capabilities) {
 		capabilities.platformName !== 'ios';
 }
 
+function isFirefox(capabilities, minVersion, maxVersion) {
+	if (capabilities.browserName !== 'firefox') {
+		return false;
+	}
+	return isValidVersion(minVersion, maxVersion);
+}
+
 function isGeckodriver(capabilities) {
-	return capabilities.browserName === 'firefox' &&
-		parseFloat(capabilities.browserVersion) >= 49;
+	return isFirefox(capabilities, 49);
 }
 
 function isMacGeckodriver(capabilities) {
@@ -583,7 +593,8 @@ Server.prototype = {
 
 			if (!('dynamicViewport' in capabilities)) {
 				testedCapabilities.dynamicViewport = session.getWindowSize().then(function (originalSize) {
-					return session.setWindowSize(originalSize.width, originalSize.height);
+					// At least Firefox 53 will hang if the target size is the same as the current size
+					return session.setWindowSize(originalSize.width - 2, originalSize.height - 2);
 				}).then(supported, unsupported);
 			}
 
@@ -1149,9 +1160,14 @@ Server.prototype = {
 			// The window sizing commands in the W3C standard don't use window handles, but they do under the
 			// JsonWireProtocol. By default, Session assumes handles are used. When the result of this check is added to
 			// capabilities, Session will take it into account.
-			testedCapabilities.implicitWindowHandles = session.getWindowSize().then(unsupported, function (error) {
-				return error.name === 'UnknownCommand';
-			});
+			if (isFirefox(capabilities, 53)) {
+				testedCapabilities.implicitWindowHandles = true;
+			}
+			else {
+				testedCapabilities.implicitWindowHandles = session.getWindowSize().then(unsupported, function (error) {
+					return error.name === 'UnknownCommand';
+				});
+			}
 
 			// At least SafariDriver 2.41.0 fails to allow stand-alone feature testing because it does not inject user
 			// scripts for URLs that are not http/https
@@ -1202,6 +1218,8 @@ Server.prototype = {
 				testedCapabilities.supportsKeysCommand = session._post('keys', { value: [ 'a' ] }).then(supported,
 					unsupported);
 			}
+
+			testedCapabilities.supportsWindowRectCommand = session._get('window/rect').then(supported, unsupported);
 
 			return Promise.all(testedCapabilities);
 		}

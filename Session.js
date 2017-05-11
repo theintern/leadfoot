@@ -931,20 +931,32 @@ Session.prototype = {
 			height: height
 		};
 
+		var self = this;
+
+		function _setWindowSize() {
+			if (self.capabilities.supportsWindowRectCommand) {
+				data.x = null;
+				data.y = null;
+				return self._post('window/rect', data);
+			}
+			else {
+				return self._post('window/size', data);
+			}
+		}
+
 		if (this.capabilities.implicitWindowHandles) {
 			if (windowHandle == null) {
-				return this._post('window/size', data);
+				return _setWindowSize();
 			}
 			else {
 				// User provided a window handle; get the current handle, switch to the new one, get the size, then
 				// switch back to the original handle.
-				var self = this;
 				var error;
 				return this.getCurrentWindowHandle().then(function (originalHandle) {
 					return self.switchToWindow(windowHandle).then(function () {
-						return this._post('window/size', data);
+						return _setWindowSize();
 					}).catch(function (_error) {
-						error = error;
+						error = _error;
 					}).then(function () {
 						return self.switchToWindow(originalHandle);
 					}).then(function () {
@@ -977,19 +989,31 @@ Session.prototype = {
 	 * An object describing the width and height of the window, in CSS pixels.
 	 */
 	getWindowSize: function (windowHandle) {
+		var self = this;
+
+		function _getWindowSize() {
+			if (self.capabilities.supportsWindowRectCommand) {
+				return self._get('window/rect').then(function (rect) {
+					return { width: rect.width, height: rect.height };
+				});
+			}
+			else {
+				return self._get('window/size');
+			}
+		}
+
 		if (this.capabilities.implicitWindowHandles) {
 			if (windowHandle == null) {
-				return this._get('window/size');
+				return _getWindowSize();
 			}
 			else {
 				// User provided a window handle; get the current handle, switch to the new one, get the size, then
 				// switch back to the original handle.
-				var self = this;
 				var error;
 				var size;
 				return this.getCurrentWindowHandle().then(function (originalHandle) {
 					return self.switchToWindow(windowHandle).then(function () {
-						return self._get('window/size');
+						return _getWindowSize();
 					}).then(function (_size) {
 						size = _size;
 					}, function (_error) {
@@ -1058,7 +1082,7 @@ Session.prototype = {
 	 * will be negative.
 	 */
 	getWindowPosition: function (windowHandle) {
-		if (typeof windowHandle === 'undefined') {
+		if (windowHandle == null) {
 			windowHandle = 'current';
 		}
 
