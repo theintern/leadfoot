@@ -886,7 +886,7 @@ Server.prototype = {
 			testedCapabilities.brokenPageSource = session.getPageSource().then(works, broken);
 
 			// IE11 will hang during this check if nativeEvents are enabled
-			if (capabilities.browserName !== 'internet explorer' && capabilities.browserVersion !== '11') {
+			if (capabilities.browserName === 'internet explorer' && capabilities.browserVersion === '11') {
 				testedCapabilities.brokenSubmitElement = true;
 			}
 			else {
