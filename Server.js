@@ -487,6 +487,7 @@ Server.prototype = {
 			// At least SafariDriver 2.41.0 fails to allow stand-alone feature testing because it does not inject user
 			// scripts for URLs that are not http/https
 			if (isSafari(capabilities) && isMac(capabilities)) {
+				testedCapabilities = {
 					nativeEvents: false,
 					rotatable: false,
 					locationContextEnabled: false,
@@ -500,6 +501,20 @@ Server.prototype = {
 					dynamicViewport: true,
 					shortcutKey: keys.COMMAND
 				};
+
+				if (isValidVersion(capabilities, 10)) {
+					// Safari 10 using SafariDriver does not appear to support executeAsync at least as of May 2017
+					testedCapabilities.supportsExecuteAsync = false;
+
+					testedCapabilities.dynamicViewport = false;
+				}
+
+				// The native safaridriver reports versions like '12603.1.30.0.34'
+				if (isValidVersion(capabilities, 1000)) {
+					testedCapabilities.isWebDriver = true;
+				}
+
+				return testedCapabilities;
 			}
 
 			// Firefox 49+ (via geckodriver) only supports W3C locator strategies
@@ -640,8 +655,8 @@ Server.prototype = {
 
 			// At least SafariDriver 2.41.0 fails to allow stand-alone feature testing because it does not inject user
 			// scripts for URLs that are not http/https
-				return {
 			if (isSafari(capabilities) && isMac(capabilities)) {
+				testedCapabilities = {
 					brokenDeleteCookie: false,
 					brokenExecuteElementReturn: false,
 					brokenExecuteUndefinedReturn: false,
@@ -666,6 +681,20 @@ Server.prototype = {
 					// SafariDriver 2.41.0 cannot delete cookies, at all, ever
 					brokenCookies: true
 				};
+
+				if (isValidVersion(capabilities, 10)) {
+					testedCapabilities.brokenWindowSize = true;
+				}
+
+				// The native safaridriver reports versions like '12603.1.30.0.34'
+				if (isValidVersion(capabilities, 1000)) {
+					testedCapabilities.fixedLogTypes = [];
+					testedCapabilities.brokenLinkTextLocator = true;
+					testedCapabilities.brokenOptionSelect = true;
+					testedCapabilities.brokenWhitespaceNormalization = true;
+				}
+
+				return testedCapabilities;
 			}
 
 			// Internet Explorer 8 and earlier will simply crash the server if we attempt to return the parent
