@@ -2017,8 +2017,8 @@ Session.prototype = {
 	_normalizeWhitespace: function (text) {
 		if (text) {
 			text = text
-				.replace(/^\s+/, '')
-				.replace(/\s+$/, '')
+				.replace(/^\s+/mg, '')
+				.replace(/\s+$/mg, '')
 				.replace(/\s*\r\n\s*/g, '\n')
 				.replace(/ +/g, ' ');
 		}
