@@ -356,6 +356,9 @@ define([
 			},
 
 			'#executeAsync non-array args': function () {
+				if (!session.capabilities.supportsExecuteAsync) {
+					this.skip('executeAsync not supported');
+				}
 				assert.throws(function () {
 					session.executeAsync('return window;', 'oops');
 				}, /Arguments passed to executeAsync must be an array/);

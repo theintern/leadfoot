@@ -12,7 +12,11 @@ define([
 			name: 'leadfoot/helpers/pollUntil',
 
 			setup: function () {
+				var self = this;
 				return util.createSessionFromRemote(this.remote).then(function (session) {
+					if (!session.capabilities.supportsExecuteAsync) {
+						self.skip('pollUntil requires executeAsync support');
+					}
 					command = new Command(session);
 				});
 			},

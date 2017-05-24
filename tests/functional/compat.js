@@ -51,6 +51,10 @@ define([
 			},
 
 			'#waitForVisible': function () {
+				if (!this.remote.session.capabilities.supportsExecuteAsync) {
+					this.skip('requires executeAsyncSupport');
+				}
+
 				return command
 					.get(require.toUrl('./data/default.html'))
 					.waitForVisible('id', 'not-existing', 100)

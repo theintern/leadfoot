@@ -139,6 +139,10 @@ define([
 			},
 
 			'basic form interaction': function () {
+				if (!session.capabilities.mouseEnabled) {
+					this.skip('mouse not enabled');
+				}
+
 				var command = new Command(session);
 				return command.get(require.toUrl('./data/form.html'))
 					.findById('input')
@@ -203,6 +207,10 @@ define([
 			// released, the mousedown event is generated for the first element and the mouseup event is generated for
 			// the second.
 			'#moveMouseTo usesElement': function () {
+				if (!session.capabilities.mouseEnabled) {
+					this.skip('mouse not enabled');
+				}
+
 				return new Command(session).get(require.toUrl('./data/pointer.html'))
 					.findById('a')
 					.moveMouseTo()
