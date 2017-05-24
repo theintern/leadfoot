@@ -795,11 +795,11 @@ Server.prototype = {
 
 			// At least MS Edge Driver 14316 doesn't support sending keys to a file input. See
 			// https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/7194303/
-			//
 			// The existing feature test for this caused some browsers to hang, so just flag it for Edge for now.
 			if (isMsEdge(capabilities)) {
 				testedCapabilities.brokenFileSendKeys = true;
 			}
+
 			// testedCapabilities.brokenFileSendKeys = function () {
 			// 	return get('<!DOCTYPE html><input type="file" id="i1">').then(function () {
 			// 		var element;
@@ -863,7 +863,8 @@ Server.prototype = {
 				}).then(works, broken);
 			};
 
-			// IE11 will hang during this check, although option selection does work with it
+			// IE11 will hang during this check (so the test is only performed if this isn't IE11), although option
+			// selection does work with it
 			if (capabilities.browserName !== 'internet explorer' && capabilities.browserVersion !== '11') {
 				// At least MS Edge Driver 14316 doesn't allow selection option elements to be clicked.
 				testedCapabilities.brokenOptionSelect = function () {
