@@ -32,25 +32,22 @@ function isValidVersion(capabilities, minVersion, maxVersion) {
 	return true;
 }
 
-function isMacSafari(capabilities) {
-	return capabilities.browserName === 'safari' &&
-		capabilities.platformName === 'MAC' &&
-		capabilities.platformName !== 'ios';
+function isSafari(capabilities, minVersion, maxVersion) {
+	if (capabilities.browserName !== 'safari') {
+		return false;
+	}
+	return isValidVersion(capabilities, minVersion, maxVersion);
 }
 
 function isFirefox(capabilities, minVersion, maxVersion) {
 	if (capabilities.browserName !== 'firefox') {
 		return false;
 	}
-	return isValidVersion(minVersion, maxVersion);
+	return isValidVersion(capabilities, minVersion, maxVersion);
 }
 
-function isGeckodriver(capabilities) {
-	return isFirefox(capabilities, 49);
-}
-
-function isMacGeckodriver(capabilities) {
-	return isGeckodriver(capabilities) && capabilities.platformName === 'MAC';
+function isMac(capabilities) {
+	return capabilities.platform === 'MAC' && capabilities.platformName !== 'ios';
 }
 
 /**
@@ -489,8 +486,7 @@ Server.prototype = {
 
 			// At least SafariDriver 2.41.0 fails to allow stand-alone feature testing because it does not inject user
 			// scripts for URLs that are not http/https
-			if (isMacSafari(capabilities)) {
-				return {
+			if (isSafari(capabilities) && isMac(capabilities)) {
 					nativeEvents: false,
 					rotatable: false,
 					locationContextEnabled: false,
@@ -507,7 +503,7 @@ Server.prototype = {
 			}
 
 			// Firefox 49+ (via geckodriver) only supports W3C locator strategies
-			if (isGeckodriver(capabilities)) {
+			if (isFirefox(capabilities, 49)) {
 				testedCapabilities.isWebDriver = true;
 			}
 
@@ -562,7 +558,7 @@ Server.prototype = {
 			// features of a given platform
 			if (!('mouseEnabled' in capabilities)) {
 				// Using mouse services such as doubleclick will hang Firefox 49+ session on the Mac.
-				if (isMacGeckodriver(capabilities)) {
+				if (isFirefox(capabilities, 49) && isMac(capabilities)) {
 					testedCapabilities.mouseEnabled = true;
 				}
 				else {
@@ -644,8 +640,8 @@ Server.prototype = {
 
 			// At least SafariDriver 2.41.0 fails to allow stand-alone feature testing because it does not inject user
 			// scripts for URLs that are not http/https
-			if (isMacSafari(capabilities)) {
 				return {
+			if (isSafari(capabilities) && isMac(capabilities)) {
 					brokenDeleteCookie: false,
 					brokenExecuteElementReturn: false,
 					brokenExecuteUndefinedReturn: false,
@@ -711,7 +707,7 @@ Server.prototype = {
 			}
 
 			// At least Firefox 49 + geckodriver can't POST empty data
-			if (isGeckodriver(capabilities)) {
+			if (isFirefox(capabilities, 49)) {
 				testedCapabilities.brokenEmptyPost = true;
 			}
 
@@ -801,7 +797,7 @@ Server.prototype = {
 			// https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/7194303/
 			//
 			// The existing feature test for this caused some browsers to hang, so just flag it for Edge for now.
-			if (isMsEdge(capabilities, null, 38.14366)) {
+			if (isMsEdge(capabilities)) {
 				testedCapabilities.brokenFileSendKeys = true;
 			}
 			// testedCapabilities.brokenFileSendKeys = function () {
@@ -930,7 +926,7 @@ Server.prototype = {
 			// same hardcoded list ourselves.
 			// At least InternetExplorerDriver 2.41.0 also fails to provide log types.
 			// Firefox 49+ (via geckodriver) doesn't support retrieving logs or log types, and may hang the session.
-			if (isMacGeckodriver(capabilities)) {
+			if (isFirefox(capabilities, 49) && isMac(capabilities)) {
 				testedCapabilities.fixedLogTypes = [];
 			}
 			else {
@@ -952,7 +948,7 @@ Server.prototype = {
 				(capabilities.browserName === 'Safari' && capabilities.platformName === 'IOS') ||
 				// At least geckodriver 0.15.0 and Firefox 51 will stop responding to commands when performing window
 				// switches.
-				isGeckodriver(capabilities)
+				isFirefox(capabilities, 49)
 			) {
 				testedCapabilities.brokenWindowSwitch = true;
 			}
@@ -1010,7 +1006,7 @@ Server.prototype = {
 				}).catch(broken);
 			};
 
-			if (isGeckodriver(capabilities)) {
+			if (isFirefox(capabilities, 49, 52)) {
 				// At least geckodriver 0.11 and Firefox 49 don't implement mouse control, so everything will need to be
 				// simulated.
 				testedCapabilities.brokenMouseEvents = true;
@@ -1171,7 +1167,7 @@ Server.prototype = {
 
 			// At least SafariDriver 2.41.0 fails to allow stand-alone feature testing because it does not inject user
 			// scripts for URLs that are not http/https
-			if (!isMacSafari(capabilities)) {
+			if (!(isSafari(capabilities) && isMac(capabilities))) {
 				// At least MS Edge 14316 returns immediately from a click request immediately rather than waiting for
 				// default action to occur.
 				if (isMsEdge(capabilities)) {
@@ -1211,7 +1207,7 @@ Server.prototype = {
 			}
 
 			// The W3C WebDriver standard does not support the session-level /keys command, but JsonWireProtocol does.
-			if (isGeckodriver(capabilities)) {
+			if (isFirefox(capabilities, 49)) {
 				testedCapabilities.supportsKeysCommand = false;
 			}
 			else {
@@ -1229,7 +1225,7 @@ Server.prototype = {
 		}
 
 		// At least geckodriver 0.11 and Firefox 49+ may hang when getting 'about:blank' in the first request
-		var promise = isGeckodriver(capabilities) ? Promise.resolve(session) : session.get('about:blank');
+		var promise = isFirefox(capabilities, 49) ? Promise.resolve(session) : session.get('about:blank');
 
 		return promise
 			.then(discoverServerFeatures)
