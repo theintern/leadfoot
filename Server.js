@@ -1140,6 +1140,8 @@ Server.prototype = {
 			return Promise.all(testedCapabilities);
 		}
 
+		var server = this;
+
 		function discoverServerFeatures() {
 			var testedCapabilities = {};
 
@@ -1165,6 +1167,9 @@ Server.prototype = {
 					return error.name === 'UnknownCommand';
 				});
 			}
+
+			// Sauce Labs will not return a list of sessions at least as of May 2017
+			testedCapabilities.brokenSessionList = server.getSessions().then(works, broken);
 
 			// At least SafariDriver 2.41.0 fails to allow stand-alone feature testing because it does not inject user
 			// scripts for URLs that are not http/https

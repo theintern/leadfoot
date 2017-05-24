@@ -91,6 +91,11 @@ define([
 			},
 
 			'#getSessions': function () {
+				var remoteCapabilities = this.remote.session.capabilities;
+				if (remoteCapabilities.brokenSessionList) {
+					this.skip('Server will not provide session lists');
+				}
+
 				var currentSessionId = this.remote.session ? this.remote.session.sessionId : this.remote.sessionId;
 				return server.getSessions().then(function (result) {
 					assert.isArray(result);
