@@ -1216,7 +1216,9 @@ Server.prototype = {
 					unsupported);
 			}
 
-			testedCapabilities.supportsWindowRectCommand = session._get('window/rect').then(supported, unsupported);
+			if (isFirefox(capabilities, 53)) {
+				testedCapabilities.supportsWindowRectCommand = true;
+			}
 
 			return Promise.all(testedCapabilities);
 		}
