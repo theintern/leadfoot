@@ -461,8 +461,19 @@ Server.prototype = {
 				isMsEdge(capabilities) 
 			) {
 				// Edge driver doesn't provide an initialBrowserUrl
-				var initialUrl = capabilities.browserName === 'internet explorer' ? capabilities.initialBrowserUrl :
-					'about:blank';
+				var initialUrl = 'about:blank';
+
+				// As of version 3.3.0.1, IEDriverServer provides IE-specific options, including the initialBrowserUrl,
+				// under an 'se:ieOptions' property rather than directly on capabilities.
+				// https://github.com/SeleniumHQ/selenium/blob/e60b607a97b9b7588d59e0c26ef9a6d1d1350911/cpp/iedriverserver/CHANGELOG
+				if (capabilities.browserName === 'internet explorer') {
+					if (capabilities['se:ieOptions']) {
+						initialUrl = capabilities['se:ieOptions'].initialBrowserUrl;
+					}
+					else if (capabilities.initialBrowserUrl) {
+						initialUrl = capabilities.initialBrowserUrl;
+					}
+				}
 
 				return session.get(initialUrl).then(function () {
 					return session.execute('document.body.innerHTML = arguments[0];', [
