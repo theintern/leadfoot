@@ -1,4 +1,4 @@
-# “Leadfoot drives browsers insanely fast”
+# Leadfoot
 
 Leadfoot is a JavaScript client library that brings cross-platform consistency to the Selenium WebDriver API.
 
@@ -43,8 +43,10 @@ release.
 
 [View API documentation](https://theintern.github.io/leadfoot/)
 
+<!-- start-github-only -->
 ## License
 
 Leadfoot is a JS Foundation project offered under the [New BSD](LICENSE) license.
 
 © [SitePen, Inc.](http://sitepen.com) and its [contributors](https://github.com/theintern/leadfoot/graphs/contributors)
+<!-- end-github-only -->
