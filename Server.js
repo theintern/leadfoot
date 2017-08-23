@@ -1047,9 +1047,10 @@ Server.prototype = {
 				}).catch(broken);
 			};
 
-			if (isFirefox(capabilities, 49, 52)) {
-				// At least geckodriver 0.11 and Firefox 49 don't implement mouse control, so everything will need to be
-				// simulated.
+			if (isFirefox(capabilities, 49)) {
+				// geckodriver 0.11+ and Firefox 49+ don't implement the Selenium mouse control endpoints, so everything
+				// will need to be simulated.
+				// TODO: Remove or update this check when Leadfoot implements the WebDriver Actions API.
 				testedCapabilities.brokenMouseEvents = true;
 			}
 			else if (capabilities.mouseEnabled) {
