@@ -2,7 +2,7 @@
 
 Leadfoot is a JavaScript client library that brings cross-platform consistency to the Selenium WebDriver API.
 
-[![Intern](https://theintern.github.io/images/intern-v3.svg)](https://github.com/theintern/intern/)
+[![Intern](https://theintern.io/images/intern-v3.svg)](https://github.com/theintern/intern/)
 
 Unlike existing WebDriver client libraries that assume the remote server will just do the Right Thing, Leadfoot detects
 and works around inconsistencies in WebDriver server implementations, so you can just worry about making your tests
