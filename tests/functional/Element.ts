@@ -976,7 +976,7 @@ registerSuite(function() {
 					return session.findById('form');
 				})
 				.then(function(element) {
-					return element.getProperty('action');
+					return element.getProperty<string>('action');
 				})
 				.then(function(action) {
 					assert.operator(action.indexOf('http'), '===', 0);

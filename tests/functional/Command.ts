@@ -120,7 +120,7 @@ registerSuite(function() {
 			}, /A parent Command or Session must be provided to a new Command/);
 
 			const dfd = this.async();
-			const parent = new Command(session, function(setContext) {
+			const parent = new Command<string>(session, function(setContext) {
 				setContext('foo');
 				return Task.resolve('bar');
 			});
@@ -205,7 +205,7 @@ registerSuite(function() {
 				.findById('input')
 				.click()
 				.type('hello')
-				.getProperty('value')
+				.getProperty<string>('value')
 				.then(function(value: string) {
 					assert.strictEqual(
 						value,
@@ -219,7 +219,7 @@ registerSuite(function() {
 			return new Command(session)
 				.get(require.toUrl('tests/functional/data/elements.html'))
 				.findAllByClassName('b')
-				.getAttribute('id')
+				.getAttribute<string[]>('id')
 				.then(function(ids: string[]) {
 					assert.deepEqual(ids, ['b2', 'b1', 'b3', 'b4']);
 				});
@@ -230,7 +230,7 @@ registerSuite(function() {
 				.get(require.toUrl('tests/functional/data/elements.html'))
 				.findById('c')
 				.findAllByClassName('b')
-				.getAttribute('id')
+				.getAttribute<string[]>('id')
 				.then(function(ids: string[]) {
 					assert.deepEqual(ids, ['b3', 'b4']);
 				})
@@ -241,7 +241,7 @@ registerSuite(function() {
 				.end(2)
 				.end()
 				.findAllByClassName('b')
-				.getAttribute('id')
+				.getAttribute<string[]>('id')
 				.then(function(ids: string[]) {
 					assert.deepEqual(ids, ['b2', 'b1', 'b3', 'b4']);
 				});
@@ -252,7 +252,7 @@ registerSuite(function() {
 				.get(require.toUrl('tests/functional/data/elements.html'))
 				.findAllByTagName('div')
 				.findAllByCssSelector('span, a')
-				.getAttribute('id')
+				.getAttribute<string[]>('id')
 				.then(function(ids: string[]) {
 					assert.deepEqual(ids, ['f', 'g', 'j', 'i1', 'k', 'zz']);
 				});
@@ -333,7 +333,7 @@ registerSuite(function() {
 		'#end in a long chain'() {
 			return new Command(session)
 				.then(function(_: any, setContext: Function) {
-					setContext(['a']);
+					setContext!(['a']);
 				})
 				.end()
 				.then(function(this: Command<any>) {

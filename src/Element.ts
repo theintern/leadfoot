@@ -212,11 +212,11 @@ export default class Element extends Locator<
 				capabilities.brokenLinkTextLocator)
 		) {
 			return session
-				.execute(
+				.execute<ElementOrElementId[]>(
 					/* istanbul ignore next */ session['_manualFindByLinkText'],
 					[using, value, true, this]
 				)
-				.then(function(elements: ElementOrElementId[]) {
+				.then(function (elements: ElementOrElementId[]) {
 					return elements.map(function(element) {
 						return new Element(element, session);
 					});
@@ -356,7 +356,7 @@ export default class Element extends Locator<
 		return this._get('name').then((name: string) => {
 			if (this.session.capabilities.brokenHtmlTagName) {
 				return this.session
-					.execute(
+					.execute<boolean>(
 						'return document.body && document.body.tagName === document.body.tagName.toUpperCase();'
 					)
 					.then(function(isHtml: boolean) {
@@ -434,7 +434,7 @@ export default class Element extends Locator<
 					(value === '' || value === undefined)
 				) {
 					return this.session
-						.execute(
+						.execute<boolean>(
 							/* istanbul ignore next */ function(
 								element: HTMLElement,
 								name: string
@@ -486,7 +486,7 @@ export default class Element extends Locator<
 	 * @param name The name of the property.
 	 * @returns The value of the property.
 	 */
-	getProperty(name: string): Task<any> {
+	getProperty<T = {}>(name: string): Task<T> {
 		return this.session.execute('return arguments[0][arguments[1]];', [
 			this,
 			name

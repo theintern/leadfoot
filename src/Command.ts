@@ -556,25 +556,22 @@ export default class Command<T> extends Locator<
 	 *    `setContext` method is not called, the element context from the
 	 *    parent will be passed through unmodified.
 	 */
-	then<U = T>(
+	then<U = T, R = never>(
 		callback?:
-			| ((
-					value: T,
-					setContext: SetContextMethod<U>
-				) => U | PromiseLike<U> | Command<U>)
+			((value: T) => U | PromiseLike<U>)
+			| ((value: T, setContext: SetContextMethod<U>) => U | PromiseLike<U>)
 			| null
 			| undefined,
 		errback?:
-			| ((error: Error) => void | U | PromiseLike<U> | Command<U>)
+			((error: any) => R | PromiseLike<R>)
 			| null
 			| undefined
-	) {
+	): Command<U | R> {
 		function runCallback(
 			command: Command<T>,
-			callback: (
-				value: T | Error,
-				setContext: SetContextMethod<U>
-			) => void | U | PromiseLike<U> | Command<U>,
+			callback: ((value: T) => U | PromiseLike<U>)
+				| ((value: T, setContext: SetContextMethod<U>) => U | PromiseLike<U>)
+				| ((error: any) => R | PromiseLike<R>),
 			value: T,
 			setContext: SetContextMethod<T>
 		): T {
@@ -614,7 +611,7 @@ export default class Command<T> extends Locator<
 	 * Adds a callback to be invoked when any of the previously chained
 	 * operations have failed.
 	 */
-	catch(errback: (reason: Error) => void | T | Command<T>) {
+	catch<R = never>(errback: (reason: any) => R | PromiseLike<R>) {
 		return this.then(null, errback);
 	}
 
@@ -662,7 +659,7 @@ export default class Command<T> extends Locator<
 	 * elements from the parent context and uses them as the context for the
 	 * newly created Command.
 	 */
-	private _callFindElementMethod<U>(key: keyof Element, ...args: any[]) {
+	private _callFindElementMethod<U>(key: keyof Element, ...args: any[]): Command<U> {
 		return new (this.constructor as typeof Command)<U>(this, function(
 			this: Command<U>,
 			setContext: SetContextMethod<U>
@@ -700,7 +697,7 @@ export default class Command<T> extends Locator<
 		});
 	}
 
-	private _callElementMethod<U>(key: keyof Element, ...args: any[]) {
+	private _callElementMethod<U>(key: keyof Element, ...args: any[]): Command<U> {
 		return new (this.constructor as typeof Command)<U>(this, function(
 			this: Command<T>,
 			setContext: Function
@@ -730,7 +727,7 @@ export default class Command<T> extends Locator<
 		});
 	}
 
-	private _callSessionMethod<U>(key: keyof Session, ...args: any[]) {
+	private _callSessionMethod<U>(key: keyof Session, ...args: any[]): Command<U> {
 		return new (this.constructor as typeof Command)<U>(this, function(
 			this: Command<T>,
 			setContext: Function
@@ -1670,8 +1667,8 @@ export default class Command<T> extends Locator<
 	 * @returns The value of the attribute, or `null` if no such attribute
 	 * exists.
 	 */
-	getAttribute(name: string) {
-		return this._callElementMethod('getAttribute', name);
+	getAttribute<T = {}>(name: string) {
+		return this._callElementMethod<T>('getAttribute', name);
 	}
 
 	/**
@@ -1682,8 +1679,8 @@ export default class Command<T> extends Locator<
 	 * @param name The name of the property.
 	 * @returns The value of the property.
 	 */
-	getProperty(name: string) {
-		return this._callElementMethod('getProperty', name);
+	getProperty<T = {}>(name: string) {
+		return this._callElementMethod<T>('getProperty', name);
 	}
 
 	/**
