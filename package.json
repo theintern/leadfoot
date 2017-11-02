@@ -8,16 +8,16 @@
   },
   "license": "BSD-3-Clause",
   "dependencies": {
-    "@dojo/core": "beta2",
-    "@dojo/has": "beta2",
-    "@dojo/interfaces": "beta2",
-    "@dojo/shim": "beta2",
+    "@dojo/core": "beta3",
+    "@dojo/has": "beta3",
+    "@dojo/interfaces": "beta3",
+    "@dojo/shim": "beta3",
     "@types/jszip": "0.0.33",
     "jszip": "~3.1.3",
     "tslib": "~1.8.0"
   },
   "devDependencies": {
-    "@dojo/loader": "beta2",
+    "@dojo/loader": "beta3",
     "@theintern/dev": "~0.6.0",
     "@types/node": "~6.0.54",
     "concurrently": "~3.5.0",
