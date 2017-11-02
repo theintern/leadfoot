@@ -772,7 +772,7 @@ export default class Server {
 		): Task<void> => {
 			return Object.keys(
 				testedCapabilities
-			).reduce((previous: Task<any>, key: keyof Capabilities) => {
+			).reduce((previous: Task<void>, key: keyof Capabilities) => {
 				return previous.then(() => {
 					const value = testedCapabilities[key];
 					const task =
@@ -1594,7 +1594,7 @@ export default class Server {
 						.get('about:blank?1')
 						.then(function() {
 							let timer: NodeJS.Timer;
-							let refresh: Task<any>;
+							let refresh: Task<boolean | void>;
 
 							return new Task(
 								resolve => {

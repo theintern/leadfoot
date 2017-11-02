@@ -141,7 +141,7 @@ registerSuite(function() {
 					return element
 						.find('css selector', '#j b.i')
 						.then(getId)
-						.then(function(id: string) {
+						.then(function(id) {
 							assert.strictEqual(id, 'i2');
 						});
 				},
@@ -150,7 +150,7 @@ registerSuite(function() {
 					return element
 						.find('name', 'nothing')
 						.then(getId)
-						.then(function(id: string) {
+						.then(function(id) {
 							assert.strictEqual(id, 'nothing1');
 						});
 				},

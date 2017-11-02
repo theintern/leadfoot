@@ -27,7 +27,7 @@ export default function waitForDeleted(
 	locator: Session | Element,
 	using: Strategy,
 	value: string
-) {
+): Task<void> {
 	let originalTimeout: number;
 
 	return session

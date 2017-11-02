@@ -557,44 +557,41 @@ export default class Command<T> extends Locator<
 	 *    parent will be passed through unmodified.
 	 */
 	then<U = T, R = never>(
-		callback?:
-			((value: T) => U | PromiseLike<U>)
-			| ((value: T, setContext: SetContextMethod<U>) => U | PromiseLike<U>)
+		callback?: ((this: Command<T>, value: T, setContext: SetContextMethod<U>) => U | PromiseLike<U>)
 			| null
 			| undefined,
 		errback?:
-			((error: any) => R | PromiseLike<R>)
+			((this: Command<T>, error: any) => R | PromiseLike<R>)
 			| null
 			| undefined
 	): Command<U | R> {
 		function runCallback(
 			command: Command<T>,
-			callback: ((value: T) => U | PromiseLike<U>)
-				| ((value: T, setContext: SetContextMethod<U>) => U | PromiseLike<U>)
-				| ((error: any) => R | PromiseLike<R>),
+			callback: ((this: Command<T>, value: T, setContext: SetContextMethod<U>) => U | PromiseLike<U>)
+				| ((this: Command<T>, error: any) => R | PromiseLike<R>),
 			value: T,
 			setContext: SetContextMethod<T>
-		): T {
-			const returnValue = callback.call(command, value, setContext);
+		) {
+			const returnValue: T | U | R | Command<T | U | R> = callback.call(command, value, setContext);
 
 			// If someone returns `this` (or a chain starting from `this`) from
 			// the callback, it will cause a deadlock where the child command
 			// is waiting for the child command to resolve
 			if (returnValue instanceof Command) {
-				let maybeCommand = returnValue;
+				let maybeCommand: Locator<any, any, any> | undefined = returnValue;
 				do {
 					if (maybeCommand === command) {
 						throw new Error(
 							'Deadlock: do not use `return this` from a Command callback'
 						);
 					}
-				} while ((maybeCommand = <Command<T>>maybeCommand.parent));
+				} while ((maybeCommand = maybeCommand.parent));
 			}
 
 			return returnValue;
 		}
 
-		return <Command<U>>new (this.constructor as typeof Command)(
+		return new (this.constructor as typeof Command)(
 			this,
 			callback ?
 				function(setContext: SetContextMethod<T>, value: T) {
@@ -611,7 +608,7 @@ export default class Command<T> extends Locator<
 	 * Adds a callback to be invoked when any of the previously chained
 	 * operations have failed.
 	 */
-	catch<R = never>(errback: (reason: any) => R | PromiseLike<R>) {
+	catch<R = never>(errback: (this: Command<T>, reason: any) => R | PromiseLike<R>) {
 		return this.then(null, errback);
 	}
 
@@ -703,13 +700,13 @@ export default class Command<T> extends Locator<
 			setContext: Function
 		) {
 			const parentContext = this._context;
-			let promise: Task<any>;
+			let promise: Task<U>;
 			let fn = (<any>parentContext)[0] && (<any>parentContext)[0][key];
 
 			if (parentContext.isSingle) {
 				promise = fn.apply(parentContext[0], args);
 			} else {
-				promise = Task.all(
+				promise = <any>Task.all(
 					parentContext.map(function(element: any) {
 						return element[key].apply(element, args);
 					})
@@ -723,7 +720,7 @@ export default class Command<T> extends Locator<
 				});
 			}
 
-			return <Task<U>>promise;
+			return promise;
 		});
 	}
 
@@ -734,7 +731,7 @@ export default class Command<T> extends Locator<
 		) {
 			const parentContext = this._context;
 			const session = this._session;
-			let task: Task<any>;
+			let task: Task<U>;
 
 			// The function may have come from a session object prototype but
 			// have been overridden on the actual session instance; in such a
@@ -755,7 +752,7 @@ export default class Command<T> extends Locator<
 				if (parentContext.isSingle) {
 					task = sessionMethod(...[parentContext[0], ...args]);
 				} else {
-					task = Task.all(
+					task = <any>Task.all(
 						parentContext.map(element => {
 							return sessionMethod(...[element, ...args]);
 						})
@@ -877,8 +874,8 @@ export default class Command<T> extends Locator<
 	 * @returns The value returned by the remote code. Only values that can be
 	 * serialised to JSON, plus DOM elements, can be returned.
 	 */
-	execute(script: Function | string, args?: any[]) {
-		return this._callSessionMethod<any>('execute', script, args);
+	execute<T = any>(script: Function | string, args?: any[]) {
+		return this._callSessionMethod<T>('execute', script, args);
 	}
 
 	/**
@@ -910,8 +907,8 @@ export default class Command<T> extends Locator<
 	 * @returns The value returned by the remote code. Only values that can be
 	 * serialised to JSON, plus DOM elements, can be returned.
 	 */
-	executeAsync(script: Function | string, args?: any[]) {
-		return this._callSessionMethod<any>('executeAsync', script, args);
+	executeAsync<T = any>(script: Function | string, args?: any[]) {
+		return this._callSessionMethod<T>('executeAsync', script, args);
 	}
 
 	/**
@@ -1667,7 +1664,7 @@ export default class Command<T> extends Locator<
 	 * @returns The value of the attribute, or `null` if no such attribute
 	 * exists.
 	 */
-	getAttribute<T = {}>(name: string) {
+	getAttribute<T = any>(name: string) {
 		return this._callElementMethod<T>('getAttribute', name);
 	}
 
@@ -1679,7 +1676,7 @@ export default class Command<T> extends Locator<
 	 * @param name The name of the property.
 	 * @returns The value of the property.
 	 */
-	getProperty<T = {}>(name: string) {
+	getProperty<T = any>(name: string) {
 		return this._callElementMethod<T>('getProperty', name);
 	}
 

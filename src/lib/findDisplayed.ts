@@ -15,7 +15,7 @@ export default function findDisplayed(
 	locator: Session | Element,
 	strategy: Strategy,
 	value: string
-) {
+): Task<Element> {
 	return session.getTimeout('implicit').then(originalTimeout => {
 		const startTime = Date.now();
 
