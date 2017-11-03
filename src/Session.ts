@@ -95,7 +95,7 @@ export default class Session extends Locator<
 		path: string,
 		requestData: any,
 		pathParts?: string[]
-	) {
+	): Task<T> {
 		path = 'session/' + this._sessionId + (path ? '/' + path : '');
 
 		if (
@@ -1171,7 +1171,7 @@ export default class Session extends Locator<
 			});
 		}
 
-		return this.serverPost<any>('element', {
+		return this.serverPost<ElementOrElementId>('element', {
 			using: using,
 			value: value
 		}).then(element => {

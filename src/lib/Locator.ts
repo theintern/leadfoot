@@ -11,6 +11,8 @@
  * 4. xpath
  */
 abstract class Locator<E, L, V> {
+	parent?: Locator<any, any, any>;
+
 	abstract find(strategy: Strategy, value: string): E;
 
 	abstract findAll(strategy: Strategy, value: string): L;

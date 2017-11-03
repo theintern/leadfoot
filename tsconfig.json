@@ -1,10 +1,11 @@
 {
-    "extends": "./node_modules/@theintern/dev/tsconfig-base.json",
+	"extends": "./node_modules/@theintern/dev/tsconfig-base.json",
 	"compilerOptions": {
 		"declaration": true,
 		"importHelpers": true,
 		"outDir": "./_build",
 		"rootDir": ".",
+		"sourceRoot": "intern:///leadfoot",
 		"lib": [
 			"es5",
 			"es2015.symbol",
