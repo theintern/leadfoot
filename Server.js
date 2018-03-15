@@ -365,7 +365,7 @@ Server.prototype = {
 		}).then(function (response) {
 			var responseData = null;
 			var sessionId = null;
-			// At least geckodriver 0.15.0 returns the response data in a 'value.capabilities'
+			// At least geckodriver 0.19.0 returns the response data in a 'value.capabilities'
             // property, whereas Selenium does not.
 			if (!response.sessionId && response.value.capabilities) {
                 responseData = response.value.capabilities;
