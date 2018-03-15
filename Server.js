@@ -363,12 +363,19 @@ Server.prototype = {
 			desiredCapabilities: desiredCapabilities,
 			requiredCapabilities: requiredCapabilities
 		}).then(function (response) {
-			// At least geckodriver 0.15.0 returns the response data in a 'value' property, whereas Selenium does not.
-			if (response.value && response.value.sessionId) {
-				response = response.value;
+			var responseData = null;
+			var sessionId = null;
+			// At least geckodriver 0.19.0 returns the response data in a 'value.capabilities'
+            // property, whereas Selenium does not.
+			if (!response.sessionId && response.value.capabilities) {
+                responseData = response.value.capabilities;
+                sessionId = response.value.sessionId;
+			} else {
+                responseData = response.value;
+                sessionId = response.sessionId;
 			}
 
-			var session = new self.sessionConstructor(response.sessionId, self, response.value);
+			var session = new self.sessionConstructor(sessionId, self, responseData);
 			if (fixSessionCapabilities) {
 				return self._fillCapabilities(session).catch(function (error) {
 					// The session was started on the server, but we did not resolve the Promise yet. If a failure
