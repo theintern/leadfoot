@@ -93,6 +93,7 @@ if (typeof process !== 'undefined') {
 
 export const functionalSuites = [
 	'tests/functional/helpers/pollUntil',
+	'tests/functional/helpers/waitForResult',
 	'tests/functional/Server',
 	'tests/functional/Session',
 	'tests/functional/Element',
