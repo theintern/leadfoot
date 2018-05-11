@@ -683,7 +683,7 @@ Session.prototype = {
 			throw new Error('Arguments passed to execute must be an array');
 		}
 
-		var result = this._post('execute', {
+		var result = this._post('execute/sync', {
 			script: util.toExecuteString(script),
 			args: args || []
 		}).then(lang.partial(convertToElements, this), fixExecuteError);
@@ -733,7 +733,7 @@ Session.prototype = {
 			throw new Error('Arguments passed to executeAsync must be an array');
 		}
 
-		return this._post('execute_async', {
+		return this._post('execute/async', {
 			script: util.toExecuteString(script),
 			args: args || []
 		}).then(lang.partial(convertToElements, this), fixExecuteError);
