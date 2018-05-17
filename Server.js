@@ -526,7 +526,8 @@ Server.prototype = {
 					mouseEnabled: true,
 					touchEnabled: false,
 					dynamicViewport: true,
-					shortcutKey: keys.COMMAND
+					shortcutKey: keys.COMMAND,
+					syncEndpoint: false
 				};
 
 				if (isValidVersion(capabilities, 10)) {
@@ -696,6 +697,7 @@ Server.prototype = {
 					fixedLogTypes: false,
 					brokenHtmlTagName: false,
 					brokenNullGetSpecAttribute: false,
+
 
 					// SafariDriver-specific
 					brokenActiveElement: true,
