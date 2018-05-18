@@ -415,6 +415,14 @@ Server.prototype = {
 			capabilities.browserVersion = capabilities.version;
 		}
 
+		//WebDriver Spec now supports execute/sync as the synchronous execute endpoint.
+		// This was updated in geckodriver as of 16.0 but not yet completed in chromedriver.
+		capabilities.syncEndpoint = false;
+
+		//Webdriver spec now supoorts text as parameter to text() call for typing into elements.
+		//This was updated in geckodriver as of 16.0 but not yet implemented in chromedriver.
+		capabilities.typeParameterCalledText = false;
+
 		function supported() { return true; }
 		function unsupported() { return false; }
 		function maybeSupported(error) {

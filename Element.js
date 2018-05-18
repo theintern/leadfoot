@@ -257,18 +257,27 @@ Element.prototype = {
 	 * @returns {Promise.<void>}
 	 */
 	type: function (value) {
+		var paramName = this.session.capabilities.typeParameterCalledText
+			? 'text'
+			: 'value';
 		function getPostData(arrayValue) {
-			if (self.session.capabilities.isWebDriver) {
-				return { value: arrayValue.join('').split('') };
+			console.log(arrayValue);
+			var obj = {};
+			obj[paramName] = null;
+			if (self.session.capabilities.isWebDriver &&
+				!self.session.capabilities.typeParameterCalledText) {
+				obj[paramName] = arrayValue.join('').split('');
+				return obj;
 			}
-			return { value: arrayValue };
+			obj[paramName] = arrayValue;
+			return obj;
 		}
 
-		var self = this;
-
-		if (!Array.isArray(value)) {
+		if (!Array.isArray(value) &&
+			!this.session.capabilities.typeParameterCalledText) {
 			value = [ value ];
 		}
+		var self = this;
 
 		if (this.session.capabilities.remoteFiles) {
 			var filename = value.join('');
@@ -278,7 +287,7 @@ Element.prototype = {
 			try {
 				if (fs.statSync(filename).isFile()) {
 					return this.session._uploadFile(filename).then(function(uploadedFilename) {
-						return self._post('value', getPostData([ uploadedFilename ])).then(noop);
+						return self._post(paramName, getPostData([ uploadedFilename ])).then(noop);
 					});
 				}
 			}
@@ -288,7 +297,15 @@ Element.prototype = {
 		}
 
 		// If the input isn't a filename, just post the value directly
-		return this._post('value', getPostData(value)).then(noop);
+		return this._post('value', getPostData(value)).then(noop).catch(function(error) {
+			if (error.detail.error === 'invalid argument'
+				&& paramName !== 'text') {
+				self.session.capabilities.typeParameterCalledText = true;
+				paramName = 'text';
+				self._post(value, getPostData(value)).then(noop);
+			}
+			throw error;
+		});
 	},
 
 	/**

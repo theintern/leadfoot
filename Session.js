@@ -676,17 +676,45 @@ Session.prototype = {
 	 * The value returned by the remote code. Only values that can be serialised to JSON, plus DOM elements, can be
 	 * returned.
 	 */
+	/*
+		var result = this._post(executeRoute, {
+			script: util.toExecuteString(script),
+			args: args || []
+		}).then(lang.partial(convertToElements, this), fixExecuteError)
+		.catch(function(error) {
+			console.log(error.name);
+			if (error.name === 'Unknown Command') {
+
+			}
+		});
+	 */
+
 	execute: function (script, args) {
 		// At least FirefoxDriver 2.40.0 will throw a confusing NullPointerException if args is not an array;
 		// provide a friendlier error message to users that accidentally pass a non-array
 		if (typeof args !== 'undefined' && !Array.isArray(args)) {
 			throw new Error('Arguments passed to execute must be an array');
 		}
+		var self = this;
 
-		var result = this._post('execute/sync', {
-			script: util.toExecuteString(script),
-			args: args || []
-		}).then(lang.partial(convertToElements, this), fixExecuteError);
+		var result = this.capabilities.syncEndpoint
+			?  executeWithEndpoint('execute/sync')
+			: executeWithEndpoint('execute');
+
+		function executeWithEndpoint(endpoint) {
+			return self._post(endpoint, {
+				script: util.toExecuteString(script),
+				args: args || []
+			}).then(lang.partial(convertToElements, self), fixExecuteError).catch(function(error) {
+				if (error.detail.error === 'unknown command'
+					&& endpoint !== 'execute/sync') {
+					self.capabilities.syncEndpoint = true;
+					return executeWithEndpoint('execute/sync');
+				}
+				throw error;
+			});
+		}
+
 
 		if (this.capabilities.brokenExecuteUndefinedReturn) {
 			result = result.then(function (value) {
