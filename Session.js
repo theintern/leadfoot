@@ -715,7 +715,6 @@ Session.prototype = {
 			});
 		}
 
-
 		if (this.capabilities.brokenExecuteUndefinedReturn) {
 			result = result.then(function (value) {
 				if (value === undefined) {

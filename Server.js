@@ -705,6 +705,7 @@ Server.prototype = {
 					brokenHtmlTagName: false,
 					brokenNullGetSpecAttribute: false,
 
+
 					// SafariDriver-specific
 					brokenActiveElement: true,
 					brokenNavigation: true,
