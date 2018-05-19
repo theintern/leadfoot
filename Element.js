@@ -270,7 +270,6 @@ Element.prototype = {
 				}
 			}
 			obj[paramName] = arrayValue;
-			console.log(arrayValue);
 			return obj;
 		}
 
@@ -313,7 +312,7 @@ Element.prototype = {
 		return  this.session.capabilities.typeParameterCalledText
 			? sendPostData('text')
 			: sendPostData('value');
-		
+
 	},
 
 	/**
