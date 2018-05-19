@@ -257,19 +257,20 @@ Element.prototype = {
 	 * @returns {Promise.<void>}
 	 */
 	type: function (value) {
-		var paramName = this.session.capabilities.typeParameterCalledText
-			? 'text'
-			: 'value';
-		function getPostData(arrayValue) {
-			console.log(arrayValue);
+		function getPostData(arrayValue, paramName) {
 			var obj = {};
 			obj[paramName] = null;
 			if (self.session.capabilities.isWebDriver &&
 				!self.session.capabilities.typeParameterCalledText) {
 				obj[paramName] = arrayValue.join('').split('');
 				return obj;
+			} else if (self.session.capabilities.typeParameterCalledText) {
+				if (Array.isArray(arrayValue)) {
+					arrayValue = arrayValue.join('');
+				}
 			}
 			obj[paramName] = arrayValue;
+			console.log(arrayValue);
 			return obj;
 		}
 
@@ -277,6 +278,7 @@ Element.prototype = {
 			!this.session.capabilities.typeParameterCalledText) {
 			value = [ value ];
 		}
+
 		var self = this;
 
 		if (this.session.capabilities.remoteFiles) {
@@ -287,7 +289,7 @@ Element.prototype = {
 			try {
 				if (fs.statSync(filename).isFile()) {
 					return this.session._uploadFile(filename).then(function(uploadedFilename) {
-						return self._post(paramName, getPostData([ uploadedFilename ])).then(noop);
+						return self._post('value', getPostData([ uploadedFilename ])).then(noop);
 					});
 				}
 			}
@@ -296,16 +298,35 @@ Element.prototype = {
 			}
 		}
 
+		function sendPostData(paramName) {
+			return self._post('value', getPostData(value, paramName)).then(noop).catch(function(error) {
+				if (error.detail.error === 'invalid argument'
+					&& paramName !== 'text') {
+					self.session.capabilities.typeParameterCalledText = true;
+					console.log(value);
+					return sendPostData('text');
+				}
+				throw error;
+			});
+		}
+
+		return  this.session.capabilities.typeParameterCalledText
+			? sendPostData('text')
+			: sendPostData('value');
+
 		// If the input isn't a filename, just post the value directly
-		return this._post('value', getPostData(value)).then(noop).catch(function(error) {
-			if (error.detail.error === 'invalid argument'
-				&& paramName !== 'text') {
-				self.session.capabilities.typeParameterCalledText = true;
-				paramName = 'text';
-				self._post(value, getPostData(value)).then(noop);
-			}
-			throw error;
-		});
+		// return this._post('value', getPostData(value)).then(noop).catch(function(error) {
+		// 	console.log(error.detail.error);
+		// 	console.log(paramName);
+		// 	if (error.detail.error === 'invalid argument'
+		// 		&& paramName !== 'text') {
+		// 		self.session.capabilities.typeParameterCalledText = true;
+		// 		paramName = 'text';
+		// 		console.log('I got here!')
+		// 		self._post(value, getPostData(value)).then(noop);
+		// 	}
+		// 	throw error;
+		// });
 	},
 
 	/**

@@ -676,18 +676,6 @@ Session.prototype = {
 	 * The value returned by the remote code. Only values that can be serialised to JSON, plus DOM elements, can be
 	 * returned.
 	 */
-	/*
-		var result = this._post(executeRoute, {
-			script: util.toExecuteString(script),
-			args: args || []
-		}).then(lang.partial(convertToElements, this), fixExecuteError)
-		.catch(function(error) {
-			console.log(error.name);
-			if (error.name === 'Unknown Command') {
-
-			}
-		});
-	 */
 
 	execute: function (script, args) {
 		// At least FirefoxDriver 2.40.0 will throw a confusing NullPointerException if args is not an array;
