@@ -313,20 +313,7 @@ Element.prototype = {
 		return  this.session.capabilities.typeParameterCalledText
 			? sendPostData('text')
 			: sendPostData('value');
-
-		// If the input isn't a filename, just post the value directly
-		// return this._post('value', getPostData(value)).then(noop).catch(function(error) {
-		// 	console.log(error.detail.error);
-		// 	console.log(paramName);
-		// 	if (error.detail.error === 'invalid argument'
-		// 		&& paramName !== 'text') {
-		// 		self.session.capabilities.typeParameterCalledText = true;
-		// 		paramName = 'text';
-		// 		console.log('I got here!')
-		// 		self._post(value, getPostData(value)).then(noop);
-		// 	}
-		// 	throw error;
-		// });
+		
 	},
 
 	/**
