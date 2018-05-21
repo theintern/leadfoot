@@ -257,18 +257,25 @@ Element.prototype = {
 	 * @returns {Promise.<void>}
 	 */
 	type: function (value) {
+		function arrayToText(array) {
+			var textValue = array;
+			while (Array.isArray(textValue)) {
+				textValue = array.join('');
+			}
+			return textValue;
+		}
 		function getPostData(arrayValue, paramName) {
 			var obj = {};
+			var valueData = arrayValue;
 			obj[paramName] = null;
 			if (self.session.capabilities.isWebDriver &&
-				!self.session.capabilities.typeParameterCalledText) {
-				obj[paramName] = arrayValue.join('').split('');
-			} else if (self.session.capabilities.typeParameterCalledText) {
-				if (Array.isArray(arrayValue)) {
-					arrayValue = arrayValue.join('');
-				}
+				!self.session.capabilities.valueParameterCalledText) {
+					valueData = arrayValue.join('').split('');
+					console.log(valueData);
+			} else if (self.session.capabilities.valueParameterCalledText) {
+				valueData = arrayToText(arrayValue);
 			}
-			obj[paramName] = arrayValue;
+			obj[paramName] = valueData;
 			return obj;
 		}
 
