@@ -263,7 +263,6 @@ Element.prototype = {
 			if (self.session.capabilities.isWebDriver &&
 				!self.session.capabilities.typeParameterCalledText) {
 				obj[paramName] = arrayValue.join('').split('');
-				return obj;
 			} else if (self.session.capabilities.typeParameterCalledText) {
 				if (Array.isArray(arrayValue)) {
 					arrayValue = arrayValue.join('');
@@ -274,7 +273,7 @@ Element.prototype = {
 		}
 
 		if (!Array.isArray(value) &&
-			!this.session.capabilities.typeParameterCalledText) {
+			!this.session.capabilities.valueParameterCalledText) {
 			value = [ value ];
 		}
 
@@ -301,15 +300,14 @@ Element.prototype = {
 			return self._post('value', getPostData(value, paramName)).then(noop).catch(function(error) {
 				if (error.detail.error === 'invalid argument'
 					&& paramName !== 'text') {
-					self.session.capabilities.typeParameterCalledText = true;
-					console.log(value);
+					self.session.capabilities.valueParameterCalledText = true;
 					return sendPostData('text');
 				}
 				throw error;
 			});
 		}
 
-		return  this.session.capabilities.typeParameterCalledText
+		return  this.session.capabilities.valueParameterCalledText
 			? sendPostData('text')
 			: sendPostData('value');
 

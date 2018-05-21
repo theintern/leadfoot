@@ -676,7 +676,6 @@ Session.prototype = {
 	 * The value returned by the remote code. Only values that can be serialised to JSON, plus DOM elements, can be
 	 * returned.
 	 */
-
 	execute: function (script, args) {
 		// At least FirefoxDriver 2.40.0 will throw a confusing NullPointerException if args is not an array;
 		// provide a friendlier error message to users that accidentally pass a non-array
@@ -685,7 +684,7 @@ Session.prototype = {
 		}
 		var self = this;
 
-		var result = this.capabilities.syncEndpoint
+		var result = this.capabilities.useExecuteSyncEndpoint
 			?  executeWithEndpoint('execute/sync')
 			: executeWithEndpoint('execute');
 
@@ -696,7 +695,7 @@ Session.prototype = {
 			}).then(lang.partial(convertToElements, self), fixExecuteError).catch(function(error) {
 				if (error.detail.error === 'unknown command'
 					&& endpoint !== 'execute/sync') {
-					self.capabilities.syncEndpoint = true;
+					self.capabilities.useExecuteSyncEndpoint = true;
 					return executeWithEndpoint('execute/sync');
 				}
 				throw error;
@@ -748,7 +747,7 @@ Session.prototype = {
 			throw new Error('Arguments passed to executeAsync must be an array');
 		}
 
-		return this._post('execute/async', {
+		return this._post('execute_async', {
 			script: util.toExecuteString(script),
 			args: args || []
 		}).then(lang.partial(convertToElements, this), fixExecuteError);

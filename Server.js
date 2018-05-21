@@ -417,11 +417,11 @@ Server.prototype = {
 
 		//WebDriver Spec now supports execute/sync as the synchronous execute endpoint.
 		// This was updated in geckodriver as of 16.0 but not yet completed in chromedriver.
-		capabilities.syncEndpoint = false;
+		capabilities.useExecuteSyncEndpoint = false;
 
 		//Webdriver spec now supoorts text as parameter to text() call for typing into elements.
 		//This was updated in geckodriver as of 16.0 but not yet implemented in chromedriver.
-		capabilities.typeParameterCalledText = false;
+		capabilities.valueParameterCalledText = false;
 
 		function supported() { return true; }
 		function unsupported() { return false; }
@@ -704,7 +704,6 @@ Server.prototype = {
 					fixedLogTypes: false,
 					brokenHtmlTagName: false,
 					brokenNullGetSpecAttribute: false,
-
 
 					// SafariDriver-specific
 					brokenActiveElement: true,
