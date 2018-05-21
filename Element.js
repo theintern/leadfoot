@@ -271,7 +271,6 @@ Element.prototype = {
 			if (self.session.capabilities.isWebDriver &&
 				!self.session.capabilities.valueParameterCalledText) {
 					valueData = arrayValue.join('').split('');
-					console.log(valueData);
 			} else if (self.session.capabilities.valueParameterCalledText) {
 				valueData = arrayToText(arrayValue);
 			}
