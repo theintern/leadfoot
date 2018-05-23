@@ -257,33 +257,31 @@ Element.prototype = {
 	 * @returns {Promise.<void>}
 	 */
 	type: function (value) {
+		console.log(value);
+
 		function arrayToText(array) {
 			var textValue = array;
 			while (Array.isArray(textValue)) {
-				textValue = array.join('');
-			}
-			return textValue;
-		}
-		function getPostData(arrayValue, paramName) {
-			var obj = {};
-			var valueData = arrayValue;
-			obj[paramName] = null;
+	            textValue = array.join('');
+	        }
+	        return textValue;
+	    }
+
+		function getPostData(arrayValue) {
 			if (self.session.capabilities.isWebDriver &&
 				!self.session.capabilities.valueParameterCalledText) {
-					valueData = arrayValue.join('').split('');
+				return { value: arrayValue.join('').split('') };
 			} else if (self.session.capabilities.valueParameterCalledText) {
-				valueData = arrayToText(arrayValue);
+				return { text : arrayToText(arrayValue)};
 			}
-			obj[paramName] = valueData;
-			return obj;
-		}
-
-		if (!Array.isArray(value) &&
-			!this.session.capabilities.valueParameterCalledText) {
-			value = [ value ];
+			return { value: arrayValue };
 		}
 
 		var self = this;
+
+		if (!Array.isArray(value)) {
+			value = [ value ];
+		}
 
 		if (this.session.capabilities.remoteFiles) {
 			var filename = value.join('');
@@ -302,21 +300,14 @@ Element.prototype = {
 			}
 		}
 
-		function sendPostData(paramName) {
-			return self._post('value', getPostData(value, paramName)).then(noop).catch(function(error) {
-				if (error.detail.error === 'invalid argument'
-					&& paramName !== 'text') {
-					self.session.capabilities.valueParameterCalledText = true;
-					return sendPostData('text');
-				}
-				throw error;
-			});
-		}
-
-		return  this.session.capabilities.valueParameterCalledText
-			? sendPostData('text')
-			: sendPostData('value');
-
+		// If the input isn't a filename, just post the value directly
+		return this._post('value', getPostData(value)).then(noop).catch(function(error){
+			console.log(error);
+			if(error.detail.error === 'invalid argument') {
+				self.session.capabilities.valueParameterCalledText = true;
+				self._post('value', getPostData(value).then(noop()));
+			}
+		});
 	},
 
 	/**
