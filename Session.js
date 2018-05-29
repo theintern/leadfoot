@@ -1410,6 +1410,7 @@ Session.prototype = {
 				self._post;
 			return activeFunc.call(this, 'element/active').then(function (element) {
 				if (element) {
+					console.log('there an element');
 					return new Element(element, self);
 				}
 				// The driver will return `null` if the active element is the body element; for consistency with how
@@ -1418,8 +1419,7 @@ Session.prototype = {
 					return getDocumentActiveElement();
 				}
 			}).catch(function(error) {
-				if (error.detail.error === 'unknown command' &&
-					!self.useGetForActiveElement) {
+				if (error.detail.error === 'unknown command') {
 					self.useGetForActiveElement = true;
 					return self._get('element/active').then(function(element) {
 						if (element) {
