@@ -1405,7 +1405,10 @@ Session.prototype = {
 			return getDocumentActiveElement();
 		}
 		else {
-			return this._post('element/active').then(function (element) {
+			var activeFunc = self.capabilities.useGetForActiveElement ?
+				self._get :
+				self._post;
+			return activeFunc.call(this, 'element/active').then(function (element) {
 				if (element) {
 					return new Element(element, self);
 				}
@@ -1413,6 +1416,23 @@ Session.prototype = {
 				// the DOM `document.activeElement` property works, we’ll diverge and always return an element
 				else {
 					return getDocumentActiveElement();
+				}
+			}).catch(function(error) {
+				if (error.detail.error === 'unknown command' &&
+					!self.useGetForActiveElement) {
+					self.useGetForActiveElement = true;
+					return self._get('element/active').then(function(element) {
+						if (element) {
+							return new Element(element, self);
+						}
+						// The driver will return `null` if the active element is the body
+						// element; for consistency with how
+						// the DOM `document.activeElement` property works,
+						// we’ll diverge and always return an element
+						else {
+							return getDocumentActiveElement();
+						}
+					});
 				}
 			});
 		}

@@ -302,7 +302,7 @@ Element.prototype = {
 		return this._post('value', getPostData(value)).then(noop).catch(function(error){
 			if(error.detail.error === 'invalid argument') {
 				self.session.capabilities.valueParameterCalledText = true;
-				self._post('value', getPostData(value).then(noop()));
+				self._post('value', getPostData(value)).then(noop);
 			}
 		});
 	},

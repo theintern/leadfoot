@@ -419,9 +419,12 @@ Server.prototype = {
 		// This was updated in geckodriver as of 16.0 but not yet completed in chromedriver.
 		capabilities.useExecuteSyncEndpoint = false;
 
-		//Webdriver spec now supoorts text as parameter to text() call for typing into elements.
-		//This was updated in geckodriver as of 16.0 but not yet implemented in chromedriver.
+
 		capabilities.valueParameterCalledText = false;
+
+		//Webdriver spec now supoorts GET endpoint for Active Element call.
+		//This was updated in geckodriver as of 16.0 but not yet implemented in chromedriver.//
+		capabilities.useGetForActiveElement = false;
 
 		function supported() { return true; }
 		function unsupported() { return false; }
