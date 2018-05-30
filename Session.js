@@ -682,11 +682,25 @@ Session.prototype = {
 		if (typeof args !== 'undefined' && !Array.isArray(args)) {
 			throw new Error('Arguments passed to execute must be an array');
 		}
+		var self = this;
 
-		var result = this._post('execute', {
-			script: util.toExecuteString(script),
-			args: args || []
-		}).then(lang.partial(convertToElements, this), fixExecuteError);
+		var result = this.capabilities.useExecuteSyncEndpoint
+			?  executeWithEndpoint('execute/sync')
+			: executeWithEndpoint('execute');
+
+		function executeWithEndpoint(endpoint) {
+			return self._post(endpoint, {
+				script: util.toExecuteString(script),
+				args: args || []
+			}).then(lang.partial(convertToElements, self), fixExecuteError).catch(function(error) {
+				if (error.detail.error === 'unknown command'
+					&& !self.capabilities.useExecuteSyncEndpoint) {
+					self.capabilities.useExecuteSyncEndpoint = true;
+					return executeWithEndpoint('execute/sync');
+				}
+				throw error;
+			});
+		}
 
 		if (this.capabilities.brokenExecuteUndefinedReturn) {
 			result = result.then(function (value) {
@@ -1391,7 +1405,10 @@ Session.prototype = {
 			return getDocumentActiveElement();
 		}
 		else {
-			return this._post('element/active').then(function (element) {
+			var activeFunc = this.capabilities.useGetForActiveElement ?
+				this._get :
+				this._post;
+			return activeFunc.call(this, 'element/active').then(function (element) {
 				if (element) {
 					return new Element(element, self);
 				}
@@ -1399,6 +1416,23 @@ Session.prototype = {
 				// the DOM `document.activeElement` property works, we’ll diverge and always return an element
 				else {
 					return getDocumentActiveElement();
+				}
+			}).catch(function(error) {
+				if (error.detail.error === 'unknown command' &&
+						!self.capabilities.useGetForActiveElement) {
+					self.useGetForActiveElement = true;
+					return self._get('element/active').then(function(element) {
+						if (element) {
+							return new Element(element, self);
+						}
+						// The driver will return `null` if the active element is the body
+						// element; for consistency with how
+						// the DOM `document.activeElement` property works,
+						// we’ll diverge and always return an element
+						else {
+							return getDocumentActiveElement();
+						}
+					});
 				}
 			});
 		}

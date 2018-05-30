@@ -257,9 +257,20 @@ Element.prototype = {
 	 * @returns {Promise.<void>}
 	 */
 	type: function (value) {
+		function arrayToText(array) {
+			var textValue = array;
+			while (Array.isArray(textValue)) {
+				textValue = array.join('');
+			}
+			return textValue;
+		}
+
 		function getPostData(arrayValue) {
-			if (self.session.capabilities.isWebDriver) {
+			if (self.session.capabilities.isWebDriver &&
+				!self.session.capabilities.valueParameterCalledText) {
 				return { value: arrayValue.join('').split('') };
+			} else if (self.session.capabilities.valueParameterCalledText) {
+				return { text : arrayToText(arrayValue)};
 			}
 			return { value: arrayValue };
 		}
@@ -288,7 +299,13 @@ Element.prototype = {
 		}
 
 		// If the input isn't a filename, just post the value directly
-		return this._post('value', getPostData(value)).then(noop);
+		return this._post('value', getPostData(value)).then(noop).catch(function(error){
+			if(error.detail.error === 'invalid argument' &&
+					!self.session.capabilities.valueParameterCalledText) {
+				self.session.capabilities.valueParameterCalledText = true;
+				self._post('value', getPostData(value)).then(noop);
+			}
+		});
 	},
 
 	/**
