@@ -694,7 +694,7 @@ Session.prototype = {
 				args: args || []
 			}).then(lang.partial(convertToElements, self), fixExecuteError).catch(function(error) {
 				if (error.detail.error === 'unknown command'
-					&& endpoint !== 'execute/sync') {
+					&& !self.capabilities.useExecuteSyncEndpoint) {
 					self.capabilities.useExecuteSyncEndpoint = true;
 					return executeWithEndpoint('execute/sync');
 				}
@@ -1405,12 +1405,11 @@ Session.prototype = {
 			return getDocumentActiveElement();
 		}
 		else {
-			var activeFunc = self.capabilities.useGetForActiveElement ?
-				self._get :
-				self._post;
+			var activeFunc = this.capabilities.useGetForActiveElement ?
+				this._get :
+				this._post;
 			return activeFunc.call(this, 'element/active').then(function (element) {
 				if (element) {
-					console.log('there an element');
 					return new Element(element, self);
 				}
 				// The driver will return `null` if the active element is the body element; for consistency with how
@@ -1419,7 +1418,8 @@ Session.prototype = {
 					return getDocumentActiveElement();
 				}
 			}).catch(function(error) {
-				if (error.detail.error === 'unknown command') {
+				if (error.detail.error === 'unknown command' &&
+						!self.capabilities.useGetForActiveElement) {
 					self.useGetForActiveElement = true;
 					return self._get('element/active').then(function(element) {
 						if (element) {

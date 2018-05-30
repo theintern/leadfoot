@@ -260,10 +260,10 @@ Element.prototype = {
 		function arrayToText(array) {
 			var textValue = array;
 			while (Array.isArray(textValue)) {
-	            textValue = array.join('');
-	        }
-	        return textValue;
-	    }
+				textValue = array.join('');
+			}
+			return textValue;
+		}
 
 		function getPostData(arrayValue) {
 			if (self.session.capabilities.isWebDriver &&
@@ -300,7 +300,8 @@ Element.prototype = {
 
 		// If the input isn't a filename, just post the value directly
 		return this._post('value', getPostData(value)).then(noop).catch(function(error){
-			if(error.detail.error === 'invalid argument') {
+			if(error.detail.error === 'invalid argument' &&
+					!self.session.capabilities.valueParameterCalledText) {
 				self.session.capabilities.valueParameterCalledText = true;
 				self._post('value', getPostData(value)).then(noop);
 			}

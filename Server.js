@@ -420,10 +420,13 @@ Server.prototype = {
 		capabilities.useExecuteSyncEndpoint = false;
 
 
+    //WebDriver Spec now supports [POST] /value  receiving a parameter named 'text' as a string instead of an
+		// array of charactrers named 'value'.
+    // This was updated in geckodriver as of 16.0 but not yet completed in chromedriver.
 		capabilities.valueParameterCalledText = false;
 
 		//Webdriver spec now supoorts GET endpoint for Active Element call.
-		//This was updated in geckodriver as of 16.0 but not yet implemented in chromedriver.//
+		//This was updated in geckodriver as of 16.0 but not yet implemented in chromedriver.
 		capabilities.useGetForActiveElement = false;
 
 		function supported() { return true; }
