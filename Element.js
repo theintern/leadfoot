@@ -273,6 +273,15 @@ Element.prototype = {
 			return { value: arrayValue };
 		}
 
+		function handleError(error) {
+			if (error.detail.error === 'invalid argument' &&
+					!self.session.capabilities.valueParameterCalledText) {
+				self.session.capabilities.valueParameterCalledText = true;
+				return self.type(value);
+			}
+			throw error;
+		}
+
 		var self = this;
 
 		if (!Array.isArray(value)) {
@@ -287,7 +296,7 @@ Element.prototype = {
 			try {
 				if (fs.statSync(filename).isFile()) {
 					return this.session._uploadFile(filename).then(function(uploadedFilename) {
-						return self._post('value', getPostData([ uploadedFilename ])).then(noop);
+						return self._post('value', getPostData([ uploadedFilename ])).then(noop).catch(handleError);
 					});
 				}
 			}
@@ -297,13 +306,7 @@ Element.prototype = {
 		}
 
 		// If the input isn't a filename, just post the value directly
-		return this._post('value', getPostData(value)).then(noop).catch(function(error){
-			if (error.detail.error === 'invalid argument' &&
-					!self.session.capabilities.valueParameterCalledText) {
-				self.session.capabilities.valueParameterCalledText = true;
-				return self.type(value);
-			}
-		});
+		return this._post('value', getPostData(value)).then(noop).catch(handleError);
 	},
 
 	/**
