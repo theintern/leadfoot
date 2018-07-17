@@ -415,6 +415,12 @@ Server.prototype = {
 			capabilities.browserVersion = capabilities.version;
 		}
 
+		// WebDriver Spec now supports [POST] /value  receiving a
+		// parameter named 'text' as a string instead of an array of
+		// charactrers named 'value'. This was updated in geckodriver as
+		// of 16.0 but not yet completed in chromedriver.
+		capabilities.valueParameterCalledText = false;
+
 		function supported() { return true; }
 		function unsupported() { return false; }
 		function maybeSupported(error) {

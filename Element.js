@@ -258,8 +258,17 @@ Element.prototype = {
 	 */
 	type: function (value) {
 		function getPostData(arrayValue) {
-			if (self.session.capabilities.isWebDriver) {
-				return { value: arrayValue.join('').split('') };
+			var capabilities = self.session.capabilities;
+			if (capabilities.isWebDriver || capabilities.valueParameterCalledText) {
+				if (capabilities.valueParameterCalledText) {
+					// The WebDriver version of `/value` requires the value
+					// property to be named `text` and to contain a string.
+					return { text: arrayValue.join('') };
+				} else {
+					// Browsers that support WebDriver but use the `value`
+					// property require it to be a flat array of characters.
+					return { value: arrayValue.join('').split('') };
+				}
 			}
 			return { value: arrayValue };
 		}
@@ -288,7 +297,13 @@ Element.prototype = {
 		}
 
 		// If the input isn't a filename, just post the value directly
-		return this._post('value', getPostData(value)).then(noop);
+		return this._post('value', getPostData(value)).then(noop).catch(function(error){
+			if (error.detail.error === 'invalid argument' &&
+					!self.session.capabilities.valueParameterCalledText) {
+				self.session.capabilities.valueParameterCalledText = true;
+				return self.type(value);
+			}
+		});
 	},
 
 	/**
