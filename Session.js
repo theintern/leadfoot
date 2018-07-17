@@ -1391,7 +1391,10 @@ Session.prototype = {
 			return getDocumentActiveElement();
 		}
 		else {
-			return this._post('element/active').then(function (element) {
+			var activeFunc = this.capabilities.useGetForActiveElement ?
+				this._get :
+				this._post;
+			return activeFunc.call(this, 'element/active').then(function (element) {
 				if (element) {
 					return new Element(element, self);
 				}
@@ -1400,6 +1403,13 @@ Session.prototype = {
 				else {
 					return getDocumentActiveElement();
 				}
+			}).catch(function(error) {
+				if (error.detail.error === 'unknown command' &&
+						!self.capabilities.useGetForActiveElement) {
+					self.capabilities.useGetForActiveElement = true;
+					return self.getActiveElement();
+				}
+				throw error;
 			});
 		}
 	}, { createsContext: true }),
