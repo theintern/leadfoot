@@ -415,6 +415,11 @@ Server.prototype = {
 			capabilities.browserVersion = capabilities.version;
 		}
 
+		// WebDriver Spec now supports execute/sync as the synchronous
+		// execute endpoint. This was updated in geckodriver as of 16.0
+		// but not yet completed in chromedriver.
+		capabilities.useExecuteSyncEndpoint = false;
+
 		// WebDriver Spec now supports [POST] /value  receiving a
 		// parameter named 'text' as a string instead of an array of
 		// charactrers named 'value'. This was updated in geckodriver as

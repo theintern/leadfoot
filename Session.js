@@ -683,10 +683,19 @@ Session.prototype = {
 			throw new Error('Arguments passed to execute must be an array');
 		}
 
-		var result = this._post('execute', {
+		var self = this;
+		var route = this.capabilities.useExecuteSyncEndpoint ? 'execute/sync' : 'execute';
+		var result = this._post(route, {
 			script: util.toExecuteString(script),
 			args: args || []
-		}).then(lang.partial(convertToElements, this), fixExecuteError);
+		}).then(lang.partial(convertToElements, this), fixExecuteError).catch(function (error) {
+			if (error.detail.error === 'unknown command'
+					&& !self.capabilities.useExecuteSyncEndpoint) {
+				self.capabilities.useExecuteSyncEndpoint = true;
+				return self.execute(script, args);
+			}
+			throw error;
+		});
 
 		if (this.capabilities.brokenExecuteUndefinedReturn) {
 			result = result.then(function (value) {
