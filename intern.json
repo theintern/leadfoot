@@ -66,7 +66,7 @@
   "node": {
     "reporters": {
       "name": "runner",
-      "options": { "hideSkipped": true, "hidePassed": true }
+      "options": { "hideSkipped": true, "hidePassed": false }
     },
     "suites": "_build/tests/unit/lib/util.js"
   },
