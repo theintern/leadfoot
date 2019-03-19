@@ -748,6 +748,14 @@ export default class Server {
         0,
         9
       );
+
+      // The IEDriverServer.exe switched from JWP to W3C (in 3.12).  In the
+      // W3C version, the object returned by the "/session" command contains
+      // value.capabilities rather than the value object being the capabilities
+      // object and the capabilities object contains an "se:ieOptions" property.
+      if (capabilities['se:ieOptions']) {
+        updates.usesWebDriverExecuteSync = true;
+      }
     }
 
     // Don't check for touch support if the environment reports that no
