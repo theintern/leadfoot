@@ -1554,7 +1554,7 @@ export default class Command<T, P = any>
    * the usual XML/HTML whitespace normalisation rules.
    */
   getVisibleText() {
-    return this._callElementMethod<string>('getVisibleText');
+    return this._callElementMethod<StringResult<T>>('getVisibleText');
   }
 
   /**
@@ -1582,7 +1582,7 @@ export default class Command<T, P = any>
    * always lowercase.
    */
   getTagName() {
-    return this._callElementMethod<string>('getTagName');
+    return this._callElementMethod<StringResult<T>>('getTagName');
   }
 
   /**
@@ -1644,7 +1644,7 @@ export default class Command<T, P = any>
    * property or attribute exists.
    */
   getSpecAttribute(name: string) {
-    return this._callElementMethod<string>('getSpecAttribute', name);
+    return this._callElementMethod<StringResult<T>>('getSpecAttribute', name);
   }
 
   /**
@@ -1721,7 +1721,10 @@ export default class Command<T, P = any>
    * hyphenated, *not* camel-case.
    */
   getComputedStyle(propertyName: string) {
-    return this._callElementMethod<string>('getComputedStyle', propertyName);
+    return this._callElementMethod<StringResult<T>>(
+      'getComputedStyle',
+      propertyName
+    );
   }
 }
 
@@ -1769,3 +1772,5 @@ if (chaiAsPromised) {
 function getParent(value: any): Command<any> | Session | undefined {
   return value && value.parent;
 }
+
+type StringResult<E> = E extends Element[] ? string[] : string;
