@@ -1656,8 +1656,8 @@ export default class Command<T, P = any>
    * @returns The value of the attribute, or `null` if no such attribute
    * exists.
    */
-  getAttribute<T = any>(name: string) {
-    return this._callElementMethod<T>('getAttribute', name);
+  getAttribute(name: string) {
+    return this._callElementMethod<StringResult<T>>('getAttribute', name);
   }
 
   /**
