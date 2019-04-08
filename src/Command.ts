@@ -157,8 +157,12 @@ import { LogEntry, Geolocation, WebDriverCookie } from './interfaces';
  * from a callback or command initialiser will deadlock the Command, as it
  * waits for itself to settle before settling.
  */
-export default class Command<T, P = any>
-  extends Locator<Command<Element>, Command<Element[]>, Command<void>>
+export default class Command<T, P = any, StringResult = string>
+  extends Locator<
+    Command<Element, P, string>,
+    Command<Element[], P, string[]>,
+    Command<void, P, string>
+  >
   implements PromiseLike<T> {
   /**
    * Augments `target` with a conversion of the `originalFn` method that
@@ -181,8 +185,8 @@ export default class Command<T, P = any>
    * @param {string} key
    * @param {Function} originalFn
    */
-  static addSessionMethod<U>(
-    target: Command<U>,
+  static addSessionMethod<U, P, S>(
+    target: Command<U, P, S>,
     key: string,
     originalFn: Function
   ) {
@@ -190,6 +194,7 @@ export default class Command<T, P = any>
     // otherwise it would need to exist in both the Command constructor
     // (for copying functions from sessions) as well as the Command factory
     // below
+    // this
     if (
       key.charAt(0) !== '_' &&
       !(<any>target)[key] &&
@@ -198,7 +203,7 @@ export default class Command<T, P = any>
       (<any>target)[key] = function(
         this: Command<U>,
         ...args: any[]
-      ): Command<U> {
+      ): Command<U, P, S> {
         return new (this.constructor as typeof Command)<U>(this, function(
           this,
           setContext: SetContextMethod
@@ -267,7 +272,7 @@ export default class Command<T, P = any>
    * @param {module:leadfoot/Command} target
    * @param {string} key
    */
-  static addElementMethod<T>(target: Command<T>, key: string) {
+  static addElementMethod<T, P, S>(target: Command<T, P, S>, key: string) {
     const anyTarget = <any>target;
     if (key.charAt(0) !== '_') {
       // some methods, like `click`, exist on both Session and Element;
@@ -275,10 +280,10 @@ export default class Command<T, P = any>
       // 'Element'
       const targetKey = key + (anyTarget[key] ? 'Element' : '');
       anyTarget[targetKey] = function(
-        this: Command<T>,
+        this: Command<T, any, S>,
         ...args: any[]
-      ): Command<T> {
-        return new (this.constructor as typeof Command)(this, function(
+      ): Command<T, P, S> {
+        return new (this.constructor as typeof Command)<T>(this, function(
           setContext: SetContextMethod
         ) {
           const parentContext = this._context;
@@ -308,7 +313,7 @@ export default class Command<T, P = any>
     }
   }
 
-  private _parent: Command<P> | undefined;
+  private _parent: Command<P, any, StringResult> | undefined;
   private _session: Session;
   private _context!: Context;
   private _task: CancellablePromise<any>;
@@ -331,7 +336,7 @@ export default class Command<T, P = any>
    */
   // TODO: Need to show that parent is mixed into this Command
   constructor(
-    parentOrSession: Session | Command<P> | null,
+    parentOrSession: Session | Command<P, any, StringResult> | null,
     initialiser?: (
       this: Command<T>,
       setContext: SetContextMethod,
@@ -358,7 +363,7 @@ export default class Command<T, P = any>
         context = contextValue;
       }
 
-      const parent = <Command<P>>parentOrSession;
+      const parent = <Command<P, any, StringResult>>parentOrSession;
 
       // If the context being set has depth, then it is coming from
       // `Command#end`, or someone smart knows what they are doing; do
@@ -400,7 +405,7 @@ export default class Command<T, P = any>
     Error.captureStackTrace(trace, Command);
 
     // parentCommand will be null if parentOrSession was a session
-    let parentCommand = <Command<P>>parentOrSession;
+    let parentCommand = <Command<P, any, StringResult>>parentOrSession;
     this._task = (parentCommand
       ? parentCommand.promise
       : Task.resolve(undefined)
@@ -479,7 +484,7 @@ export default class Command<T, P = any>
    *
    * @param ms Time to delay, in milliseconds.
    */
-  sleep(ms: number): Command<void> {
+  sleep(ms: number): Command<void, P, StringResult> {
     return new (this.constructor as typeof Command)<void>(this, function() {
       return sleep(ms);
     });
@@ -505,7 +510,7 @@ export default class Command<T, P = any>
    * @param numCommandsToPop The number of element contexts to pop. Defaults
    * to 1.
    */
-  end(numCommandsToPop: number = 1): Command<void> {
+  end(numCommandsToPop: number = 1): Command<void, P, StringResult> {
     return new (this.constructor as typeof Command)<void>(this, function(
       setContext: Function
     ) {
@@ -557,7 +562,7 @@ export default class Command<T, P = any>
       | ((this: Command<T>, error: any) => R | PromiseLike<R>)
       | null
       | undefined
-  ): Command<U | R> {
+  ): Command<U | R, P, StringResult> {
     function runCallback(
       command: Command<U>,
       callback:
@@ -656,18 +661,18 @@ export default class Command<T, P = any>
     method: 'find' | 'findDisplayed',
     strategy: Strategy,
     value: string
-  ): Command<Element>;
+  ): Command<Element, P, string>;
   private _callFindElementMethod(
     method: 'findAll',
     strategy: Strategy,
     value: string
-  ): Command<Element[]>;
+  ): Command<Element[], P, string[]>;
   private _callFindElementMethod(
     method: 'find' | 'findAll' | 'findDisplayed',
     strategy: Strategy,
     value: string
-  ): Command<Element | Element[]> {
-    return new (this.constructor as typeof Command)(this, function(
+  ): Command<Element, P, string> | Command<Element[], P, string[]> {
+    return new (this.constructor as typeof Command)<any>(this, function(
       setContext: SetContextMethod
     ) {
       const parentContext = this._context;
@@ -699,7 +704,7 @@ export default class Command<T, P = any>
   private _callElementMethod<U>(
     method: keyof Element,
     ...args: any[]
-  ): Command<U> {
+  ): Command<U, P, StringResult> {
     return new (this.constructor as typeof Command)<U>(this, function(
       setContext: SetContextMethod
     ) {
@@ -729,7 +734,7 @@ export default class Command<T, P = any>
   private _callSessionMethod<U>(
     method: keyof Session,
     ...args: any[]
-  ): Command<U> {
+  ): Command<U, P, StringResult> {
     return new (this.constructor as typeof Command)<U>(this, function(
       setContext: SetContextMethod
     ) {
@@ -1020,12 +1025,12 @@ export default class Command<T, P = any>
    *
    * @param height The new height of the window, in CSS pixels.
    */
-  setWindowSize(width: number, height: number): Command<void>;
+  setWindowSize(width: number, height: number): Command<void, P, StringResult>;
   setWindowSize(
     windowHandle: string,
     width: number,
     height: number
-  ): Command<void>;
+  ): Command<void, P, StringResult>;
   setWindowSize(...args: any[]) {
     return this._callSessionMethod<void>('setWindowSize', ...args);
   }
@@ -1061,8 +1066,12 @@ export default class Command<T, P = any>
    * @param y The screen y-coordinate to move to, in CSS pixels, relative to
    * the top edge of the primary monitor.
    */
-  setWindowPosition(x: number, y: number): Command<void>;
-  setWindowPosition(windowHandle: string, x: number, y: number): Command<void>;
+  setWindowPosition(x: number, y: number): Command<void, P, StringResult>;
+  setWindowPosition(
+    windowHandle: string,
+    x: number,
+    y: number
+  ): Command<void, P, StringResult>;
   setWindowPosition(...args: any[]) {
     return this._callSessionMethod<void>('setWindowPosition', ...args);
   }
@@ -1244,8 +1253,11 @@ export default class Command<T, P = any>
     element?: Element,
     xOffset?: number,
     yOffset?: number
-  ): Command<void>;
-  moveMouseTo(xOffset?: number, yOffset?: number): Command<void>;
+  ): Command<void, P, StringResult>;
+  moveMouseTo(
+    xOffset?: number,
+    yOffset?: number
+  ): Command<void, P, StringResult>;
   moveMouseTo(...args: any[]) {
     return this._callSessionMethod<void>('moveMouseTo', ...args);
   }
@@ -1351,12 +1363,12 @@ export default class Command<T, P = any>
    * element, in CSS pixels. If no element is specified, the offset is
    * relative to the previous scroll position of the window.
    */
-  touchScroll(xOffset: number, yOffset: number): Command<void>;
+  touchScroll(xOffset: number, yOffset: number): Command<void, P, StringResult>;
   touchScroll(
     element?: Element,
     xOffset?: number,
     yOffset?: number
-  ): Command<void>;
+  ): Command<void, P, StringResult>;
   touchScroll(...args: any[]) {
     return this._callSessionMethod<void>('touchScroll', ...args);
   }
@@ -1396,8 +1408,12 @@ export default class Command<T, P = any>
     xOffset: number,
     yOffset: number,
     speed?: number
-  ): Command<void>;
-  flickFinger(xOffset: number, yOffset: number, speed?: number): Command<void>;
+  ): Command<void, P, StringResult>;
+  flickFinger(
+    xOffset: number,
+    yOffset: number,
+    speed?: number
+  ): Command<void, P, StringResult>;
   flickFinger(...args: any[]) {
     return this._callSessionMethod<void>('flickFinger', ...args);
   }
@@ -1554,7 +1570,7 @@ export default class Command<T, P = any>
    * the usual XML/HTML whitespace normalisation rules.
    */
   getVisibleText() {
-    return this._callElementMethod<StringResult<T>>('getVisibleText');
+    return this._callElementMethod<StringResult>('getVisibleText');
   }
 
   /**
@@ -1582,7 +1598,7 @@ export default class Command<T, P = any>
    * always lowercase.
    */
   getTagName() {
-    return this._callElementMethod<StringResult<T>>('getTagName');
+    return this._callElementMethod<StringResult>('getTagName');
   }
 
   /**
@@ -1644,7 +1660,7 @@ export default class Command<T, P = any>
    * property or attribute exists.
    */
   getSpecAttribute(name: string) {
-    return this._callElementMethod<StringResult<T>>('getSpecAttribute', name);
+    return this._callElementMethod<StringResult>('getSpecAttribute', name);
   }
 
   /**
@@ -1656,7 +1672,7 @@ export default class Command<T, P = any>
    * @returns The value of the attribute, or `null` if no such attribute
    * exists.
    */
-  getAttribute<S = StringResult<T>>(name: string) {
+  getAttribute<S = StringResult>(name: string) {
     return this._callElementMethod<S>('getAttribute', name);
   }
 
@@ -1721,7 +1737,7 @@ export default class Command<T, P = any>
    * hyphenated, *not* camel-case.
    */
   getComputedStyle(propertyName: string) {
-    return this._callElementMethod<StringResult<T>>(
+    return this._callElementMethod<StringResult>(
       'getComputedStyle',
       propertyName
     );
@@ -1772,5 +1788,3 @@ if (chaiAsPromised) {
 function getParent(value: any): Command<any> | Session | undefined {
   return value && value.parent;
 }
-
-type StringResult<E> = E extends Element[] ? string[] : string;
