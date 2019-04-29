@@ -161,7 +161,7 @@ export default class Command<T, P = any, StringResult = string>
   extends Locator<
     Command<Element, P, string>,
     Command<Element[], P, string[]>,
-    Command<void, P, string>
+    Command<void, P, StringResult>
   >
   implements PromiseLike<T> {
   /**

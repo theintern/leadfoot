@@ -10054,8 +10054,8 @@
 											"name": "P"
 										},
 										{
-											"type": "intrinsic",
-											"name": "string"
+											"type": "typeParameter",
+											"name": "StringResult"
 										}
 									]
 								}
