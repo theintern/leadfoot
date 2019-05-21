@@ -57,7 +57,17 @@
     },
 
     "wd": {
-      "environments": ["node", "chrome"]
+      "environments": ["node", "chrome"],
+      "tunnelOptions": {
+        "drivers": [{ "name": "chrome", "version": "74.0.3729.6" }]
+      }
+    },
+
+    "firefox": {
+      "environments": "firefox",
+      "tunnelOptions": {
+        "drivers": ["firefox"]
+      }
     }
   },
 
