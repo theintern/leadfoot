@@ -1730,6 +1730,10 @@ registerSuite('Session', () => {
           this.skip('mouse not enabled');
         }
 
+        if (session.capabilities.usesWebDriverMoveBase) {
+          this.skip('webdriver movement not supported');
+        }
+
         return session
           .get('tests/functional/data/pointer.html')
           .then(function() {
