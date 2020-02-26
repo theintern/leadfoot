@@ -1152,7 +1152,7 @@ registerSuite('Session', () => {
                   assert.operator(
                     Date.now() - startTime,
                     '>=',
-                    2000,
+                    1950,
                     'Driver should wait for implicit timeout before continuing'
                   );
                 }
