@@ -637,6 +637,8 @@ export default class Server {
             // Sessions for Safari 13 on BrowserStack can become unresponsive
             // when the `buttonup` call is used
             brokenMouseEvents: true,
+            // Simulated events in Safari 13 do not change select values
+            brokenOptionSelect: true,
             // Trying to close a window in Safari 13 will cause Safari to exit
             brokenWindowClose: true
           });
