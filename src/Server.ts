@@ -628,6 +628,19 @@ export default class Server {
             brokenDeleteWindow: true
           });
         }
+
+        if (isValidVersion(capabilities, 13)) {
+          Object.assign(updates, {
+            // Safari 13 clicks the wrong location when clicking an element
+            // See https://github.com/SeleniumHQ/selenium/issues/7649
+            brokenClick: true,
+            // Sessions for Safari 13 on BrowserStack can become unresponsive
+            // when the `buttonup` call is used
+            brokenMouseEvents: true,
+            // Trying to close a window in Safari 13 will cause Safari to exit
+            brokenWindowClose: true
+          });
+        }
       }
 
       // At least ios-driver 0.6.6-SNAPSHOT April 2014 corrupts its
@@ -1525,26 +1538,26 @@ export default class Server {
 
       // At least Chrome on Mac doesn't properly maximize. See
       // https://bugs.chromium.org/p/chromedriver/issues/detail?id=985
-      if (capabilities.brokenWindowMaximize == null) {
-        testedCapabilities.brokenWindowMaximize = () => {
-          let originalSize: { width: number; height: number };
-          return session
-            .getWindowSize()
-            .then(size => {
-              originalSize = size;
-              return session.setWindowSize(size.width - 10, size.height - 10);
-            })
-            .then(() => session.maximizeWindow())
-            .then(() => session.getWindowSize())
-            .then(size => {
-              return (
-                size.width > originalSize.width &&
-                size.height > originalSize.height
-              );
-            })
-            .catch(broken);
-        };
-      }
+      // if (capabilities.brokenWindowMaximize == null) {
+      //   testedCapabilities.brokenWindowMaximize = () => {
+      //     let originalSize: { width: number; height: number };
+      //     return session
+      //       .getWindowSize()
+      //       .then(size => {
+      //         originalSize = size;
+      //         return session.setWindowSize(size.width - 10, size.height - 10);
+      //       })
+      //       .then(() => session.maximizeWindow())
+      //       .then(() => session.getWindowSize())
+      //       .then(size => {
+      //         return (
+      //           size.width > originalSize.width &&
+      //           size.height > originalSize.height
+      //         );
+      //       })
+      //       .catch(broken);
+      //   };
+      // }
 
       // At least Selendroid 0.9.0 has a bug where it catastrophically
       // fails to retrieve available types; they have tried to hardcode
