@@ -1604,6 +1604,11 @@ export default class Server {
             .then(works, broken);
       }
 
+      if (capabilities.brokenParentFrameSwitch == null) {
+        testedCapabilities.brokenParentFrameSwitch = () =>
+          session.serverPost('frame/parent').then(works, broken);
+      }
+
       // This URL is used by several tests below
       const scrollTestUrl =
         '<!DOCTYPE html><div id="a" style="margin: 3000px;"></div>';
