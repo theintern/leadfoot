@@ -629,7 +629,7 @@ export default class Server {
           });
         }
 
-        if (isValidVersion(capabilities, 13)) {
+        if (isValidVersion(capabilities, 13, Infinity)) {
           Object.assign(updates, {
             // Safari 13 clicks the wrong location when clicking an element
             // See https://github.com/SeleniumHQ/selenium/issues/7649
