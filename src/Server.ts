@@ -219,8 +219,6 @@ export default class Server {
           // http://code.google.com/p/selenium/wiki/JsonWireProtocol#Response_Status_Codes
           if (!data) {
             data = {
-              status:
-                response.status === 404 || response.status === 501 ? 9 : 13,
               value: {
                 message: responseData.data
               }
@@ -239,6 +237,12 @@ export default class Server {
                   : 13,
               value: data
             };
+          }
+
+          // At least BrowserStack in December 2020 returns response data with a value but no status
+          if (!data.status) {
+            data.status =
+              response.status === 404 || response.status === 501 ? 9 : 13;
           }
 
           // At least InternetExplorerDriver 3.141.59 includes `status` and
