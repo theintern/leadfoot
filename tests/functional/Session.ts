@@ -1738,7 +1738,7 @@ registerSuite('Session', () => {
         return session
           .get('tests/functional/data/pointer.html')
           .then(function() {
-            return session.moveMouseTo(100, 12);
+            return session.moveMouseTo(110, 12);
           })
           .then(function() {
             return session.execute(
@@ -1747,7 +1747,7 @@ registerSuite('Session', () => {
           })
           .then(function(event: MouseEvent) {
             assert.isObject(event);
-            assert.strictEqual(event.clientX, 100);
+            assert.strictEqual(event.clientX, 110);
             assert.strictEqual(event.clientY, 12);
             return session.moveMouseTo(100, 41);
           })
@@ -1758,7 +1758,7 @@ registerSuite('Session', () => {
           })
           .then(function(event: MouseEvent) {
             assert.isObject(event);
-            assert.strictEqual(event.clientX, 200);
+            assert.strictEqual(event.clientX, 210);
             assert.strictEqual(event.clientY, 53);
             return session.findById('c');
           })
