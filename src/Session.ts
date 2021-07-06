@@ -591,7 +591,11 @@ export default class Session extends Locator<
     return this.serverPost<void>('frame', { id: id }).catch(error => {
       if (
         this.capabilities.usesWebDriverFrameId == null &&
-        (error.name === 'NoSuchFrame' ||
+        (error.name === 'InvalidArgument' ||
+          // An earlier version of the W3C spec said to return a NoSuchFrame
+          // error for invalid IDs, and at least chromedriver in Jan 2019 used
+          // this behavior.
+          error.name === 'NoSuchFrame' ||
           // At least geckodriver 0.24.0 throws an Unknown Command error
           // with a message about an invalid tag name rather than a NoSuchFrame error
           // (see https://github.com/mozilla/geckodriver/issues/1456)
@@ -1538,11 +1542,9 @@ export default class Session extends Locator<
             });
         });
       } else {
-        return this.execute<Element>('return document.documentElement;').then(
-          element => {
-            return this.moveMouseTo(element, xOffset, yOffset);
-          }
-        );
+        return this.execute<Element>('return document.body;').then(element => {
+          return this.moveMouseTo(element, xOffset, yOffset);
+        });
       }
     }
 

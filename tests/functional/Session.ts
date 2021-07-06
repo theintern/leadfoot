@@ -3,6 +3,7 @@ import { strategies } from '../../src/lib/Locator';
 import Element from '../../src/Element';
 import { WebDriverCookie, Geolocation } from '../../src/interfaces';
 import Session from '../../src/Session';
+import { isInternetExplorer } from '../../src/Server';
 import { Task } from '@theintern/common';
 import Test, { TestFunction } from 'intern/lib/Test';
 import Suite from 'intern/lib/Suite';
@@ -228,10 +229,11 @@ registerSuite('Session', () => {
 
       '#getTimeout implicit'() {
         return session.getTimeout('implicit').then(function(value: number) {
+          const expected = session.capabilities.brokenZeroTimeout ? 1 : 0;
           assert.strictEqual(
             value,
             // set to 0 in beforeEach
-            0,
+            expected,
             'Implicit timeout should be default value'
           );
         });
@@ -1152,7 +1154,7 @@ registerSuite('Session', () => {
                   assert.operator(
                     Date.now() - startTime,
                     '>=',
-                    2000,
+                    1950,
                     'Driver should wait for implicit timeout before continuing'
                   );
                 }
@@ -1730,6 +1732,10 @@ registerSuite('Session', () => {
           this.skip('mouse not enabled');
         }
 
+        if (session.capabilities.usesWebDriverMoveBase) {
+          this.skip('webdriver movement not supported');
+        }
+
         return session
           .get('tests/functional/data/pointer.html')
           .then(function() {
@@ -1742,8 +1748,19 @@ registerSuite('Session', () => {
           })
           .then(function(event: MouseEvent) {
             assert.isObject(event);
-            assert.strictEqual(event.clientX, 100);
-            assert.strictEqual(event.clientY, 12);
+
+            if (isInternetExplorer(session.capabilities)) {
+              assert.closeTo(event.clientX, 100, 10);
+            } else {
+              assert.strictEqual(event.clientX, 100);
+            }
+
+            if (isInternetExplorer(session.capabilities)) {
+              assert.closeTo(event.clientY, 12, 10);
+            } else {
+              assert.strictEqual(event.clientY, 12);
+            }
+
             return session.moveMouseTo(100, 41);
           })
           .then(function() {

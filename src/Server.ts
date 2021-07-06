@@ -219,8 +219,6 @@ export default class Server {
           // http://code.google.com/p/selenium/wiki/JsonWireProtocol#Response_Status_Codes
           if (!data) {
             data = {
-              status:
-                response.status === 404 || response.status === 501 ? 9 : 13,
               value: {
                 message: responseData.data
               }
@@ -239,6 +237,12 @@ export default class Server {
                   : 13,
               value: data
             };
+          }
+
+          // At least BrowserStack in December 2020 returns response data with a value but no status
+          if (!data.status) {
+            data.status =
+              response.status === 404 || response.status === 501 ? 9 : 13;
           }
 
           // At least InternetExplorerDriver 3.141.59 includes `status` and
@@ -264,6 +268,19 @@ export default class Server {
           // UnknownCommand, so we make the appropriate coercion here
           if (
             response.status === 500 &&
+            data.value &&
+            data.value.message === 'Invalid Command'
+          ) {
+            data.status = 9;
+          }
+
+          // At least BrowserStack in Aug 2020 responds with HTTP 422
+          // and a message value of "Invalid Command" for at least
+          // some unknown commands. These errors are more properly
+          // represented to end-users using the Selenium status
+          // UnknownCommand, so we make the appropriate coercion here
+          if (
+            response.status === 422 &&
             data.value &&
             data.value.message === 'Invalid Command'
           ) {
@@ -628,6 +645,21 @@ export default class Server {
             brokenDeleteWindow: true
           });
         }
+
+        if (isValidVersion(capabilities, 13, Infinity)) {
+          Object.assign(updates, {
+            // Safari 13 clicks the wrong location when clicking an element
+            // See https://github.com/SeleniumHQ/selenium/issues/7649
+            brokenClick: true,
+            // Sessions for Safari 13 on BrowserStack can become unresponsive
+            // when the `buttonup` call is used
+            brokenMouseEvents: true,
+            // Simulated events in Safari 13 do not change select values
+            brokenOptionSelect: true,
+            // Trying to close a window in Safari 13 will cause Safari to exit
+            brokenWindowClose: true
+          });
+        }
       }
 
       // At least ios-driver 0.6.6-SNAPSHOT April 2014 corrupts its
@@ -745,6 +777,9 @@ export default class Server {
     }
 
     if (isInternetExplorer(capabilities)) {
+      // Internet Explorer does not allow data URIs to be used for navigation
+      updates.supportsNavigationDataUris = false;
+
       if (isValidVersion(capabilities, 10, Infinity)) {
         // At least IE10+ don't support the /frame/parent command
         updates.brokenParentFrameSwitch = true;
@@ -769,6 +804,14 @@ export default class Server {
         // At least IE11 will hang during this check, although option
         // selection does work with it
         updates.brokenOptionSelect = false;
+
+        // At least IE11 will fail this feature test because it only supports
+        // the POST endpoint for timeouts
+        updates.supportsGetTimeouts = false;
+
+        // At least IE11 will fail this feature test because it only supports
+        // the POST endpoint for timeouts
+        updates.brokenZeroTimeout = true;
       }
 
       // It is not possible to test this since the feature tests runs in
@@ -788,10 +831,8 @@ export default class Server {
     }
 
     // Don't check for touch support if the environment reports that no
-    // touchscreen is available. Also, ChromeDriver
-    // 2.19 claims that it supports touch but it does not implement all of
-    //   the touch endpoints from JsonWireProtocol
-    if (capabilities.hasTouchScreen === false || isChrome(capabilities)) {
+    // touchscreen is available.
+    if (capabilities.hasTouchScreen === false) {
       updates.touchEnabled = false;
     }
 
@@ -835,6 +876,11 @@ export default class Server {
       if (/The command .* not found/.test(error.message)) {
         return false;
       }
+      // At least Firefox 73 returns an error with the message "HTTP method not
+      // allowed" when POSTing to touch endpoints
+      if (/HTTP method not allowed/.test(error.message)) {
+        return false;
+      }
       return true;
     };
     const broken = supported;
@@ -870,14 +916,13 @@ export default class Server {
         );
       }
 
-      // Internet Explorer 9 and earlier, and Microsoft Edge build 10240
-      // and earlier, hang when attempting to do navigate after a
-      // `document.write` is performed to reset the tab content; we can
-      // still do some limited testing in these browsers by using the
-      // initial browser URL page and injecting some content through
-      // innerHTML, though it is unfortunately a quirks-mode file so
-      // testing is limited
-      if (isInternetExplorer(capabilities, 0, 10) || isMsEdge(capabilities)) {
+      // Internet Explorer and Microsoft Edge build 10240 and earlier hang when
+      // attempting to do navigate after a `document.write` is performed to
+      // reset the tab content; we can still do some limited testing in these
+      // browsers by using the initial browser URL page and injecting some
+      // content through innerHTML, though it is unfortunately a quirks-mode
+      // file so testing is limited
+      if (isInternetExplorer(capabilities) || isMsEdge(capabilities)) {
         // Edge driver doesn't provide an initialBrowserUrl
         let initialUrl = 'about:blank';
 
@@ -957,12 +1002,21 @@ export default class Server {
               // Try to set a timeout using W3C semantics
               .serverPost<void>('timeouts', { implicit: 1234 })
               .then(() => {
-                // Verify that the timeout was set
+                // At least IE 11 on BrowserStack doesn't support GET for
+                // timeouts. If we got here, though, the driver supports setting
+                // W3C timeouts.
+                if (isInternetExplorer(capabilities)) {
+                  return supported();
+                }
+
+                // Verify that the timeout was set; at least Firefox 77 with
+                // geckodriver 0.26 on BrowserStack will allow some properties
+                // to be set using W3C-style data, but will fail to set the
+                // `implicit` timeout this way. Note that IE11 doesn't support
+                // GET for timeouts, so will always fail this test.
                 return session
                   .serverGet<WebDriverTimeouts>('timeouts')
-                  .then(timeouts => {
-                    return timeouts.implicit === 1234;
-                  })
+                  .then(timeouts => timeouts.implicit === 1234)
                   .catch(unsupported);
               }, unsupported)
           );
@@ -993,23 +1047,6 @@ export default class Server {
       if (capabilities.brokenSessionList == null) {
         testedCapabilities.brokenSessionList = () =>
           this.getSessions().then(works, broken);
-      }
-
-      if (capabilities.usesWebDriverFrameId == null) {
-        testedCapabilities.usesWebDriverFrameId = () =>
-          get(
-            '<!DOCTYPE html><html><body><iframe id="inlineFrame"></iframe></body></html>'
-          ).then(() =>
-            session.serverPost<void>('frame', { id: 'inlineFrame' }).then(
-              unsupported,
-              error =>
-                error.name === 'NoSuchFrame' ||
-                // At least geckodriver 0.24.0 throws an Unknown Command error
-                // with a message about an invalid tag name rather than a NoSuchFrame error
-                // (see https://github.com/mozilla/geckodriver/issues/1456)
-                /any variant of untagged/.test(error.message)
-            )
-          );
       }
 
       if (capabilities.returnsFromClickImmediately == null) {
@@ -1203,6 +1240,41 @@ export default class Server {
               )
             )
             .catch(unsupported);
+      }
+
+      if (capabilities.usesWebDriverMoveBase == null) {
+        testedCapabilities.usesWebDriverMoveBase = () => {
+          return get(
+            `<!DOCTYPE html><html><body style="width:100%;height:100px;">
+              <script>
+                var events = [];
+                document.onmousemove = function (event) {
+                  events.push({
+                    x: event.clientX,
+                    y: event.clientY
+                  });
+                };
+              </script>
+            </body></html>
+            `
+          )
+            .then(() => session.moveMouseTo(100, 50))
+            .then(() =>
+              session.execute<{ x: number; y: number }[]>(
+                'return window.events'
+              )
+            )
+            .then(events => {
+              if (!events) {
+                return undefined;
+              }
+              const event = events[0];
+              // Webdriver's move base is the element center, whereas JWP uses
+              // the top left corner. Here the element is the document body, so
+              // if x == 100, it's JWP, otherwise it's probably webdriver.
+              return event.x !== 100;
+            });
+        };
       }
 
       return Task.all(
@@ -1509,26 +1581,26 @@ export default class Server {
 
       // At least Chrome on Mac doesn't properly maximize. See
       // https://bugs.chromium.org/p/chromedriver/issues/detail?id=985
-      if (capabilities.brokenWindowMaximize == null) {
-        testedCapabilities.brokenWindowMaximize = () => {
-          let originalSize: { width: number; height: number };
-          return session
-            .getWindowSize()
-            .then(size => {
-              originalSize = size;
-              return session.setWindowSize(size.width - 10, size.height - 10);
-            })
-            .then(() => session.maximizeWindow())
-            .then(() => session.getWindowSize())
-            .then(size => {
-              return (
-                size.width > originalSize.width &&
-                size.height > originalSize.height
-              );
-            })
-            .catch(broken);
-        };
-      }
+      // if (capabilities.brokenWindowMaximize == null) {
+      //   testedCapabilities.brokenWindowMaximize = () => {
+      //     let originalSize: { width: number; height: number };
+      //     return session
+      //       .getWindowSize()
+      //       .then(size => {
+      //         originalSize = size;
+      //         return session.setWindowSize(size.width - 10, size.height - 10);
+      //       })
+      //       .then(() => session.maximizeWindow())
+      //       .then(() => session.getWindowSize())
+      //       .then(size => {
+      //         return (
+      //           size.width > originalSize.width &&
+      //           size.height > originalSize.height
+      //         );
+      //       })
+      //       .catch(broken);
+      //   };
+      // }
 
       // At least Selendroid 0.9.0 has a bug where it catastrophically
       // fails to retrieve available types; they have tried to hardcode
@@ -1566,6 +1638,11 @@ export default class Server {
             .getCurrentWindowHandle()
             .then(handle => session.switchToWindow(handle))
             .then(works, broken);
+      }
+
+      if (capabilities.brokenParentFrameSwitch == null) {
+        testedCapabilities.brokenParentFrameSwitch = () =>
+          session.serverPost('frame/parent').then(works, broken);
       }
 
       // This URL is used by several tests below
@@ -1912,18 +1989,6 @@ function isAndroid(capabilities: Capabilities) {
 function isAndroidEmulator(capabilities: Capabilities) {
   const { deviceName = '' } = capabilities;
   return deviceName.toLowerCase() === 'android emulator';
-}
-
-function isChrome(
-  capabilities: Capabilities,
-  minOrExactVersion?: number,
-  maxVersion?: number
-) {
-  const { browserName = '' } = capabilities;
-  if (browserName.toLowerCase() !== 'chrome') {
-    return false;
-  }
-  return isValidVersion(capabilities, minOrExactVersion, maxVersion);
 }
 
 function isIos(capabilities: Capabilities) {
