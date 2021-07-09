@@ -1,0 +1,20 @@
+{
+	"extends": "./node_modules/@theintern/dev/eslint.config.js",
+	"rules": {
+		"@typescript-eslint/no-empty-function": "off",
+		"@typescript-eslint/no-floating-promises": "off",
+		"@typescript-eslint/no-implied-eval": "off",
+		"@typescript-eslint/no-inferrable-types": "off",
+		"@typescript-eslint/no-misused-promises": "off",
+		"@typescript-eslint/no-this-alias": "off",
+		"@typescript-eslint/no-unnecessary-type-assertion": "off",
+		"@typescript-eslint/prefer-as-const": "off",
+		"@typescript-eslint/restrict-plus-operands": "off",
+		"@typescript-eslint/restrict-template-expressions": "off",
+		"@typescript-eslint/unbound-method": "off",
+		"no-empty": "off",
+		"no-extra-boolean-cast": "off",
+		"prefer-const": "off",
+		"prefer-spread": "off"
+	}
+}

@@ -1,6 +1,6 @@
 {
   "name": "@theintern/leadfoot",
-  "version": "2.3.4-pre",
+  "version": "2.4.0",
   "description": "Leadfoot. A JavaScript client library that brings cross-platform consistency to the Selenium WebDriver API.",
   "repository": {
     "type": "git",
@@ -8,16 +8,15 @@
   },
   "license": "BSD-3-Clause",
   "dependencies": {
-    "@theintern/common": "~0.2.3",
-    "jszip": "~3.2.1",
-    "tslib": "~1.9.3"
+    "@theintern/common": "~0.3.0",
+    "jszip": "~3.6.0",
+    "tslib": "~2.3.0"
   },
   "devDependencies": {
-    "@theintern/dev": "~0.10.2",
-    "@types/jszip": "~3.1.6",
-    "@types/node": "~12.0.5",
-    "concurrently": "~4.1.0",
-    "intern": "~4.4.3"
+    "@theintern/dev": "^0.11.0",
+    "@types/node": "~16.3.1",
+    "concurrently": "^6.2.0",
+    "intern": "^4.9.0"
   },
   "scripts": {
     "clean": "intern-dev-clean",
@@ -51,20 +50,16 @@
   "homepage": "http://github.com/theintern/leadfoot",
   "lint-staged": {
     "src/**/*.{ts,json,css}": [
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ],
     "tests/**/*.{ts,json,css}": [
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ],
     "*.ts": [
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ],
     "{intern,tsconfig}.json": [
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ]
   },
   "pre-commit": "precommit"

@@ -8,7 +8,7 @@ import {
   forCommand as utilForCommand,
   manualFindByLinkText,
   sleep,
-  toExecuteString
+  toExecuteString,
 } from './lib/util';
 import waitForDeleted from './lib/waitForDeleted';
 import {
@@ -16,7 +16,7 @@ import {
   Geolocation,
   LogEntry,
   WebDriverCookie,
-  WebDriverResponse
+  WebDriverResponse,
 } from './interfaces';
 
 /**
@@ -60,7 +60,7 @@ export default class Session extends Locator<
     this._timeouts = {
       script: Task.resolve(0),
       implicit: Task.resolve(0),
-      'page load': Task.resolve(Infinity)
+      'page load': Task.resolve(Infinity),
     };
   }
 
@@ -108,7 +108,7 @@ export default class Session extends Locator<
 
     let cancelled = false;
     return new Task<T>(
-      resolve => {
+      (resolve) => {
         // The promise is cleared from `_nextRequest` once it has been
         // resolved in order to avoid infinitely long chains of promises
         // retaining values that are not used any more
@@ -133,12 +133,12 @@ export default class Session extends Locator<
             path,
             requestData,
             pathParts
-          ).then(response => response.value);
+          ).then((response) => response.value);
 
           // safePromise is simply a promise based on the response that
           // is guaranteed to resolve -- it is only used for promise
           // chain management
-          const safePromise = response.catch(_error => {});
+          const safePromise = response.catch((_error) => {});
           safePromise.then(clearNextRequest);
 
           // The value of the response always needs to be taken directly
@@ -160,9 +160,8 @@ export default class Session extends Locator<
         // requests as well, so serialisation is applied universally, even
         // though it has negative performance implications
         if (this._nextRequest) {
-          thisRequest = this._nextRequest = this._nextRequest.finally(
-            runRequest
-          );
+          thisRequest = this._nextRequest =
+            this._nextRequest.finally(runRequest);
         } else {
           thisRequest = this._nextRequest = runRequest();
         }
@@ -192,7 +191,7 @@ export default class Session extends Locator<
    */
   getTimeout(type: Timeout): CancellablePromise<number> {
     if (this.capabilities.supportsGetTimeouts) {
-      return this.serverGet<WebDriverTimeouts>('timeouts').then(timeouts =>
+      return this.serverGet<WebDriverTimeouts>('timeouts').then((timeouts) =>
         type === 'page load' ? timeouts.pageLoad : timeouts[type]
       );
     } else {
@@ -227,24 +226,24 @@ export default class Session extends Locator<
     // Set both JSONWireProtocol and WebDriver properties in the data object
     let data = this.capabilities.usesWebDriverTimeouts
       ? {
-          [type === 'page load' ? 'pageLoad' : type]: ms
+          [type === 'page load' ? 'pageLoad' : type]: ms,
         }
       : {
           type,
-          ms
+          ms,
         };
 
-    const promise = this.serverPost<void>('timeouts', data).catch(error => {
+    const promise = this.serverPost<void>('timeouts', data).catch((error) => {
       // Appium as of April 2014 complains that `timeouts` is
       // unsupported, so try the more specific endpoints if they exist
       if (error.name === 'UnknownCommand') {
         if (type === 'script') {
           return this.serverPost<void>('timeouts/async_script', {
-            ms: ms
+            ms: ms,
           });
         } else if (type === 'implicit') {
           return this.serverPost<void>('timeouts/implicit_wait', {
-            ms: ms
+            ms: ms,
           });
         }
       } else if (
@@ -280,7 +279,7 @@ export default class Session extends Locator<
       : 'window_handle';
 
     return this.serverGet<string>(endpoint)
-      .then(handle => {
+      .then((handle) => {
         if (
           this.capabilities.brokenDeleteWindow &&
           this._closedWindows[handle]
@@ -294,7 +293,7 @@ export default class Session extends Locator<
 
         return handle;
       })
-      .catch(error => {
+      .catch((error) => {
         if (
           // At least Edge 44.17763 returns an UnknownError when it doesn't
           // support /window_handle, whereas most drivers return an
@@ -320,14 +319,14 @@ export default class Session extends Locator<
     return this.serverGet<string[]>(endpoint)
       .then((handles: string[]) => {
         if (this.capabilities.brokenDeleteWindow) {
-          return handles.filter(handle => {
+          return handles.filter((handle) => {
             return !this._closedWindows[handle];
           });
         }
 
         return handles;
       })
-      .catch(error => {
+      .catch((error) => {
         if (
           error.name === 'UnknownCommand' &&
           !this.capabilities.usesWebDriverWindowHandleCommands
@@ -425,10 +424,10 @@ export default class Session extends Locator<
 
     let result = this.serverPost<T>(endpoint, {
       script: toExecuteString(script),
-      args: args || []
+      args: args || [],
     })
-      .then(value => convertToElements(this, value), fixExecuteError)
-      .catch(error => {
+      .then((value) => convertToElements(this, value), fixExecuteError)
+      .catch((error) => {
         if (
           error.detail.error === 'unknown command' &&
           !this.capabilities.usesWebDriverExecuteSync
@@ -440,7 +439,7 @@ export default class Session extends Locator<
       });
 
     if (this.capabilities.brokenExecuteUndefinedReturn) {
-      result = result.then(value => (value == null ? null : value));
+      result = result.then((value) => (value == null ? null : value));
     }
 
     return result;
@@ -493,10 +492,10 @@ export default class Session extends Locator<
 
     return this.serverPost<T>(endpoint, {
       script: toExecuteString(script),
-      args: args || []
+      args: args || [],
     })
       .then(partial(convertToElements, this), fixExecuteError)
-      .catch(error => {
+      .catch((error) => {
         if (
           error.detail.error === 'unknown command' &&
           !this.capabilities.usesWebDriverExecuteAsync
@@ -521,7 +520,7 @@ export default class Session extends Locator<
    * @returns A buffer containing a PNG image.
    */
   takeScreenshot() {
-    return this.serverGet<string>('screenshot').then(data =>
+    return this.serverGet<string>('screenshot').then((data) =>
       Buffer.from(data, 'base64')
     );
   }
@@ -583,12 +582,12 @@ export default class Session extends Locator<
     id: string | number | Element | null
   ): CancellablePromise<void> {
     if (this.capabilities.usesWebDriverFrameId && typeof id === 'string') {
-      return this.findById(id).then(element =>
+      return this.findById(id).then((element) =>
         this.serverPost<void>('frame', { id: element })
       );
     }
 
-    return this.serverPost<void>('frame', { id: id }).catch(error => {
+    return this.serverPost<void>('frame', { id: id }).catch((error) => {
       if (
         this.capabilities.usesWebDriverFrameId == null &&
         (error.name === 'InvalidArgument' ||
@@ -635,7 +634,7 @@ export default class Session extends Locator<
   switchToParentFrame(): CancellablePromise<void> {
     if (this.capabilities.brokenParentFrameSwitch) {
       return this.execute<Element>('return window.parent.frameElement;').then(
-        parent => {
+        (parent) => {
           // TODO: Using `null` if no parent frame was returned keeps
           // the request from being invalid, but may be incorrect and
           // may cause incorrect frame retargeting on certain
@@ -644,7 +643,7 @@ export default class Session extends Locator<
         }
       );
     } else {
-      return this.serverPost<void>('frame/parent').catch(error => {
+      return this.serverPost<void>('frame/parent').catch((error) => {
         if (this.capabilities.scriptedParentFrameCrashesBrowser) {
           throw error;
         }
@@ -663,8 +662,8 @@ export default class Session extends Locator<
   closeCurrentWindow() {
     const self = this;
     function manualClose() {
-      return self.getCurrentWindowHandle().then(function(handle: any) {
-        return self.execute('window.close();').then(function() {
+      return self.getCurrentWindowHandle().then(function (handle: any) {
+        return self.execute('window.close();').then(function () {
           self._closedWindows[handle] = true;
         });
       });
@@ -674,7 +673,7 @@ export default class Session extends Locator<
       return manualClose();
     }
 
-    return this.serverDelete<void>('window').catch(error => {
+    return this.serverDelete<void>('window').catch((error) => {
       // ios-driver 0.6.6-SNAPSHOT April 2014 does not implement close
       // window command
       if (
@@ -719,14 +718,14 @@ export default class Session extends Locator<
 
     if (this.capabilities.usesWebDriverWindowCommands) {
       const setWindowSize = () =>
-        this.getWindowPosition().then(position =>
+        this.getWindowPosition().then((position) =>
           this.setWindowRect({
             // At least Firefox + geckodriver 0.17.0 requires all 4 rect
             // parameters have values
             x: position.x,
             y: position.y,
             width: data.width,
-            height: data.height
+            height: data.height,
           })
         );
 
@@ -737,10 +736,10 @@ export default class Session extends Locator<
         // switch to the new one, get the size, then switch back to the
         // original handle.
         let error: Error;
-        return this.getCurrentWindowHandle().then(originalHandle => {
+        return this.getCurrentWindowHandle().then((originalHandle) => {
           return this.switchToWindow(windowHandle)
             .then(() => setWindowSize())
-            .catch(_error => {
+            .catch((_error) => {
               error = _error;
             })
             .then(() => this.switchToWindow(originalHandle))
@@ -756,7 +755,7 @@ export default class Session extends Locator<
         windowHandle = 'current';
       }
       return this.serverPost<void>('window/$0/size', { width, height }, [
-        windowHandle
+        windowHandle,
       ]);
     }
   }
@@ -774,9 +773,9 @@ export default class Session extends Locator<
   getWindowSize(windowHandle?: string) {
     if (this.capabilities.usesWebDriverWindowCommands) {
       const getWindowSize = () =>
-        this.getWindowRect().then(rect => ({
+        this.getWindowRect().then((rect) => ({
           width: rect.width,
-          height: rect.height
+          height: rect.height,
         }));
 
       if (windowHandle == null) {
@@ -787,14 +786,14 @@ export default class Session extends Locator<
         // original handle.
         let error: Error;
         let size: { width: number; height: number };
-        return this.getCurrentWindowHandle().then(originalHandle => {
+        return this.getCurrentWindowHandle().then((originalHandle) => {
           return this.switchToWindow(windowHandle!)
             .then(() => getWindowSize())
             .then(
-              _size => {
+              (_size) => {
                 size = _size;
               },
-              _error => {
+              (_error) => {
                 error = _error;
               }
             )
@@ -873,7 +872,7 @@ export default class Session extends Locator<
     if (this.capabilities.usesWebDriverWindowCommands) {
       // At least Firefox + geckodriver 0.17.0 requires all 4 rect
       // parameters have values
-      return this.getWindowSize().then(size => {
+      return this.getWindowSize().then((size) => {
         const data = { x, y, width: size.width, height: size.height };
 
         if (windowHandle == null) {
@@ -883,13 +882,13 @@ export default class Session extends Locator<
           // switch to the new one, get the size, then switch back to the
           // original handle.
           let error: Error;
-          return this.getCurrentWindowHandle().then(originalHandle => {
+          return this.getCurrentWindowHandle().then((originalHandle) => {
             if (originalHandle === windowHandle) {
               this.setWindowRect(data);
             } else {
               return this.switchToWindow(windowHandle)
                 .then(() => this.setWindowRect(data))
-                .catch(_error => {
+                .catch((_error) => {
                   error = _error;
                 })
                 .then(() => this.switchToWindow(originalHandle))
@@ -907,7 +906,7 @@ export default class Session extends Locator<
         windowHandle = 'current';
       }
       return this.serverPost<void>('window/$0/position', { x, y }, [
-        windowHandle
+        windowHandle,
       ]);
     }
   }
@@ -941,14 +940,14 @@ export default class Session extends Locator<
         // the original handle.
         let error: Error;
         let position: { x: number; y: number };
-        return this.getCurrentWindowHandle().then(originalHandle => {
+        return this.getCurrentWindowHandle().then((originalHandle) => {
           return this.switchToWindow(windowHandle!)
             .then(() => getWindowPosition())
             .then(
-              _position => {
+              (_position) => {
                 position = _position;
               },
-              _error => {
+              (_error) => {
                 error = _error;
               }
             )
@@ -968,12 +967,12 @@ export default class Session extends Locator<
       return this.serverGet<{
         x: number;
         y: number;
-      }>('window/$0/position', null, [windowHandle]).then(position => {
+      }>('window/$0/position', null, [windowHandle]).then((position) => {
         // At least Firefox + geckodriver 0.19.0 will return a full
         // rectangle for the position command.
         return {
           x: position.x,
-          y: position.y
+          y: position.y,
         };
       });
     }
@@ -997,10 +996,10 @@ export default class Session extends Locator<
         // switch to the new one, get the position, then switch back to
         // the original handle.
         let error: Error;
-        return this.getCurrentWindowHandle().then(originalHandle => {
+        return this.getCurrentWindowHandle().then((originalHandle) => {
           return this.switchToWindow(windowHandle!)
             .then(() => maximizeWindow())
-            .catch(_error => {
+            .catch((_error) => {
               error = _error;
             })
             .then(() => this.switchToWindow(originalHandle))
@@ -1023,12 +1022,12 @@ export default class Session extends Locator<
    * Gets all cookies set on the current page.
    */
   getCookies() {
-    return this.serverGet<WebDriverCookie[]>('cookie').then(function(
+    return this.serverGet<WebDriverCookie[]>('cookie').then(function (
       cookies: WebDriverCookie[]
     ) {
       // At least SafariDriver 2.41.0 returns cookies with extra class
       // and hCode properties that should not exist
-      return (cookies || []).map(function(badCookie) {
+      return (cookies || []).map(function (badCookie) {
         let cookie: any = {};
         for (let key in badCookie) {
           if (
@@ -1067,7 +1066,7 @@ export default class Session extends Locator<
     const self = this;
 
     return this.serverPost<void>('cookie', {
-      cookie: cookie
+      cookie: cookie,
     }).catch((error: SessionError) => {
       // At least ios-driver 0.6.0-SNAPSHOT April 2014 does not know how
       // to set cookies
@@ -1100,7 +1099,7 @@ export default class Session extends Locator<
         pushCookieProperties(cookieToSet, cookie);
 
         return self.execute<void>(
-          /* istanbul ignore next */ function(cookie: any) {
+          /* istanbul ignore next */ function (cookie: any) {
             document.cookie = cookie;
           },
           [cookieToSet.join(';')]
@@ -1116,17 +1115,17 @@ export default class Session extends Locator<
    */
   clearCookies() {
     if (this.capabilities.brokenDeleteCookie) {
-      return this.getCookies().then(cookies => {
+      return this.getCookies().then((cookies) => {
         return cookies.reduce((promise, cookie) => {
           const expiredCookie = [
             `${cookie.name}=`,
-            'expires=Thu, 01 Jan 1970 00:00:00 GMT'
+            'expires=Thu, 01 Jan 1970 00:00:00 GMT',
           ];
           pushCookieProperties(expiredCookie, cookie);
 
           return promise.then(() => {
             return this.execute<void>(
-              /* istanbul ignore next */ function(expiredCookie: string) {
+              /* istanbul ignore next */ function (expiredCookie: string) {
                 // Assume the cookie was created by Selenium,
                 // so its path is '/'; at least MS Edge
                 // requires a path to delete a cookie
@@ -1151,10 +1150,10 @@ export default class Session extends Locator<
    */
   deleteCookie(name: string) {
     if (this.capabilities.brokenDeleteCookie) {
-      return this.getCookies().then(cookies => {
+      return this.getCookies().then((cookies) => {
         let cookie: any;
         if (
-          cookies.some(value => {
+          cookies.some((value) => {
             if (value.name === name) {
               cookie = value;
               return true;
@@ -1164,13 +1163,13 @@ export default class Session extends Locator<
         ) {
           const expiredCookie = [
             `${cookie.name}=`,
-            'expires=Thu, 01 Jan 1970 00:00:00 GMT'
+            'expires=Thu, 01 Jan 1970 00:00:00 GMT',
           ];
 
           pushCookieProperties(expiredCookie, cookie);
 
           return this.execute<void>(
-            /* istanbul ignore next */ function(expiredCookie: any) {
+            /* istanbul ignore next */ function (expiredCookie: any) {
               // Assume the cookie was created by Selenium, so
               // its path is '/'; at least MS Edge requires a
               // path to delete a cookie
@@ -1195,7 +1194,7 @@ export default class Session extends Locator<
   getPageSource() {
     if (this.capabilities.brokenPageSource) {
       return this.execute<string>(
-        /* istanbul ignore next */ function() {
+        /* istanbul ignore next */ function () {
           return document.documentElement!.outerHTML;
         }
       );
@@ -1240,7 +1239,7 @@ export default class Session extends Locator<
         this.capabilities.brokenLinkTextLocator)
     ) {
       return this.execute<Element>(manualFindByLinkText, [using, value]).then(
-        element => {
+        (element) => {
           if (!element) {
             const error = new Error();
             error.name = 'NoSuchElement';
@@ -1253,13 +1252,13 @@ export default class Session extends Locator<
 
     return this.serverPost<ElementOrElementId>('element', {
       using: using,
-      value: value
+      value: value,
     }).then(
-      element => {
+      (element) => {
         return new Element(element, this);
       },
 
-      error => {
+      (error) => {
         if (
           !this.capabilities.usesWebDriverLocators &&
           /search strategy: 'id'/.test(error.message)
@@ -1298,8 +1297,8 @@ export default class Session extends Locator<
       return this.execute<Element[]>(manualFindByLinkText, [
         using,
         value,
-        true
-      ]).then(elements => {
+        true,
+      ]).then((elements) => {
         return elements.map((element: ElementOrElementId) => {
           return new Element(element, this);
         });
@@ -1308,15 +1307,15 @@ export default class Session extends Locator<
 
     return this.serverPost<any[]>('elements', {
       using: using,
-      value: value
+      value: value,
     }).then(
-      elements => {
+      (elements) => {
         return elements.map((element: ElementOrElementId) => {
           return new Element(element, this);
         });
       },
 
-      error => {
+      (error) => {
         if (
           !this.capabilities.usesWebDriverLocators &&
           /search strategy: 'id'/.test(error.message)
@@ -1362,7 +1361,7 @@ export default class Session extends Locator<
             return getDocumentActiveElement();
           }
         },
-        error => {
+        (error) => {
           if (
             error.name === 'UnknownMethod' &&
             !this.capabilities.usesWebDriverActiveElement
@@ -1399,7 +1398,7 @@ export default class Session extends Locator<
     }
 
     return this.serverPost<void>('keys', {
-      value: keys
+      value: keys,
     });
   }
 
@@ -1410,7 +1409,7 @@ export default class Session extends Locator<
    */
   getOrientation() {
     return this.serverGet<'portrait' | 'landscape'>('orientation').then(
-      function(orientation) {
+      function (orientation) {
         return orientation.toLowerCase();
       }
     );
@@ -1425,7 +1424,7 @@ export default class Session extends Locator<
     orientation = orientation.toUpperCase();
 
     return this.serverPost<void>('orientation', {
-      orientation: orientation
+      orientation: orientation,
     });
   }
 
@@ -1447,7 +1446,7 @@ export default class Session extends Locator<
     }
 
     return this.serverPost<void>('alert_text', {
-      text: text
+      text: text,
     });
   }
 
@@ -1513,9 +1512,9 @@ export default class Session extends Locator<
           position: this._lastMousePosition,
           element: element,
           xOffset: xOffset,
-          yOffset: yOffset
-        }
-      ]).then(newPosition => {
+          yOffset: yOffset,
+        },
+      ]).then((newPosition) => {
         this._lastMousePosition = newPosition;
       });
     }
@@ -1530,21 +1529,25 @@ export default class Session extends Locator<
       // just assume that the mouse position defaults to the top-left
       // corner of the document
       if (this.capabilities.brokenHtmlMouseMove) {
-        return this.execute<Element>('return document.body;').then(element => {
-          return element
-            .getPosition()
-            .then((position: { x: number; y: number }) => {
-              return this.moveMouseTo(
-                element,
-                xOffset - position.x,
-                yOffset - position.y
-              );
-            });
-        });
+        return this.execute<Element>('return document.body;').then(
+          (element) => {
+            return element
+              .getPosition()
+              .then((position: { x: number; y: number }) => {
+                return this.moveMouseTo(
+                  element,
+                  xOffset - position.x,
+                  yOffset - position.y
+                );
+              });
+          }
+        );
       } else {
-        return this.execute<Element>('return document.body;').then(element => {
-          return this.moveMouseTo(element, xOffset, yOffset);
-        });
+        return this.execute<Element>('return document.body;').then(
+          (element) => {
+            return this.moveMouseTo(element, xOffset, yOffset);
+          }
+        );
       }
     }
 
@@ -1580,13 +1583,13 @@ export default class Session extends Locator<
         {
           action: 'click',
           button: button,
-          position: this._lastMousePosition
-        }
+          position: this._lastMousePosition,
+        },
       ]);
     }
 
     return this.serverPost<void>('click', {
-      button: button
+      button: button,
     }).then(() => {
       // ios-driver 0.6.6-SNAPSHOT April 2014 does not wait until the
       // default action for a click event occurs before returning
@@ -1608,13 +1611,13 @@ export default class Session extends Locator<
         {
           action: 'mousedown',
           button: button,
-          position: this._lastMousePosition
-        }
+          position: this._lastMousePosition,
+        },
       ]);
     }
 
     return this.serverPost<void>('buttondown', {
-      button: button
+      button: button,
     });
   }
 
@@ -1630,13 +1633,13 @@ export default class Session extends Locator<
         {
           action: 'mouseup',
           button: button,
-          position: this._lastMousePosition
-        }
+          position: this._lastMousePosition,
+        },
       ]);
     }
 
     return this.serverPost<void>('buttonup', {
-      button: button
+      button: button,
     });
   }
 
@@ -1649,8 +1652,8 @@ export default class Session extends Locator<
         {
           action: 'dblclick',
           button: 0,
-          position: this._lastMousePosition
-        }
+          position: this._lastMousePosition,
+        },
       ]);
     }
 
@@ -1680,7 +1683,7 @@ export default class Session extends Locator<
   @forCommand({ usesElement: true })
   tap(element: Element) {
     return this.serverPost<void>('touch/click', {
-      element: element.elementId
+      element: element.elementId,
     });
   }
 
@@ -1753,7 +1756,7 @@ export default class Session extends Locator<
 
     if (this.capabilities.brokenTouchScroll) {
       return this.execute<void>(
-        /* istanbul ignore next */ function(
+        /* istanbul ignore next */ function (
           element: HTMLElement,
           x: number,
           y: number
@@ -1780,7 +1783,7 @@ export default class Session extends Locator<
     return this.serverPost<void>('touch/scroll', {
       element: element,
       xoffset: xOffset,
-      yoffset: yOffset
+      yoffset: yOffset,
     });
   }
 
@@ -1793,7 +1796,7 @@ export default class Session extends Locator<
   doubleTap(element?: Element) {
     const elementId = element && element.elementId;
     return this.serverPost<void>('touch/doubleclick', {
-      element: elementId
+      element: elementId,
     });
   }
 
@@ -1839,7 +1842,7 @@ export default class Session extends Locator<
     ) {
       return this.serverPost<void>('touch/flick', {
         xspeed: element,
-        yspeed: xOffset
+        yspeed: xOffset,
       });
     }
 
@@ -1851,7 +1854,7 @@ export default class Session extends Locator<
       element: element.elementId,
       xoffset: xOffset,
       yoffset: yOffset,
-      speed: speed
+      speed: speed,
     });
   }
 
@@ -1863,7 +1866,7 @@ export default class Session extends Locator<
    * WGS84 ellipsoid. Not all environments support altitude.
    */
   getGeolocation() {
-    return this.serverGet<Geolocation>('location').then(location => {
+    return this.serverGet<Geolocation>('location').then((location) => {
       // ChromeDriver 2.9 ignores altitude being set and then returns 0;
       // to match the Geolocation API specification, we will just pretend
       // that altitude is not supported by the browser at all by changing
@@ -1909,8 +1912,8 @@ export default class Session extends Locator<
    */
   getLogsFor(type: string) {
     return this.serverPost<string[] | LogEntry[]>('log', {
-      type: type
-    }).then(function(logs) {
+      type: type,
+    }).then(function (logs) {
       // At least Selendroid 0.9.0 returns logs as an array of strings
       // instead of an array of log objects, which is a spec violation;
       // see https://github.com/selendroid/selendroid/issues/366
@@ -1919,7 +1922,7 @@ export default class Session extends Locator<
       }
 
       if (isStringArray(logs)) {
-        return logs.map(log => {
+        return logs.map((log) => {
           const logData = /\[([^\]]+)\]\s*\[([^\]]+)\]\s*(.*)/.exec(log);
           let entry: LogEntry;
 
@@ -1927,13 +1930,13 @@ export default class Session extends Locator<
             entry = {
               timestamp: Date.parse(logData[1]) / 1000,
               level: logData[2],
-              message: logData[3]
+              message: logData[3],
             };
           } else {
             entry = {
               timestamp: NaN,
               level: 'INFO',
-              message: log
+              message: log,
             };
           }
 
@@ -2178,7 +2181,7 @@ function forCommand(properties: {
   usesElement?: boolean;
   createsContext?: boolean;
 }) {
-  return function(
+  return function (
     target: any,
     property: string,
     descriptor: PropertyDescriptor
@@ -2244,7 +2247,7 @@ function fixExecuteError(error: SessionError) {
  * properly escaped key-value strings.
  */
 function pushCookieProperties(target: any[], source: any) {
-  Object.keys(source).forEach(function(key) {
+  Object.keys(source).forEach(function (key) {
     let value = source[key];
 
     if (
@@ -2293,11 +2296,13 @@ function simulateKeys(keys: string[]) {
         cancelable: kwArgs.cancelable || false,
         view: window,
         key: kwArgs.key || '',
-        location: 3
+        location: 3,
       });
     } else {
       event = document.createEvent('KeyboardEvent');
-      event.initKeyboardEvent(
+      // initKeyboardEvent only exists in certain legacy situations, and TS
+      // doesn't know about it
+      (event as any).initKeyboardEvent(
         kwArgs.type,
         true,
         kwArgs.cancelable || false,
@@ -2324,7 +2329,7 @@ function simulateKeys(keys: string[]) {
     return target.dispatchEvent(event);
   }
 
-  keys = (<string[]>[]).concat(...keys.map(keys => keys.split('')));
+  keys = (<string[]>[]).concat(...keys.map((keys) => keys.split('')));
 
   for (let i = 0, j = keys.length; i < j; ++i) {
     const key = keys[i];
@@ -2333,7 +2338,7 @@ function simulateKeys(keys: string[]) {
     performDefault = dispatch({
       type: 'keydown',
       cancelable: true,
-      key: key
+      key: key,
     });
     performDefault =
       performDefault &&
@@ -2389,7 +2394,7 @@ function simulateMouse(kwArgs: any) {
         altKey: kwArgs.altKey || false,
         metaKey: kwArgs.metaKey || false,
         button: kwArgs.button || 0,
-        relatedTarget: kwArgs.relatedTarget
+        relatedTarget: kwArgs.relatedTarget,
       });
     } else {
       event = document.createEvent('MouseEvents');
@@ -2429,7 +2434,7 @@ function simulateMouse(kwArgs: any) {
       cancelable: true,
       detail: detail,
       target: target,
-      type: 'click'
+      type: 'click',
     });
   }
 
@@ -2438,7 +2443,7 @@ function simulateMouse(kwArgs: any) {
       button: button,
       cancelable: true,
       target: target,
-      type: 'mousedown'
+      type: 'mousedown',
     });
   }
 
@@ -2447,7 +2452,7 @@ function simulateMouse(kwArgs: any) {
       button: button,
       cancelable: true,
       target: target,
-      type: 'mouseup'
+      type: 'mouseup',
     });
   }
 
@@ -2482,24 +2487,24 @@ function simulateMouse(kwArgs: any) {
       dispatch({
         type: 'mouseout',
         target: currentElement,
-        relatedTarget: newElement
+        relatedTarget: newElement,
       });
       dispatch({
         type: 'mouseleave',
         target: currentElement,
         relatedTarget: newElement,
-        bubbles: false
+        bubbles: false,
       });
       dispatch({
         type: 'mouseenter',
         target: newElement,
         relatedTarget: currentElement,
-        bubbles: false
+        bubbles: false,
       });
       dispatch({
         type: 'mouseover',
         target: newElement,
-        relatedTarget: currentElement
+        relatedTarget: currentElement,
       });
     }
 
@@ -2532,7 +2537,7 @@ function simulateMouse(kwArgs: any) {
       target: target,
       button: kwArgs.button,
       detail: 2,
-      cancelable: true
+      cancelable: true,
     });
   }
 }

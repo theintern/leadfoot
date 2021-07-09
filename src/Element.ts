@@ -5,7 +5,7 @@ import waitForDeleted from './lib/waitForDeleted';
 import { manualFindByLinkText, sleep } from './lib/util';
 import { Task, CancellablePromise } from '@theintern/common';
 import Session from './Session';
-import * as JSZip from 'jszip';
+import JSZip from 'jszip';
 import { basename } from 'path';
 
 /**
@@ -80,7 +80,7 @@ export default class Element extends Locator<
     // Include both the JSONWireProtocol and W3C element properties
     return {
       ELEMENT: this._elementId,
-      'element-6066-11e4-a52e-4f735466cecf': this._elementId
+      'element-6066-11e4-a52e-4f735466cecf': this._elementId,
     };
   }
 
@@ -114,12 +114,12 @@ export default class Element extends Locator<
    * and used by the server.
    */
   private _uploadFile(filename: string): CancellablePromise<string> {
-    return new Task<string>(resolve => {
+    return new Task<string>((resolve) => {
       const content = fs.readFileSync(filename);
 
       let zip = new JSZip();
       zip.file(basename(filename), content);
-      zip.generateAsync({ type: 'base64' }).then(file => {
+      zip.generateAsync({ type: 'base64' }).then((file) => {
         resolve(this.session.serverPost('file', { file }));
       });
     });
@@ -158,9 +158,9 @@ export default class Element extends Locator<
           using,
           value,
           false,
-          this
+          this,
         ])
-        .then(function(element) {
+        .then(function (element) {
           if (!element) {
             const error = new Error();
             error.name = 'NoSuchElement';
@@ -172,12 +172,12 @@ export default class Element extends Locator<
 
     return this._post<ElementOrElementId>('element', {
       using,
-      value
+      value,
     })
-      .then(function(element) {
+      .then(function (element) {
         return new Element(element, session);
       })
-      .catch(function(error) {
+      .catch(function (error) {
         // At least Firefox 49 + geckodriver returns an UnknownCommand
         // error when unable to find elements.
         if (
@@ -222,17 +222,17 @@ export default class Element extends Locator<
         using,
         value,
         true,
-        this
+        this,
       ]);
     } else {
       task = this._post<ElementOrElementId[]>('elements', {
         using: using,
-        value: value
+        value: value,
       });
     }
 
-    return task.then(function(elements) {
-      return elements.map(function(element) {
+    return task.then(function (elements) {
+      return elements.map(function (element) {
         return new Element(element, session);
       });
     });
@@ -253,7 +253,7 @@ export default class Element extends Locator<
             // At least in Safari 13, calling an element's click() method will not
             // focus it.
             this.session.execute<void>(
-              /* istanbul ignore next */ function(element: HTMLElement) {
+              /* istanbul ignore next */ function (element: HTMLElement) {
                 element.click();
                 element.focus();
               },
@@ -315,7 +315,7 @@ export default class Element extends Locator<
     const result = this._get<string>('text');
 
     if (this.session.capabilities.brokenWhitespaceNormalization) {
-      return result.then(text => this._normalizeWhitespace(text));
+      return result.then((text) => this._normalizeWhitespace(text));
     }
 
     return result;
@@ -377,7 +377,7 @@ export default class Element extends Locator<
       // and then post it's remote name into the field
       try {
         if (fs.statSync(filename).isFile()) {
-          return this._uploadFile(filename).then(uploadedFilename => {
+          return this._uploadFile(filename).then((uploadedFilename) => {
             return this._post('value', getPostData([uploadedFilename]))
               .then(noop)
               .catch(handleError);
@@ -399,13 +399,13 @@ export default class Element extends Locator<
    * always lowercase.
    */
   getTagName(): CancellablePromise<string> {
-    return this._get<string>('name').then(name => {
+    return this._get<string>('name').then((name) => {
       if (this.session.capabilities.brokenHtmlTagName) {
         return this.session
           .execute<boolean>(
             'return document.body && document.body.tagName === document.body.tagName.toUpperCase();'
           )
-          .then(function(isHtml: boolean) {
+          .then(function (isHtml: boolean) {
             return isHtml ? name.toLowerCase() : name;
           });
       }
@@ -436,7 +436,7 @@ export default class Element extends Locator<
   isEnabled(): CancellablePromise<boolean> {
     if (this.session.capabilities.brokenElementEnabled) {
       return this.session.execute<boolean>(
-        /* istanbul ignore next */ function(element: HTMLElement) {
+        /* istanbul ignore next */ function (element: HTMLElement) {
           return !Boolean(element.hasAttribute('disabled'));
         },
         [this]
@@ -482,14 +482,14 @@ export default class Element extends Locator<
    */
   getSpecAttribute(name: string): CancellablePromise<string | null> {
     return this._get<string | undefined>('attribute/$0', null, [name])
-      .then(value => {
+      .then((value) => {
         if (
           this.session.capabilities.brokenNullGetSpecAttribute &&
           (value === '' || value === undefined)
         ) {
           return this.session
             .execute<boolean>(
-              /* istanbul ignore next */ function(
+              /* istanbul ignore next */ function (
                 element: HTMLElement,
                 name: string
               ) {
@@ -497,14 +497,14 @@ export default class Element extends Locator<
               },
               [this, name]
             )
-            .then(function(hasAttribute: boolean) {
+            .then(function (hasAttribute: boolean) {
               return hasAttribute ? <string>value : null;
             });
         }
 
         return value || null;
       })
-      .then(function(value) {
+      .then(function (value) {
         // At least ios-driver 0.6.6-SNAPSHOT violates draft spec and
         // returns boolean attributes as booleans instead of the string
         // "true" or null
@@ -548,7 +548,7 @@ export default class Element extends Locator<
     if (this.session.capabilities.brokenElementProperty) {
       return this.session.execute<T>('return arguments[0][arguments[1]];', [
         this,
-        name
+        name,
       ]);
     }
 
@@ -570,7 +570,7 @@ export default class Element extends Locator<
     }
 
     const elementId = other.elementId || other;
-    return this._get<boolean>('equals/$0', null, [elementId]).catch(error => {
+    return this._get<boolean>('equals/$0', null, [elementId]).catch((error) => {
       // At least Selendroid 0.9.0 does not support this command;
       // At least ios-driver 0.6.6-SNAPSHOT April 2014 fails
       if (
@@ -598,7 +598,7 @@ export default class Element extends Locator<
    * 5. Elements with no `offsetWidth` or `offsetHeight`
    */
   isDisplayed(): CancellablePromise<boolean> {
-    return this._get<boolean>('displayed').then(isDisplayed => {
+    return this._get<boolean>('displayed').then((isDisplayed) => {
       if (
         isDisplayed &&
         (this.session.capabilities.brokenElementDisplayedOpacity ||
@@ -645,7 +645,7 @@ export default class Element extends Locator<
         x: number;
         y: number;
       }>(
-        /* istanbul ignore next */ function(element: HTMLElement) {
+        /* istanbul ignore next */ function (element: HTMLElement) {
           const bbox = element.getBoundingClientRect();
           const scrollX =
             document.documentElement!.scrollLeft || document.body.scrollLeft;
@@ -658,9 +658,9 @@ export default class Element extends Locator<
       );
     }
 
-    return this._get<{ x: number; y: number }>('location').then(function({
+    return this._get<{ x: number; y: number }>('location').then(function ({
       x,
-      y
+      y,
     }) {
       // At least FirefoxDriver 2.41.0 incorrectly returns an object with
       // additional `class` and `hCode` properties
@@ -678,11 +678,11 @@ export default class Element extends Locator<
         width: number;
         height: number;
       }>(
-        /* istanbul ignore next */ function(element: HTMLElement) {
+        /* istanbul ignore next */ function (element: HTMLElement) {
           const bbox = element.getBoundingClientRect();
           return {
             width: bbox.right - bbox.left,
-            height: bbox.bottom - bbox.top
+            height: bbox.bottom - bbox.top,
           };
         },
         [this]
@@ -694,7 +694,7 @@ export default class Element extends Locator<
     }
 
     return this._get<{ width: number; height: number }>('size')
-      .catch(function(error) {
+      .catch(function (error) {
         // At least ios-driver 0.6.0-SNAPSHOT April 2014 does not
         // support this command
         if (error.name === 'UnknownCommand') {
@@ -703,7 +703,7 @@ export default class Element extends Locator<
 
         throw error;
       })
-      .then(function({ width, height }) {
+      .then(function ({ width, height }) {
         // At least ChromeDriver 2.9 incorrectly returns an object with
         // an additional `toString` property
         return { width, height };
@@ -732,7 +732,7 @@ export default class Element extends Locator<
       promise = manualGetStyle();
     } else {
       promise = this._get<string>('css/$0', null, [propertyName]).catch(
-        function(error) {
+        function (error) {
           // At least Selendroid 0.9.0 does not support this command
           if (error.name === 'UnknownCommand') {
             return manualGetStyle();
@@ -750,18 +750,16 @@ export default class Element extends Locator<
       );
     }
 
-    return promise.then(function(value) {
+    return promise.then(function (value) {
       // At least ChromeDriver 2.9 and Selendroid 0.9.0 returns colour
       // values as rgb instead of rgba
       if (value) {
-        value = value.replace(/(.*\b)rgb\((\d+,\s*\d+,\s*\d+)\)(.*)/g, function(
-          _,
-          prefix,
-          rgb,
-          suffix
-        ) {
-          return prefix + 'rgba(' + rgb + ', 1)' + suffix;
-        });
+        value = value.replace(
+          /(.*\b)rgb\((\d+,\s*\d+,\s*\d+)\)(.*)/g,
+          function (_, prefix, rgb, suffix) {
+            return prefix + 'rgba(' + rgb + ', 1)' + suffix;
+          }
+        );
       }
 
       // For consistency with Firefox, missing values are always returned
