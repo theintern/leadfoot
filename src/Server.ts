@@ -9,7 +9,7 @@ import {
   request,
   RequestOptions,
   RequestMethod,
-  Response
+  Response,
 } from '@theintern/common';
 import Session, { WebDriverTimeouts } from './Session';
 import Element from './Element';
@@ -42,11 +42,11 @@ export default class Server {
   // https://github.com/browserstack/fast-selenium-scripts/blob/master/node/fast-selenium.js
   private _httpAgent = new HttpAgent({
     keepAlive: true,
-    keepAliveMsecs: 30000
+    keepAliveMsecs: 30000,
   });
   private _httpsAgent = new HttpsAgent({
     keepAlive: true,
-    keepAliveMsecs: 30000
+    keepAliveMsecs: 30000,
   });
 
   /**
@@ -100,7 +100,7 @@ export default class Server {
   ): CancellablePromise<T> {
     const url =
       this.url +
-      path.replace(/\$(\d)/, function(_, index) {
+      path.replace(/\$(\d)/, function (_, index) {
         return encodeURIComponent(pathParts![index]);
       });
 
@@ -109,7 +109,7 @@ export default class Server {
       // NullPointerException when retrieving session capabilities if an
       // Accept header is not provided. (It is a good idea to provide one
       // anyway)
-      Accept: 'application/json,text/plain;q=0.9'
+      Accept: 'application/json,text/plain;q=0.9',
     };
 
     const headers = { ...defaultRequestHeaders };
@@ -121,7 +121,7 @@ export default class Server {
       httpAgent: this._httpAgent,
       httpsAgent: this._httpsAgent,
       headers,
-      method
+      method,
     } as RequestOptions;
 
     if (requestData) {
@@ -176,11 +176,11 @@ export default class Server {
           }
 
           return request(redirectUrl, {
-            headers: defaultRequestHeaders
+            headers: defaultRequestHeaders,
           }).then(handleResponse);
         }
 
-        return response.text().then(data => {
+        return response.text().then((data) => {
           return { response, data };
         });
       })
@@ -206,7 +206,7 @@ export default class Server {
           data = {
             status: 0,
             sessionId: null,
-            value: null
+            value: null,
           };
         } else if (response.status >= 400 || (data && data.status > 0)) {
           const error: any = new Error();
@@ -220,8 +220,8 @@ export default class Server {
           if (!data) {
             data = {
               value: {
-                message: responseData.data
-              }
+                message: responseData.data,
+              },
             };
           } else if (!data.value && 'message' in data) {
             // ios-driver 0.6.6-SNAPSHOT April 2014 incorrectly
@@ -235,7 +235,7 @@ export default class Server {
                 data.message.indexOf('cannot find command') > -1
                   ? 9
                   : 13,
-              value: data
+              value: data,
             };
           }
 
@@ -355,11 +355,11 @@ export default class Server {
           error.request = {
             url: url,
             method: method,
-            data: requestData
+            data: requestData,
           };
           error.response = response;
 
-          const sanitizedUrl = (function() {
+          const sanitizedUrl = (function () {
             const parsedUrl = parse(url);
             if (parsedUrl.auth) {
               parsedUrl.auth = '(redacted)';
@@ -379,7 +379,7 @@ export default class Server {
 
         return data;
       })
-      .catch(function(error) {
+      .catch(function (error) {
         error.stack = error.message + trimStack(trace.stack);
         throw error;
       });
@@ -444,9 +444,15 @@ export default class Server {
     }
 
     return this.post<any>('session', {
+      // new way of passing capabilities (as defined in the W3C WebDriver spec)
+      capabilities: {
+        alwaysMatch: requiredCapabilities,
+        firstMatch: [desiredCapabilities],
+      },
+      // legacy way of passing capabilities
       desiredCapabilities,
-      requiredCapabilities
-    }).then(response => {
+      requiredCapabilities,
+    }).then((response) => {
       let responseData: object;
       let sessionId: string;
 
@@ -478,7 +484,7 @@ export default class Server {
       // present in the capabilities returned by the server. This will allow
       // for feature flags to be manually set.
       const userKeys = Object.keys(desiredCapabilities).filter(
-        key => !(key in session.capabilities)
+        (key) => !(key in session.capabilities)
       );
       for (const key of userKeys) {
         session.capabilities[key] = desiredCapabilities[key];
@@ -489,7 +495,7 @@ export default class Server {
           <S>session,
           fixSessionCapabilities !== 'no-detect'
         )
-          .catch(error =>
+          .catch((error) =>
             // The session was started on the server, but we did
             // not resolve the Task yet. If a failure occurs during
             // capabilities filling, we should quit the session on
@@ -516,13 +522,14 @@ export default class Server {
     detectCapabilities = true
   ): CancellablePromise<S> {
     Object.assign(session.capabilities, this._getKnownCapabilities(session));
-    return (detectCapabilities
-      ? this._detectCapabilities(session)
-      : Task.resolve(session)
+    return (
+      detectCapabilities
+        ? this._detectCapabilities(session)
+        : Task.resolve(session)
     ).then(() => {
       Object.defineProperty(session.capabilities, '_filled', {
         value: true,
-        configurable: true
+        configurable: true,
       });
       return session;
     });
@@ -598,7 +605,7 @@ export default class Server {
             brokenCssTransformedSize: true,
             fixedLogTypes: false as false,
             brokenHtmlTagName: false,
-            brokenNullGetSpecAttribute: false
+            brokenNullGetSpecAttribute: false,
           });
         }
 
@@ -618,7 +625,7 @@ export default class Server {
             brokenWindowSize: true,
 
             // SafariDriver 2.41.0 cannot delete cookies, at all, ever
-            brokenCookies: true
+            brokenCookies: true,
           });
         }
 
@@ -630,7 +637,7 @@ export default class Server {
             brokenWhitespaceNormalization: true,
             brokenMouseEvents: true,
             brokenWindowClose: true,
-            usesWebDriverActiveElement: true
+            usesWebDriverActiveElement: true,
           });
         }
 
@@ -642,7 +649,7 @@ export default class Server {
             // At least Safari 12 will sometimes close a tab or window other
             // than the current top-level browsing context when using DELETE
             // /window
-            brokenDeleteWindow: true
+            brokenDeleteWindow: true,
           });
         }
 
@@ -657,7 +664,7 @@ export default class Server {
             // Simulated events in Safari 13 do not change select values
             brokenOptionSelect: true,
             // Trying to close a window in Safari 13 will cause Safari to exit
-            brokenWindowClose: true
+            brokenWindowClose: true,
           });
         }
       }
@@ -836,7 +843,7 @@ export default class Server {
       updates.touchEnabled = false;
     }
 
-    updates.shortcutKey = (function() {
+    updates.shortcutKey = (function () {
       if (isIos(capabilities)) {
         return null;
       }
@@ -937,7 +944,7 @@ export default class Server {
           initialUrl = capabilities.initialBrowserUrl;
         }
 
-        return session.get(initialUrl).then(function() {
+        return session.get(initialUrl).then(function () {
           return session.execute<void>(
             'document.body.innerHTML = arguments[0];',
             [
@@ -946,13 +953,13 @@ export default class Server {
               // `<script>` and `<style>` if they are the first
               // elements injected with `innerHTML`, so an extra text
               // node is added before the rest of the content instead
-              page.replace('<!DOCTYPE html>', 'x')
+              page.replace('<!DOCTYPE html>', 'x'),
             ]
           );
         });
       }
 
-      return session.get('about:blank').then(function() {
+      return session.get('about:blank').then(function () {
         return session.execute<void>('document.write(arguments[0]);', [page]);
       });
     };
@@ -975,9 +982,9 @@ export default class Server {
                 'CgAAAAAAPR62RgAAAAAAAAAAAAAAAAgA' +
                 'GAAAAAAAAAAAAKSBAAAAAHRlc3QudHh0' +
                 'VVQFAANlp15VdXgLAAEE8gMAAATyAwAA' +
-                'UEsFBgAAAAABAAEATgAAAEIAAAAAAA=='
+                'UEsFBgAAAAABAAEATgAAAEIAAAAAAA==',
             })
-            .then(filename => filename && filename.indexOf('test.txt') > -1)
+            .then((filename) => filename && filename.indexOf('test.txt') > -1)
             .catch(unsupported);
       }
 
@@ -1016,7 +1023,7 @@ export default class Server {
                 // GET for timeouts, so will always fail this test.
                 return session
                   .serverGet<WebDriverTimeouts>('timeouts')
-                  .then(timeouts => timeouts.implicit === 1234)
+                  .then((timeouts) => timeouts.implicit === 1234)
                   .catch(unsupported);
               }, unsupported)
           );
@@ -1036,7 +1043,7 @@ export default class Server {
             .switchToWindow('current')
             .then(
               unsupported,
-              error =>
+              (error) =>
                 error.name === 'InvalidArgument' ||
                 /missing .*handle/i.test(error.message)
             );
@@ -1052,7 +1059,7 @@ export default class Server {
       if (capabilities.returnsFromClickImmediately == null) {
         testedCapabilities.returnsFromClickImmediately = () => {
           function assertSelected(expected: any) {
-            return function(actual: any) {
+            return function (actual: any) {
               if (expected !== actual) {
                 throw new Error('unexpected selection state');
               }
@@ -1061,7 +1068,7 @@ export default class Server {
 
           return get('<!DOCTYPE html><input type="checkbox" id="c">')
             .then(() => session.findById('c'))
-            .then(element =>
+            .then((element) =>
               element
                 .click()
                 .then(() => element.isSelected())
@@ -1079,9 +1086,10 @@ export default class Server {
       // /keys command, but JsonWireProtocol does.
       if (capabilities.noKeysCommand == null) {
         testedCapabilities.noKeysCommand = () =>
-          session
-            .serverPost('keys', { value: ['a'] })
-            .then(() => false, () => true);
+          session.serverPost('keys', { value: ['a'] }).then(
+            () => false,
+            () => true
+          );
       }
 
       // The W3C WebDriver standard does not support the /displayed endpoint
@@ -1089,12 +1097,15 @@ export default class Server {
         testedCapabilities.noElementDisplayed = () =>
           session
             .findByCssSelector('html')
-            .then(element => element.isDisplayed())
-            .then(() => false, () => true);
+            .then((element) => element.isDisplayed())
+            .then(
+              () => false,
+              () => true
+            );
       }
 
       return Task.all(
-        Object.keys(testedCapabilities).map(key => testedCapabilities[key])
+        Object.keys(testedCapabilities).map((key) => testedCapabilities[key])
       ).then(() => testedCapabilities);
     };
 
@@ -1117,7 +1128,7 @@ export default class Server {
 
       if (capabilities.locationContextEnabled) {
         testedCapabilities.locationContextEnabled = () =>
-          session.getGeolocation().then(supported, function(error) {
+          session.getGeolocation().then(supported, function (error) {
             // At least FirefoxDriver 2.40.0 and ios-driver 0.6.0
             // claim they support geolocation in their returned
             // capabilities map, when they do not
@@ -1134,7 +1145,7 @@ export default class Server {
                 .setGeolocation({
                   latitude: 12.1,
                   longitude: -22.33,
-                  altitude: 1000.2
+                  altitude: 1000.2,
                 })
                 .then(() => session.getGeolocation())
                 .then(supported, unsupported);
@@ -1182,7 +1193,7 @@ export default class Server {
         testedCapabilities.mouseEnabled = () =>
           get('<!DOCTYPE html><button id="clicker">Click me</button>')
             .then(() => session.findById('clicker'))
-            .then(button => button.click().then(supported, maybeSupported))
+            .then((button) => button.click().then(supported, maybeSupported))
             .catch(unsupported);
       }
 
@@ -1190,7 +1201,7 @@ export default class Server {
         testedCapabilities.touchEnabled = () =>
           get('<!DOCTYPE html><button id="clicker">Click me</button>')
             .then(() => session.findById('clicker'))
-            .then(button =>
+            .then((button) =>
               session.doubleTap(button).then(supported, maybeSupported)
             )
             .catch(unsupported);
@@ -1200,7 +1211,7 @@ export default class Server {
         testedCapabilities.dynamicViewport = () =>
           session
             .getWindowSize()
-            .then(originalSize =>
+            .then((originalSize) =>
               // At least Firefox 53 will hang if the target size is
               // the same as the current size
               session.setWindowSize(
@@ -1217,7 +1228,7 @@ export default class Server {
         testedCapabilities.supportsNavigationDataUris = () =>
           get('<!DOCTYPE html><title>a</title>')
             .then(() => session.getPageTitle())
-            .then(pageTitle => pageTitle === 'a')
+            .then((pageTitle) => pageTitle === 'a')
             .catch(unsupported);
       }
 
@@ -1264,7 +1275,7 @@ export default class Server {
                 'return window.events'
               )
             )
-            .then(events => {
+            .then((events) => {
               if (!events) {
                 return undefined;
               }
@@ -1278,7 +1289,7 @@ export default class Server {
       }
 
       return Task.all(
-        Object.keys(testedCapabilities).map(key => testedCapabilities[key])
+        Object.keys(testedCapabilities).map((key) => testedCapabilities[key])
       ).then(() => testedCapabilities);
     };
 
@@ -1298,7 +1309,7 @@ export default class Server {
         testedCapabilities.brokenActiveElement = () =>
           session
             .getActiveElement()
-            .then(works, error => error.name === 'UnknownCommand');
+            .then(works, (error) => error.name === 'UnknownCommand');
       }
 
       if (capabilities.brokenDeleteCookie == null) {
@@ -1313,15 +1324,18 @@ export default class Server {
               .then(() =>
                 session.setCookie({
                   name: 'foo',
-                  value: 'foo'
+                  value: 'foo',
                 })
               )
               .then(() => session.deleteCookie('foo'))
               .then(() => session.getCookies())
-              .then(cookies => cookies.length > 0)
+              .then((cookies) => cookies.length > 0)
               .catch(() => true)
-              .then(isBroken =>
-                session.clearCookies().then(() => isBroken, () => isBroken)
+              .then((isBroken) =>
+                session.clearCookies().then(
+                  () => isBroken,
+                  () => isBroken
+                )
               );
         } else {
           // At least MS Edge < 18 doesn't support cookie deletion
@@ -1339,8 +1353,8 @@ export default class Server {
         testedCapabilities.brokenHtmlTagName = () =>
           session
             .findByTagName('html')
-            .then(element => element.getTagName())
-            .then(tagName => tagName !== 'html')
+            .then((element) => element.getTagName())
+            .then((tagName) => tagName !== 'html')
             .catch(broken);
       }
 
@@ -1350,8 +1364,8 @@ export default class Server {
         testedCapabilities.brokenNullGetSpecAttribute = () =>
           session
             .findByTagName('html')
-            .then(element => element.getSpecAttribute('nonexisting'))
-            .then(value => value !== null)
+            .then((element) => element.getSpecAttribute('nonexisting'))
+            .then((value) => value !== null)
             .catch(broken);
       }
 
@@ -1361,14 +1375,14 @@ export default class Server {
         testedCapabilities.brokenElementSerialization = () =>
           get('<!DOCTYPE html><div id="a"></div>')
             .then(() => session.findById('a'))
-            .then(element =>
+            .then((element) =>
               session.execute(
                 /* istanbul ignore next */
                 (element: Element) => element.getAttribute('id'),
                 [element]
               )
             )
-            .then(attribute => attribute !== 'a')
+            .then((attribute) => attribute !== 'a')
             .catch(broken);
       }
 
@@ -1379,7 +1393,7 @@ export default class Server {
         testedCapabilities.brokenExecuteUndefinedReturn = () =>
           session
             .execute('return undefined;')
-            .then(value => value !== null, broken);
+            .then((value) => value !== null, broken);
       }
 
       // At least Selendroid 0.9.0 always returns invalid element handles
@@ -1390,7 +1404,7 @@ export default class Server {
             .then(() =>
               session.execute<Element>('return document.getElementById("a");')
             )
-            .then(element => element && element.getTagName())
+            .then((element) => element && element.getTagName())
             .then(works, broken);
       }
 
@@ -1406,14 +1420,14 @@ export default class Server {
                 'var o = document.getElementById("a").style.opacity; return o && o.charAt(0) === "0";'
               )
             )
-            .then(supportsOpacity => {
+            .then((supportsOpacity) => {
               if (!supportsOpacity) {
                 return works();
               } else {
                 return session
                   .execute('document.getElementById("a").style.opacity = "0";')
                   .then(() => session.findById('a'))
-                  .then(element => element.isDisplayed());
+                  .then((element) => element.isDisplayed());
               }
             })
             .catch(broken);
@@ -1427,7 +1441,7 @@ export default class Server {
             '<!DOCTYPE html><div id="a" style="left: 0; position: absolute; top: -1000px;">a</div>';
           return get(pageText)
             .then(() => session.findById('a'))
-            .then(element => element.isDisplayed())
+            .then((element) => element.isDisplayed())
             .catch(broken);
         };
       }
@@ -1462,8 +1476,8 @@ export default class Server {
             .then(() =>
               session
                 .findById('d')
-                .then(element => element.getVisibleText())
-                .then(text => {
+                .then((element) => element.getVisibleText())
+                .then((text) => {
                   if (text !== 'This is great') {
                     throw new Error('Incorrect text');
                   }
@@ -1482,8 +1496,8 @@ export default class Server {
             .then(() =>
               session
                 .findById('d')
-                .then(element => element.getVisibleText())
-                .then(text => {
+                .then((element) => element.getVisibleText())
+                .then((text) => {
                   if (/\r\n/.test(text) || /\s+$/.test(text)) {
                     throw new Error('invalid whitespace');
                   }
@@ -1503,8 +1517,8 @@ export default class Server {
             .then(() =>
               session
                 .findByLinkText('What a cute, yellow backpack')
-                .then(element => element.getAttribute('id'))
-                .then(attr => {
+                .then((element) => element.getAttribute('id'))
+                .then((attr) => {
                   if (attr !== 'e') {
                     throw new Error('incorrect link was found');
                   }
@@ -1521,8 +1535,8 @@ export default class Server {
             '<!DOCTYPE html><style>a { background: purple }</style><a id="a1">foo</a>';
           return get(pageText)
             .then(() => session.findById('a1'))
-            .then(element => element.getComputedStyle('background-color'))
-            .then(value => {
+            .then((element) => element.getComputedStyle('background-color'))
+            .then((value) => {
               if (!value) {
                 throw new Error('empty style');
               }
@@ -1540,9 +1554,9 @@ export default class Server {
               '<option id="o2" value="bar" selected>bar</option></select>'
           )
             .then(() => session.findById('d'))
-            .then(element => element.click())
+            .then((element) => element.click())
             .then(() => session.findById('o1'))
-            .then(element => element.click())
+            .then((element) => element.click())
             .then(works, broken);
       }
 
@@ -1566,9 +1580,9 @@ export default class Server {
               '<input id="a" type="submit" name="a" value="a"></form>'
           )
             .then(() => session.findById('a'))
-            .then(element => element.submit())
+            .then((element) => element.submit())
             .then(() => session.getCurrentUrl())
-            .then(url => url.indexOf('a=a') === -1)
+            .then((url) => url.indexOf('a=a') === -1)
             .catch(broken);
       }
 
@@ -1636,7 +1650,7 @@ export default class Server {
         testedCapabilities.brokenWindowSwitch = () =>
           session
             .getCurrentWindowHandle()
-            .then(handle => session.switchToWindow(handle))
+            .then((handle) => session.switchToWindow(handle))
             .then(works, broken);
       }
 
@@ -1655,8 +1669,8 @@ export default class Server {
         testedCapabilities.brokenElementPosition = () =>
           get(scrollTestUrl)
             .then(() => session.findById('a'))
-            .then(element => element.getPosition())
-            .then(position => position.x !== 3000 || position.y !== 3000)
+            .then((element) => element.getPosition())
+            .then((position) => position.x !== 3000 || position.y !== 3000)
             .catch(broken);
       }
 
@@ -1671,7 +1685,7 @@ export default class Server {
               let refresh: CancellablePromise<boolean | void>;
 
               return new Task(
-                resolve => {
+                (resolve) => {
                   let settled = false;
 
                   refresh = session
@@ -1694,7 +1708,7 @@ export default class Server {
                       }
                     });
 
-                  timer = setTimeout(function() {
+                  timer = setTimeout(function () {
                     refresh.cancel();
                   }, 2000);
                 },
@@ -1716,10 +1730,10 @@ export default class Server {
               '<script>window.counter = 0; var d = document; d.onmousemove = function () { window.counter++; };</script>'
           )
             .then(() => session.findById('foo'))
-            .then(element => session.moveMouseTo(element, 20, 20))
+            .then((element) => session.moveMouseTo(element, 20, 20))
             .then(() => sleep(100))
             .then(() => session.execute<number>('return window.counter;'))
-            .then(counter => (counter > 0 ? works() : broken()), broken);
+            .then((counter) => (counter > 0 ? works() : broken()), broken);
 
         // At least ChromeDriver 2.12 through 2.19 will throw an error
         // if mouse movement relative to the <html> element is
@@ -1730,7 +1744,7 @@ export default class Server {
               .then(() =>
                 session
                   .findByTagName('html')
-                  .then(element => session.moveMouseTo(element, 0, 0))
+                  .then((element) => session.moveMouseTo(element, 0, 0))
               )
               .then(works, broken);
         }
@@ -1740,44 +1754,43 @@ export default class Server {
       // entire sequence of events that would normally occur during a
       // double-click
       if (capabilities.brokenDoubleClick == null) {
-        testedCapabilities.brokenDoubleClick = function retry(): CancellablePromise<
-          any
-        > {
-          // InternetExplorerDriver is not buggy, but IE9 in
-          // quirks-mode is; since we cannot do feature tests in
-          // standards-mode in IE<10, force the value to false
-          // since it is not broken in this browser
-          if (
-            capabilities.browserName === 'internet explorer' &&
-            capabilities.browserVersion === '9'
-          ) {
-            return Task.resolve(false);
-          }
+        testedCapabilities.brokenDoubleClick =
+          function retry(): CancellablePromise<any> {
+            // InternetExplorerDriver is not buggy, but IE9 in
+            // quirks-mode is; since we cannot do feature tests in
+            // standards-mode in IE<10, force the value to false
+            // since it is not broken in this browser
+            if (
+              capabilities.browserName === 'internet explorer' &&
+              capabilities.browserVersion === '9'
+            ) {
+              return Task.resolve(false);
+            }
 
-          return get(
-            '<!DOCTYPE html><html><body><button id="clicker">Clicker</button><script>' +
-              'window.counter = 0; var d = document; d.onclick = ' +
-              'd.onmousedown = d.onmouseup = function () { window.counter++; };' +
-              '</script></body></html>'
-          )
-            .then(() => session.findById('clicker'))
-            .then(element => session.moveMouseTo(element))
-            .then(() => sleep(100))
-            .then(() => session.doubleClick())
-            .then(() => session.execute('return window.counter;'))
-            .then(counter => {
-              // InternetExplorerDriver 2.41.0 has a race
-              // condition that makes this test sometimes
-              // fail
-              /* istanbul ignore if: inconsistent race condition */
-              if (counter === 0) {
-                return retry();
-              }
+            return get(
+              '<!DOCTYPE html><html><body><button id="clicker">Clicker</button><script>' +
+                'window.counter = 0; var d = document; d.onclick = ' +
+                'd.onmousedown = d.onmouseup = function () { window.counter++; };' +
+                '</script></body></html>'
+            )
+              .then(() => session.findById('clicker'))
+              .then((element) => session.moveMouseTo(element))
+              .then(() => sleep(100))
+              .then(() => session.doubleClick())
+              .then(() => session.execute('return window.counter;'))
+              .then((counter) => {
+                // InternetExplorerDriver 2.41.0 has a race
+                // condition that makes this test sometimes
+                // fail
+                /* istanbul ignore if: inconsistent race condition */
+                if (counter === 0) {
+                  return retry();
+                }
 
-              return counter !== 6;
-            })
-            .catch(broken);
-        };
+                return counter !== 6;
+              })
+              .catch(broken);
+          };
       }
 
       if (capabilities.touchEnabled) {
@@ -1787,7 +1800,7 @@ export default class Server {
           testedCapabilities.brokenLongTap = () =>
             session
               .findByTagName('body')
-              .then(element => session.longTap(element))
+              .then((element) => session.longTap(element))
               .then(works, broken);
 
           // At least ios-driver 0.6.6-SNAPSHOT April 2014 claims to
@@ -1799,7 +1812,7 @@ export default class Server {
                 .pressFinger(0, 0)
                 .then(
                   works,
-                  error =>
+                  (error) =>
                     error.name === 'UnknownCommand' ||
                     error.message.indexOf('need to specify the JS') > -1
                 );
@@ -1813,14 +1826,14 @@ export default class Server {
               get(scrollTestUrl)
                 .then(() => session.touchScroll(0, 20))
                 .then(() => session.execute('return window.scrollY !== 20;'))
-                .then(isBroken => {
+                .then((isBroken) => {
                   if (isBroken) {
                     return true;
                   }
 
                   return session
                     .findById('a')
-                    .then(element => session.touchScroll(element, 0, 0))
+                    .then((element) => session.touchScroll(element, 0, 0))
                     .then(() =>
                       session.execute('return window.scrollY !== 3000;')
                     );
@@ -1855,9 +1868,9 @@ export default class Server {
             .then(() =>
               session
                 .execute<Element>('return document.getElementById("a");')
-                .then(element => element.getSize())
+                .then((element) => element.getSize())
                 .then(
-                  dimensions =>
+                  (dimensions) =>
                     dimensions.width !== 4 || dimensions.height !== 4
                 )
             )
@@ -1873,15 +1886,15 @@ export default class Server {
               () =>
                 session
                   .execute<Element>('return document.getElementById("dis");')
-                  .then(element => element.isEnabled())
-                  .then(isEnabled => (isEnabled ? broken() : works()))
+                  .then((element) => element.isEnabled())
+                  .then((isEnabled) => (isEnabled ? broken() : works()))
                   .catch(broken)
             );
         }
       }
 
       return Task.all(
-        Object.keys(testedCapabilities).map(key => testedCapabilities[key])
+        Object.keys(testedCapabilities).map((key) => testedCapabilities[key])
       ).then(() => testedCapabilities);
     };
 
@@ -1916,7 +1929,7 @@ export default class Server {
    * server.
    */
   getSessions(): CancellablePromise<Session[]> {
-    return this.get('sessions').then(function(sessions: any) {
+    return this.get('sessions').then(function (sessions: any) {
       // At least BrowserStack is now returning an array for the sessions
       // response
       if (sessions && !Array.isArray(sessions)) {
@@ -1925,7 +1938,7 @@ export default class Server {
 
       // At least ChromeDriver 2.19 uses the wrong keys
       // https://code.google.com/p/chromedriver/issues/detail?id=1229
-      sessions.forEach(function(session: any) {
+      sessions.forEach(function (session: any) {
         if (session.sessionId && !session.id) {
           session.id = session.sessionId;
         }
@@ -1977,7 +1990,7 @@ function getErrorName(error: { name: string; detail: { error: string } }) {
   // Pascal case name
   return desc
     .split(' ')
-    .map(word => `${word[0].toUpperCase()}${word.slice(1)}`)
+    .map((word) => `${word[0].toUpperCase()}${word.slice(1)}`)
     .join('');
 }
 
