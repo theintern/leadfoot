@@ -295,3 +295,38 @@ export interface LeadfootError extends Error {
 export interface WebDriverResponse {
   value: any;
 }
+
+export enum w3cCapabilities {
+  /** The name of the remote browser (e.g., 'safari') */
+  browserName,
+  /**
+   * Identifies the version of the user agent. This may or may not correspond
+   * to the publicly visible version.
+   */
+  browserVersion,
+  /**
+   * The platform the remote browser is running on. This is typically more
+   * specifc than [[interfaces.Capabilities.platform]].
+   */
+  platformName,
+  /**
+   * Indicates whether untrusted and self-signed TLS certificates are implicitly
+   * trusted on navigation for the duration of the session.
+   */
+  acceptInsecureCerts,
+  /** Defines the current session's page load strategy. */
+  pageLoadStrategy,
+  /** Defines the current session's proxy configuration. */
+  proxy,
+  /** Indicates whether the remote end supports all of the resizing and repositioning commands. */
+  setWindowRect,
+  /** Describes the timeouts imposed on certain session operations. */
+  timeouts,
+  /** Defines the current session's strict file interactability. */
+  strictFileInteractability,
+  /**
+   * Describes the current session's user prompt handler.
+   * Defaults to the dismiss and notify state.
+   */
+  unhandledPromptBehavior,
+}

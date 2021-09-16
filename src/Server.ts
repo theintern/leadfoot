@@ -16,7 +16,12 @@ import Element from './Element';
 import statusCodes from './lib/statusCodes';
 import { format, parse, resolve, Url } from 'url';
 import { sleep, trimStack } from './lib/util';
-import { Capabilities, LeadfootURL, LeadfootError } from './interfaces';
+import {
+  Capabilities,
+  w3cCapabilities,
+  LeadfootURL,
+  LeadfootError,
+} from './interfaces';
 
 export default class Server {
   url: string;
@@ -385,6 +390,25 @@ export default class Server {
       });
   }
 
+  /**
+   * Filters a list of capabilities to return only the ones specified
+   * in the W3C specifications.
+   * @param capabilities List of capabilities to filter.
+   * @returns The filtered list of W3C-compliant capabilities.
+   */
+  private _filterNonW3cCompliantCapabilities(
+    capabilities: Capabilities
+  ): Capabilities {
+    return Object.keys(capabilities)
+      .filter(
+        (key) => Object.keys(w3cCapabilities).includes(key) || /:/.exec(key)
+      )
+      .reduce((obj, key) => {
+        obj[key] = capabilities[key];
+        return obj;
+      }, {} as Capabilities);
+  }
+
   get<T>(
     path: string,
     requestData?: Object,
@@ -443,16 +467,29 @@ export default class Server {
       desiredCapabilities.fixSessionCapabilities = undefined;
     }
 
-    return this.post<any>('session', {
-      // new way of passing capabilities (as defined in the W3C WebDriver spec)
+    // Modern way of declaring capabilities, as specified in W3C WebDriver specifications.
+    let sessionCapabilities: any = {
       capabilities: {
-        alwaysMatch: requiredCapabilities,
-        firstMatch: [desiredCapabilities],
+        alwaysMatch: requiredCapabilities
+          ? this._filterNonW3cCompliantCapabilities(requiredCapabilities)
+          : undefined,
+        firstMatch: [
+          this._filterNonW3cCompliantCapabilities(desiredCapabilities),
+        ],
       },
-      // legacy way of passing capabilities
-      desiredCapabilities,
-      requiredCapabilities,
-    }).then((response) => {
+    };
+
+    // At least Chrome 93 considers that sending capabilities in W3C compliant way
+    // activates strict W3C mode and all endpoints not part of W3C spec (such as /moveto)
+    // are unusable. So falling back to legacy desired/required capabilities.
+    if (desiredCapabilities.browserName === 'chrome') {
+      sessionCapabilities = {
+        requiredCapabilities,
+        desiredCapabilities,
+      };
+    }
+
+    return this.post<any>('session', sessionCapabilities).then((response) => {
       let responseData: object;
       let sessionId: string;
 
