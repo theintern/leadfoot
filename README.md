@@ -9,7 +9,7 @@
 A JavaScript client library that brings cross-platform consistency to the
 Selenium WebDriver API
 
-[![Build Status](https://travis-ci.org/theintern/leadfoot.svg?branch=master)](https://travis-ci.org/theintern/leadfoot)
+[![Build Status](https://github.com/theintern/leadfoot/actions/workflows/ci.yml/badge.svg)](https://github.com/theintern/leadfoot/actions/workflows/ci.yml)
 [![npm version](https://badge.fury.io/js/leadfoot.svg)](https://badge.fury.io/js/leadfoot)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/theintern/leadfoot.svg)](http://isitmaintained.com/project/theintern/leadfoot 'Average time to resolve an issue')
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/theintern/leadfoot.svg)](http://isitmaintained.com/project/theintern/leadfoot 'Percentage of issues still open')
