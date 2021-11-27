@@ -1,9 +1,5 @@
 # Leadfoot
 
-> ⚠️ This repository has been deprecated. It may still receive bugfixes, but
-> development has been moved into the main
-> [Intern repository](https://github.com/theintern/intern).
-
 <!-- start-github-only -->
 
 A JavaScript client library that brings cross-platform consistency to the
