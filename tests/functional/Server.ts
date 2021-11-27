@@ -2,7 +2,6 @@ import * as util from './support/util';
 import { Task } from '@theintern/common';
 import Server from '../../src/Server';
 import Session from '../../src/Session';
-import * as urlUtil from 'url';
 import { Capabilities } from '../../src/interfaces';
 import Test from 'intern/lib/Test';
 import { ObjectSuiteDescriptor } from 'intern/lib/interfaces/object';
@@ -27,7 +26,7 @@ registerSuite('Server', () => {
           protocol: 'https',
           hostname: 'test',
           port: '1234',
-          pathname: '/w/d'
+          pathname: '/w/d',
         });
         assert.strictEqual(server.url, 'https://test:1234/w/d/');
       },
@@ -39,7 +38,7 @@ registerSuite('Server', () => {
           port: '1234',
           pathname: '/w/d/',
           username: 'user',
-          password: 'pass'
+          password: 'pass',
         });
         assert.strictEqual(server.url, 'https://user:pass@test:1234/w/d/');
       },
@@ -51,19 +50,19 @@ registerSuite('Server', () => {
           port: '1234',
           pathname: '/w/d/',
           username: 'user',
-          accessKey: 'pass'
+          accessKey: 'pass',
         });
         assert.strictEqual(server.url, 'https://user:pass@test:1234/w/d/');
       },
 
       'error handling'() {
         return server.get('invalidCommand').then(
-          function() {
+          function () {
             throw new Error(
               'Request to invalid command should not be successful'
             );
           },
-          function(error: Error) {
+          function (error: Error) {
             assert.strictEqual(
               error.name,
               'UnknownCommand',
@@ -74,38 +73,32 @@ registerSuite('Server', () => {
       },
 
       'error output security'() {
-        const url = urlUtil.parse(server.url);
-        if (!url.auth) {
-          url.auth = 'user:pass';
+        const url = new URL(server.url);
+        if (!url.username) {
+          url.username = 'user';
+          url.password = 'pass';
         }
 
         const testServer = new Server(url);
 
         return testServer.get('invalidCommand').then(
-          function() {
+          function () {
             throw new Error(
               'Request to invalid command should not be successful'
             );
           },
-          function(error: Error) {
+          function (error: Error) {
             assert.notInclude(
               error.message,
-              url.auth,
+              url.username,
               'HTTP auth credentials should not be displayed in errors'
-            );
-
-            url.auth = '(redacted)';
-            assert.include(
-              error.message,
-              urlUtil.format(url),
-              'Redacted URL should be displayed in error'
             );
           }
         );
       },
 
       '#getStatus'() {
-        return server.getStatus().then(function(result) {
+        return server.getStatus().then(function (result) {
           assert.isObject(
             result,
             'Server should provide an object with details about the server'
@@ -126,16 +119,16 @@ registerSuite('Server', () => {
           : (<any>this.remote).sessionId;
         return server
           .getSessions()
-          .then(function(result: any[]) {
+          .then(function (result: any[]) {
             assert.isArray(result);
             assert.operator(result.length, '>=', 1);
             assert.isTrue(
-              result.some(function(session: any) {
+              result.some(function (session: any) {
                 return currentSessionId === session.id;
               })
             );
           })
-          .catch(function(error) {
+          .catch(function (error) {
             // Some servers do not support retrieving sessions; this is
             // OK, another server test will verify that this code is
             // working
@@ -155,12 +148,12 @@ registerSuite('Server', () => {
 
         const sessionId = this.remote.session.sessionId;
         const platforms: { [key: string]: string[] } = {
-          WINDOWS: ['Windows NT', 'WINDOWS', 'WIN8_1', 'XP']
+          WINDOWS: ['Windows NT', 'WINDOWS', 'WIN8_1', 'XP'],
         };
 
         return server
           .getSessionCapabilities(sessionId)
-          .then(function(capabilities: Capabilities) {
+          .then(function (capabilities: Capabilities) {
             assert.isObject(capabilities);
             assert.strictEqual(
               capabilities.browserName,
@@ -172,14 +165,14 @@ registerSuite('Server', () => {
             );
             assert.include(
               platforms[desiredCapabilities.platform!] || [
-                desiredCapabilities.platform
+                desiredCapabilities.platform,
               ],
               capabilities.platform
             );
           });
       },
 
-      '#createSession & .sessionConstructor': (function() {
+      '#createSession & .sessionConstructor': (function () {
         class CustomSession {
           sessionId: string;
           server: Server;
@@ -199,7 +192,7 @@ registerSuite('Server', () => {
         let oldCtor: any;
         let oldPost: any;
         let mockCapabilities = {
-          isMockCapabilities: true
+          isMockCapabilities: true,
         };
         let desiredCapabilities: Capabilities = { fooCapability: true };
         let requiredCapabilities: Capabilities = {};
@@ -220,7 +213,7 @@ registerSuite('Server', () => {
 
               return Task.resolve<any>({
                 sessionId: 'test',
-                value: mockCapabilities
+                value: mockCapabilities,
               });
             };
           },
@@ -235,24 +228,24 @@ registerSuite('Server', () => {
             test() {
               return server
                 .createSession(desiredCapabilities, requiredCapabilities)
-                .then(function(session: Session) {
+                .then(function (session: Session) {
                   assert.instanceOf(session, CustomSession);
                   assert.strictEqual(session.sessionId, 'test');
                   assert.strictEqual(session.server, server);
                   assert.deepEqual(session.capabilities, {
                     ...mockCapabilities,
-                    ...desiredCapabilities
+                    ...desiredCapabilities,
                   });
                 });
-            }
-          }
+            },
+          },
         };
       })(),
 
       '#deleteSession'() {
         const oldDelete = server.delete;
         server.delete = <any>(
-          function(command: string, _data: any, pathData: string[]) {
+          function (command: string, _data: any, pathData: string[]) {
             assert.strictEqual(command, 'session/$0');
             assert.deepEqual(pathData, ['test']);
             return Task.resolve();
@@ -264,7 +257,7 @@ registerSuite('Server', () => {
         } finally {
           server.delete = oldDelete;
         }
-      }
-    }
+      },
+    },
   } as ObjectSuiteDescriptor;
 });

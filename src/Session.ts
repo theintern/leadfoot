@@ -595,10 +595,14 @@ export default class Session extends Locator<
           // error for invalid IDs, and at least chromedriver in Jan 2019 used
           // this behavior.
           error.name === 'NoSuchFrame' ||
-          // At least geckodriver 0.24.0 throws an Unknown Command error
-          // with a message about an invalid tag name rather than a NoSuchFrame error
-          // (see https://github.com/mozilla/geckodriver/issues/1456)
-          /any variant of untagged/.test(error.detail.message))
+          // At least geckodriver 0.24.0 throws an UnknownCommand error
+          // with a message about an invalid tag name rather than a NoSuchFrame
+          // error (see https://github.com/mozilla/geckodriver/issues/1456)
+          /any variant of untagged/.test(error.detail.message) ||
+          // At least chromedriver 96 throws an UnknownCommand error with a
+          // message about an invalid argument rather than an InvalidArgument
+          // error
+          /invalid argument/.test(error.detail.message))
       ) {
         this.capabilities.usesWebDriverFrameId = true;
         return this.switchToFrame(id);
