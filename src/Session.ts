@@ -991,7 +991,9 @@ export default class Session extends Locator<
    */
   maximizeWindow(windowHandle?: string) {
     if (this.capabilities.usesWebDriverWindowCommands) {
-      const maximizeWindow = () => this.serverPost<void>('window/maximize');
+      // at least chromedriver 96 requires a body to be sent with a
+      // `window/maximize` command
+      const maximizeWindow = () => this.serverPost<void>('window/maximize', {});
 
       if (windowHandle == null) {
         return maximizeWindow();
