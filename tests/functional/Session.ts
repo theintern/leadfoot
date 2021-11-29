@@ -607,6 +607,12 @@ registerSuite('Session', () => {
           this.skip('screenshots not supported');
         }
 
+        if (isInternetExplorer(session.capabilities)) {
+          // This test frequently, but not always, fails on IE -- disable it
+          // until it can be made more reliable.
+          this.skip('screenshot testing is unreliable');
+        }
+
         const magic = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 
         this.async(60000);
